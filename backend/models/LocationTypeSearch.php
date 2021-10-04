@@ -9,15 +9,14 @@ use backend\models\LocationType;
 /**
  * LocationTypeSearch represents the model behind the search form of `backend\models\LocationType`.
  */
-class LocationTypeSearch extends LocationType
-{
+class LocationTypeSearch extends LocationType {
+
     /**
      * {@inheritdoc}
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            [['id'], 'integer'],
+            [['id', 'shared_id'], 'integer'],
             [['name'], 'safe'],
         ];
     }
@@ -25,8 +24,7 @@ class LocationTypeSearch extends LocationType
     /**
      * {@inheritdoc}
      */
-    public function scenarios()
-    {
+    public function scenarios() {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -38,8 +36,7 @@ class LocationTypeSearch extends LocationType
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
-    {
+    public function search($params) {
         $query = LocationType::find();
 
         // add conditions that should always apply here
@@ -59,10 +56,12 @@ class LocationTypeSearch extends LocationType
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'shared_id' => $this->shared_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'name', $this->name]);
 
         return $dataProvider;
     }
+
 }

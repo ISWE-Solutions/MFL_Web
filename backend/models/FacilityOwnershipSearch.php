@@ -17,7 +17,7 @@ class FacilityOwnershipSearch extends FacilityOwnership
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id','shared_id'], 'integer'],
             [['name'], 'safe'],
         ];
     }
@@ -59,6 +59,7 @@ class FacilityOwnershipSearch extends FacilityOwnership
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'shared_id' => $this->shared_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'name', $this->name]);

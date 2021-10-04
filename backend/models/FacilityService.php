@@ -30,8 +30,9 @@ class FacilityService extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['name', 'category_id'], 'required'],
-            [['category_id'], 'default', 'value' => null],
+            [['category_id','comments'], 'default', 'value' => null],
             [['category_id'], 'integer'],
+            [['comments'], 'safe'],
             ['name', 'unique', 'when' => function($model) {
                     return $model->isAttributeChanged('name') &&
                             empty($model->category_id) ? TRUE : FALSE;
@@ -49,8 +50,9 @@ class FacilityService extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'name' => 'Name',
-            'category_id' => 'Service Category',
+            'name' => 'Scope',
+            'category_id' => 'Service Area',
+            'comments' => 'Comment',
         ];
     }
 

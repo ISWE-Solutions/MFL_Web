@@ -38,21 +38,21 @@ $opstatus_id = "";
 $facility_model = "";
 //We assume facility operation status name "Operational" 
 //will never be renamed/deleted otherwise the system breaks
-$operation_status_model = \backend\models\Operationstatus::findOne(['name' => "Operational"]);
+$operation_status_model = \backend\models\Operationstatus::findOne(['shared_id' => 1]);
 if (!empty($operation_status_model)) {
     $opstatus_id = $operation_status_model->id;
 //We get facilities by operating status and type
-    $facility_model = backend\models\MFLFacility::find()->cache(Yii::$app->params['cache_duration'])
-                    ->select(['facility_type_id', 'COUNT(*) AS count'])
-                    ->where(['operation_status_id' => $opstatus_id])
-                    ->groupBy(['facility_type_id'])
+    $facility_model = backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
+                    ->select(['type', 'COUNT(*) AS count'])
+                    ->where(['operational_status' => $opstatus_id])
+                    ->groupBy(['type'])
                     ->createCommand()->queryAll();
     foreach ($facility_model as $model) {
         //Push pie data to array
-        array_push($data, ['name' => backend\models\Facilitytype::findOne($model['facility_type_id'])->name, 'y' => (int) $model['count'],]);
+        array_push($data, ['name' => backend\models\Facilitytype::findOne($model['type'])->name, 'y' => (int) $model['count'],]);
         //Push column labels to array
-        if (!in_array(backend\models\Facilitytype::findOne($model['facility_type_id'])->name, $labels)) {
-            array_push($labels, backend\models\Facilitytype::findOne($model['facility_type_id'])->name);
+        if (!in_array(backend\models\Facilitytype::findOne($model['type'])->name, $labels)) {
+            array_push($labels, backend\models\Facilitytype::findOne($model['type'])->name);
         }
         //We push column data to array
         array_push($data1, (int) $model['count']);
@@ -74,10 +74,10 @@ $data3 = [];
 $labels1 = [];
 if (!empty($operation_status_model)) {
     $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
-        return $connection->createCommand('select count(f.id) as count,p.name from public."MFL_facility" f INNER JOIN 
+        return $connection->createCommand('select count(f.id) as count,p.name from public."facility" f INNER JOIN 
 public."geography_district" d ON f.district_id=d.id INNER JOIN
 public."geography_province" p ON d.province_id=p.id INNER JOIN
-public."MFL_operationstatus" ops ON f.operation_status_id=ops.id
+public."MFL_operationstatus" ops ON f.operational_status=ops.id
 WHERE ops.id=' . $operation_status_model->id . '
 group by p.name Order by p.name')->queryAll();
     });
@@ -349,11 +349,11 @@ $model
 
                             //We set the map settings based on the province/distric search
                             //1. By province
-                            if (isset($_GET['MFLFacility']['province_id']) &&
-                                    !empty($_GET['MFLFacility']['province_id'])) {
+                            if (isset($_GET['Facility']['province_id']) &&
+                                    !empty($_GET['Facility']['province_id'])) {
                                 $prov_model = \backend\models\Provinces::find()->cache(Yii::$app->params['cache_duration'])
                                                 ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
-                                                ->where(["id" => $_GET['MFLFacility']['province_id']])->one();
+                                                ->where(["id" => $_GET['Facility']['province_id']])->one();
 
                                 if (!empty($prov_model)) {
                                     $coords = \backend\models\Provinces::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
@@ -379,11 +379,11 @@ $model
                                 }
                             }
                             //2. By district
-                            if (isset($_GET['MFLFacility']['district_id']) &&
-                                    !empty($_GET['MFLFacility']['district_id'])) {
+                            if (isset($_GET['Facility']['district_id']) &&
+                                    !empty($_GET['Facility']['district_id'])) {
                                 $prov_model = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
                                                 ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
-                                                ->where(["id" => $_GET['MFLFacility']['district_id']])->one();
+                                                ->where(["id" => $_GET['Facility']['district_id']])->one();
 
                                 if (!empty($prov_model)) {
                                     $coords = \backend\models\Districts::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
@@ -411,54 +411,54 @@ $model
 
 
                             //Show the filter parameters
-                            if (isset($_GET['MFLFacility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
-                                if (!empty($_GET['MFLFacility']['province_id']) ||
-                                        !empty($_GET['MFLFacility']['ownership_id']) ||
-                                        !empty($_GET['MFLFacility']['facility_type_id']) ||
-                                        !empty($_GET['MFLFacility']['name']) ||
-                                        !empty($_GET['MFLFacility']['district_id'])) {
-                                    $_province = !empty($_GET['MFLFacility']['province_id']) ? \backend\models\Provinces::findOne($_GET['MFLFacility']['province_id'])->name : "";
-                                    $_district = !empty($_GET['MFLFacility']['district_id']) ? \backend\models\Districts::findOne($_GET['MFLFacility']['district_id'])->name : "";
-                                    $_facility_type = !empty($_GET['MFLFacility']['facility_type_id']) ? \backend\models\Facilitytype::findOne($_GET['MFLFacility']['facility_type_id'])->name : "";
-                                    $_ownership = !empty($_GET['MFLFacility']['ownership_id']) ? \backend\models\FacilityOwnership::findOne($_GET['MFLFacility']['ownership_id'])->name : "";
+                            if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
+                                if (!empty($_GET['Facility']['province_id']) ||
+                                        !empty($_GET['Facility']['ownership']) ||
+                                        !empty($_GET['Facility']['type']) ||
+                                        !empty($_GET['Facility']['name']) ||
+                                        !empty($_GET['Facility']['district_id'])) {
+                                    $_province = !empty($_GET['Facility']['province_id']) ? \backend\models\Provinces::findOne($_GET['Facility']['province_id'])->name : "";
+                                    $_district = !empty($_GET['Facility']['district_id']) ? \backend\models\Districts::findOne($_GET['Facility']['district_id'])->name : "";
+                                    $_facility_type = !empty($_GET['Facility']['type']) ? \backend\models\Facilitytype::findOne($_GET['Facility']['type'])->name : "";
+                                    $_ownership = !empty($_GET['Facility']['ownership']) ? \backend\models\FacilityOwnership::findOne($_GET['Facility']['ownership'])->name : "";
                                     $prov_str = !empty($_province) ? "Province:" . $_province . " | " : "";
                                     $dist_str = !empty($_district) ? "District:" . $_district . " | " : "";
                                     $fac_str = !empty($_facility_type) ? "Facility type:" . $_facility_type . " | " : "";
                                     $own_str = !empty($_ownership) ? "Ownship:" . $_ownership : "";
-                                    $name_str = !empty($_GET['MFLFacility']['name']) ? "Facility name:" . $_GET['MFLFacility']['name'] . "|" : "";
+                                    $name_str = !empty($_GET['Facility']['name']) ? "Facility name:" . $_GET['Facility']['name'] . "|" : "";
                                     $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i>"
                                             . $fac_str . "</i><i>" . $own_str . "</I>";
                                     echo "<p class='text-sm'>$filter_str</p>";
                                 }
                             }
-                            if (isset($_GET['MFLFacility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
+                            if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
                                 echo "<p class='text-sm'>No search results were found!</p>";
                             }
 
                             //We make sure that the filter form maintains the filter values
-                            if (isset($_GET['MFLFacility']['province_id']) &&
-                                    !empty($_GET['MFLFacility']['province_id'])) {
-                                $MFLFacility_model->province_id = $_GET['MFLFacility']['province_id'];
+                            if (isset($_GET['Facility']['province_id']) &&
+                                    !empty($_GET['Facility']['province_id'])) {
+                                $Facility_model->province_id = $_GET['Facility']['province_id'];
                             }
-                            if (isset($_GET['MFLFacility']['district_id']) &&
-                                    !empty($_GET['MFLFacility']['district_id'])) {
-                                $MFLFacility_model->district_id = $_GET['MFLFacility']['district_id'];
+                            if (isset($_GET['Facility']['district_id']) &&
+                                    !empty($_GET['Facility']['district_id'])) {
+                                $Facility_model->district_id = $_GET['Facility']['district_id'];
                             }
-                            if (isset($_GET['MFLFacility']['ownership_id']) &&
-                                    !empty($_GET['MFLFacility']['ownership_id'])) {
-                                $MFLFacility_model->ownership_id = $_GET['MFLFacility']['ownership_id'];
+                            if (isset($_GET['Facility']['ownership']) &&
+                                    !empty($_GET['Facility']['ownership'])) {
+                                $Facility_model->ownership = $_GET['Facility']['ownership'];
                             }
-                            if (isset($_GET['MFLFacility']['facility_type_id']) &&
-                                    !empty($_GET['MFLFacility']['facility_type_id'])) {
-                                $MFLFacility_model->facility_type_id = $_GET['MFLFacility']['facility_type_id'];
+                            if (isset($_GET['Facility']['type']) &&
+                                    !empty($_GET['Facility']['type'])) {
+                                $Facility_model->type = $_GET['Facility']['type'];
                             }
-                            if (isset($_GET['MFLFacility']['name']) &&
-                                    !empty($_GET['MFLFacility']['name'])) {
-                                $MFLFacility_model->name = $_GET['MFLFacility']['name'];
+                            if (isset($_GET['Facility']['name']) &&
+                                    !empty($_GET['Facility']['name'])) {
+                                $Facility_model->name = $_GET['Facility']['name'];
                             }
-                            /* if (isset($_GET['MFLFacility']['district_id']) &&
-                              !empty($_GET['MFLFacility']['district_id'])) {
-                              $MFLFacility_model->district_id = $_GET['MFLFacility']['district_id'];
+                            /* if (isset($_GET['Facility']['district_id']) &&
+                              !empty($_GET['Facility']['district_id'])) {
+                              $Facility_model->district_id = $_GET['Facility']['district_id'];
                               } */
                             if ($dataProvider !== "" && $dataProvider->getTotalCount() > 0) {
                                 $dataProvider_models = $dataProvider->getModels();
@@ -491,18 +491,18 @@ $model
                                         }
 
                                         //We now get the facilities in the province
-                                        $facilities_counts = backend\models\MFLFacility::find()
+                                        $facilities_counts = backend\models\Facility::find()
                                                         ->cache(Yii::$app->params['cache_duration'])
-                                                        ->select(["COUNT(*) as count", "facility_type_id"])
-                                                        ->where(['operation_status_id' => $opstatus_id])
+                                                        ->select(["COUNT(*) as count", "type"])
+                                                        ->where(['operational_status' => $opstatus_id])
                                                         ->andWhere(['IN', 'district_id', $district_ids])
-                                                        ->groupBy(['facility_type_id'])
+                                                        ->groupBy(['type'])
                                                         ->createCommand()->queryAll();
 
                                         //We build the window string
                                         $type_str = "";
                                         foreach ($facilities_counts as $f_model) {
-                                            $facility_type = !empty($f_model['facility_type_id']) ? backend\models\Facilitytype::findOne($f_model['facility_type_id'])->name : "";
+                                            $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
                                             $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
                                         }
                                         $polygon->attachInfoWindow(new InfoWindow([
@@ -524,10 +524,10 @@ $model
 
                                                 $constituency = !empty($_model->constituency_id) ? backend\models\Constituency::findOne($_model->constituency_id)->name : "";
                                                 $ward = !empty($_model->ward_id) ? backend\models\Wards::findOne($_model->ward_id)->name : "";
-                                                $loc_type = !empty($_model->location_type_id) ? backend\models\LocationType::findOne($_model->location_type_id)->name : "";
-                                                $type = !empty($_model->facility_type_id) ? backend\models\Facilitytype::findOne($_model->facility_type_id)->name : "";
-                                                $ownership = !empty($_model->ownership_id) ? backend\models\FacilityOwnership::findOne($_model->ownership_id)->name : "";
-                                                $operation_status = !empty($_model->operation_status_id) ? backend\models\Operationstatus::findOne($_model->operation_status_id)->name : "";
+                                                $loc_type = !empty($_model->location) ? backend\models\LocationType::findOne($_model->location)->name : "";
+                                                $type = !empty($_model->type) ? backend\models\Facilitytype::findOne($_model->type)->name : "";
+                                                $ownership = !empty($_model->ownership) ? backend\models\FacilityOwnership::findOne($_model->ownership)->name : "";
+                                                $operation_status = !empty($_model->operational_status) ? backend\models\Operationstatus::findOne($_model->operational_status)->name : "";
                                                 $type_str = "";
                                                 $type_str .= "<b>Province: </b>" . \backend\models\Provinces::findOne(backend\models\Districts::findOne($_model->district_id)->province_id)->name . "<br>";
                                                 $type_str .= "<b>District: </b>" . backend\models\Districts::findOne($_model->district_id)->name . "<br>";
@@ -583,18 +583,18 @@ $model
                                         }
 
                                         //We now get the facilities in the province
-                                        $facilities_counts = backend\models\MFLFacility::find()
+                                        $facilities_counts = backend\models\Facility::find()
                                                         ->cache(Yii::$app->params['cache_duration'])
-                                                        ->select(["COUNT(*) as count", "facility_type_id"])
-                                                        ->where(['operation_status_id' => $opstatus_id])
+                                                        ->select(["COUNT(*) as count", "type"])
+                                                        ->where(['operational_status' => $opstatus_id])
                                                         ->andWhere(['IN', 'district_id', $district_ids])
-                                                        ->groupBy(['facility_type_id'])
+                                                        ->groupBy(['type'])
                                                         ->createCommand()->queryAll();
 
                                         //We build the window string
                                         $type_str = "";
                                         foreach ($facilities_counts as $f_model) {
-                                            $facility_type = !empty($f_model['facility_type_id']) ? backend\models\Facilitytype::findOne($f_model['facility_type_id'])->name : "";
+                                            $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
                                             $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
                                         }
                                         $polygon->attachInfoWindow(new InfoWindow([
@@ -627,14 +627,14 @@ $model
                                 ?>
                                 <div class="col-lg-12">
                                     <?php
-                                    echo $form->field($MFLFacility_model, 'name')->textInput(['maxlength' => true, 'placeholder' =>
+                                    echo $form->field($Facility_model, 'name')->textInput(['maxlength' => true, 'placeholder' =>
                                         'Filter by facility name', 'required' => false,]);
                                     ?>
                                 </div>
                                 <div class="col-lg-12">
                                     <?php
                                     echo
-                                            $form->field($MFLFacility_model, 'province_id')
+                                            $form->field($Facility_model, 'province_id')
                                             ->dropDownList(
                                                     \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Filter by province', 'required' => false]
                                     );
@@ -642,17 +642,17 @@ $model
                                 </div>
                                 <div class="col-lg-12">
                                     <?php
-                                    $MFLFacility_model->isNewRecord = !empty($_GET['MFLFacility']['province_id']) ? false : true;
-                                    echo Html::hiddenInput('selected_id', $MFLFacility_model->isNewRecord ? '' : $MFLFacility_model->district_id, ['id' => 'selected_id']);
+                                    $Facility_model->isNewRecord = !empty($_GET['Facility']['province_id']) ? false : true;
+                                    echo Html::hiddenInput('selected_id', $Facility_model->isNewRecord ? '' : $Facility_model->district_id, ['id' => 'selected_id']);
 
-                                    echo $form->field($MFLFacility_model, 'district_id')->widget(DepDrop::classname(), [
+                                    echo $form->field($Facility_model, 'district_id')->widget(DepDrop::classname(), [
                                         'options' => ['id' => 'dist_id', 'custom' => true, 'required' => false,],
-                                        //'data' => [backend\models\Districts::getListByProvinceID($MFLFacility_model->province_id)],
-                                        //'value'=>$MFLFacility_model->district_id,
+                                        //'data' => [backend\models\Districts::getListByProvinceID($Facility_model->province_id)],
+                                        //'value'=>$Facility_model->district_id,
                                         'type' => DepDrop::TYPE_SELECT2,
                                         'pluginOptions' => [
                                             'depends' => ['prov_id'],
-                                            'initialize' => $MFLFacility_model->isNewRecord ? false : true,
+                                            'initialize' => $Facility_model->isNewRecord ? false : true,
                                             'placeholder' => 'Filter by district',
                                             'prompt' => 'Filter by district',
                                             'url' => Url::to(['/site/district']),
@@ -665,7 +665,7 @@ $model
                                 </div>
                                 <div class="col-lg-12">
                                     <?=
-                                            $form->field($MFLFacility_model, 'facility_type_id')
+                                            $form->field($Facility_model, 'type')
                                             ->dropDownList(
                                                     \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
                                     );
@@ -673,7 +673,7 @@ $model
                                 </div>
                                 <div class="col-lg-12">
                                     <?=
-                                            $form->field($MFLFacility_model, 'ownership_id')
+                                            $form->field($Facility_model, 'ownership')
                                             ->dropDownList(
                                                     \backend\models\FacilityOwnership::getList(), ['custom' => true, 'prompt' => 'Filter by ownership', 'required' => false]
                                     );
@@ -700,7 +700,7 @@ $model
                     <?php
                     if (!empty($facility_types_model)) {
                         foreach ($facility_types_model as $_typeModel) {
-                            echo Html::a($_typeModel->name, ['/facility/index', 'facility_type_id' => $_typeModel->id], ["class" => "card-link text-sm"]);
+                            echo Html::a($_typeModel->name, ['/facility/index', 'type' => $_typeModel->id], ["class" => "card-link text-sm"]);
                         }
                     }
                     ?>
@@ -717,7 +717,7 @@ $model
                     <?php
                     if (!empty($facility_ownership_model)) {
                         foreach ($facility_ownership_model as $_ownershipModel) {
-                            echo Html::a($_ownershipModel->name, ['/facility/index', 'ownership_id' => $_ownershipModel->id], ["class" => "card-link text-sm"]);
+                            echo Html::a($_ownershipModel->name, ['/facility/index', 'ownership' => $_ownershipModel->id], ["class" => "card-link text-sm"]);
                         }
                     }
                     ?>

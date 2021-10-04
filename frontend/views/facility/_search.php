@@ -6,7 +6,7 @@ use kartik\depdrop\DepDrop;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $model backend\models\MFLFacilitySearch */
+/* @var $model backend\models\FacilitySearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -26,7 +26,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-lg-3">
-        <?= $form->field($model, 'HMIS_code')->textInput(['placeholder' => 'Filter by HMIS Code',]) ?>
+        <?= $form->field($model, 'hims_code')->textInput(['placeholder' => 'Filter by HMIS Code',]) ?>
     </div>
     <div class="col-lg-3">
         <?=
@@ -46,7 +46,7 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-                $form->field($model, 'facility_type_id')
+                $form->field($model, 'type')
                 ->dropDownList(
                         \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
         );
@@ -54,7 +54,7 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-                $form->field($model, 'ownership_id')
+                $form->field($model, 'ownership')
                 ->dropDownList(
                         \backend\models\FacilityOwnership::getList(), ['custom' => true, 'prompt' => 'Filter by facility owner', 'required' => false]
         );
@@ -62,7 +62,7 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-                $form->field($model, 'operation_status_id')
+                $form->field($model, 'operational_status')
                 ->dropDownList(
                         \backend\models\Operationstatus::getList(), ['custom' => true, 'prompt' => 'Filter by operation status', 'required' => false]
         );
@@ -70,9 +70,9 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-                $form->field($model, 'operating_hours')
+        $form->field($model, 'ownership_type')
                 ->dropDownList(
-                        \backend\models\Operatinghours::getList(), ['custom' => true, 'prompt' => 'Filter by availability', 'required' => false]
+                        [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Filter by availability', 'required' => false]
         );
         ?>
     </div>
@@ -87,12 +87,12 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?php
-        $model->isNewRecord = !empty($_GET['MFLFacilitySearch']['province_id']) ? false : true;
+        $model->isNewRecord = !empty($_GET['FacilitySearch']['province_id']) ? false : true;
         echo Html::hiddenInput('selected_id', $model->isNewRecord ? '' : $model->district_id, ['id' => 'selected_id']);
 
         echo $form->field($model, 'district_id')->widget(DepDrop::classname(), [
             'options' => ['id' => 'dist_id', 'custom' => true, 'required' => false,],
-           //'data' => [backend\models\Districts::getListByProvinceID($model->province_id)],
+            //'data' => [backend\models\Districts::getListByProvinceID($model->province_id)],
             //'value'=>$MFLFacility_model->district_id,
             'type' => DepDrop::TYPE_SELECT2,
             'pluginOptions' => [
@@ -110,11 +110,11 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?php
-        $model->isNewRecord = !empty($_GET['MFLFacilitySearch']['district_id']) ? false : true;
+        $model->isNewRecord = !empty($_GET['FacilitySearch']['district_id']) ? false : true;
         echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
         echo $form->field($model, 'constituency_id')->widget(DepDrop::classname(), [
             'options' => ['id' => 'constituency_id', 'custom' => true,],
-           // 'data' => [\backend\models\Constituency::getListByDistrictID($model->district_id)],
+            // 'data' => [\backend\models\Constituency::getListByDistrictID($model->district_id)],
             'type' => DepDrop::TYPE_SELECT2,
             'pluginOptions' => [
                 'depends' => ['dist_id'],
@@ -130,10 +130,10 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?php
-        $model->isNewRecord = !empty($_GET['MFLFacilitySearch']['district_id']) ? false : true;
+        $model->isNewRecord = !empty($_GET['FacilitySearch']['district_id']) ? false : true;
         echo Html::hiddenInput('selected_id3', $model->isNewRecord ? '' : $model->ward_id, ['id' => 'selected_id3']);
         echo $form->field($model, 'ward_id')->widget(DepDrop::classname(), [
-            'options' => ['id' => 'ward_id', 'custom' => true, ],
+            'options' => ['id' => 'ward_id', 'custom' => true,],
             //'data' => [\backend\models\Wards::getListByDistrictID($model->district_id)],
             'type' => DepDrop::TYPE_SELECT2,
             'pluginOptions' => [

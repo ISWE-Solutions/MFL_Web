@@ -81,6 +81,19 @@ class FacilityServicecategoryController extends Controller {
                 }
                 return $out;
             }
+
+             $dataProvider->pagination = ['pageSize' => 10];
+            $dataProvider->setSort([
+                'attributes' => [
+                    'id' => [
+                        'desc' => ['id' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ],
+                ],
+                'defaultOrder' => [
+                    'id' => SORT_DESC
+                ]
+            ]);
             return $this->render('index', [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,

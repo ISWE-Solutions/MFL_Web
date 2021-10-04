@@ -11,7 +11,7 @@ use backend\models\User;
 /* @var $searchModel backend\models\FacilityServicecategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Service Categories';
+$this->title = 'Service Areas';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="card card-primary card-outline">
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php
             if (User::userIsAllowedTo('Manage MFL services')) {
                 echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
-                    return false;"><i class="fa fa-plus"></i> Add service categroy</button>';
+                    return false;"><i class="fa fa-plus"></i> Add service area</button>';
                 echo '<hr class="dotted short">';
             }
             ?>
@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => ['allowClear' => true],
                     ],
                     'filter' => \backend\models\FacilityServicecategory::getNames(),
-                    'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
+                    'filterInputOptions' => ['prompt' => 'Filter by area', 'class' => 'form-control',],
                     'format' => 'raw',
                     'refreshGrid' => true,
                 ],

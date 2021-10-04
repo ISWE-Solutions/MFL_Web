@@ -27,9 +27,18 @@ class LocationType extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['name'], 'required'],
+            [['shared_id'], 'integer'],
+            [['name', 'shared_id'], 'required'],
             [['name'], 'string', 'max' => 20],
-            [['name'], 'unique', 'message' => 'Location type exist already!'],
+            ['shared_id', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('shared_id');
+                }, 'message' => 'Location type with this HPCZ id exist already!'],
+            ['name', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('name');
+                }, 'message' => 'Location type should be unique!'],
+            ['name', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('name') && !empty(self::findOne(['name' => $model->name, "shared_id" => $model->shared_id])) ? TRUE : FALSE;
+                }, 'message' => 'Location type exist already with the same shared id!'],
         ];
     }
 
@@ -40,6 +49,7 @@ class LocationType extends \yii\db\ActiveRecord {
         return [
             'id' => 'ID',
             'name' => 'Name',
+            'shared_id' => 'HPCZ id',
         ];
     }
 
@@ -65,6 +75,11 @@ class LocationType extends \yii\db\ActiveRecord {
     public static function getById($id) {
         $data = self::find()->where(['id' => $id])->one();
         return $data->name;
+    }
+
+    public static function getHPCZIds() {
+        $list = self::find()->orderBy(['name' => SORT_ASC])->all();
+        return ArrayHelper::map($list, 'id', 'shared_id');
     }
 
 }

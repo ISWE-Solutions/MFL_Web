@@ -136,18 +136,21 @@ class LocationTypeController extends Controller {
         if (User::userIsAllowedTo('Manage location types')) {
             $model = $this->findModel($id);
             $name = $model->name;
-            if ($model->delete()) {
-                $audit = new AuditTrail();
-                $audit->user = Yii::$app->user->id;
-                $audit->action = "Removed Location type $name from the system.";
-                $audit->ip_address = Yii::$app->request->getUserIP();
-                $audit->user_agent = Yii::$app->request->getUserAgent();
-                $audit->save();
-                Yii::$app->session->setFlash('success', "Location type $name was successfully removed.");
-            } else {
-                Yii::$app->session->setFlash('error', "Location type $name could not be removed. Please try again!");
+            try {
+                if ($model->delete()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Removed Location type $name from the system.";
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', "Location type: $name was successfully removed.");
+                } else {
+                    Yii::$app->session->setFlash('error', "Location type: $name could not be removed. Please try again!");
+                }
+            } catch (yii\db\IntegrityException $ex) {
+                Yii::$app->session->setFlash('error', "Location type: $name could not be removed. Please try again!");
             }
-
             return $this->redirect(['index']);
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');

@@ -17,7 +17,7 @@ class OperationstatusSearch extends Operationstatus
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id','shared_id'], 'integer'],
             [['name', 'description'], 'safe'],
         ];
     }
@@ -59,6 +59,7 @@ class OperationstatusSearch extends Operationstatus
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'shared_id' => $this->shared_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'name', $this->name])

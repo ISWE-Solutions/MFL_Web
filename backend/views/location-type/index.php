@@ -1,11 +1,13 @@
 <?php
-
+use kartik\editable\Editable;
 use kartik\grid\EditableColumn;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\grid\ActionColumn;
 use backend\models\User;
+use kartik\number\NumberControl;
+use \kartik\popover\PopoverX;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\DistrictTypeSearch */
@@ -49,6 +51,39 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'filter' => \backend\models\LocationType::getNames(),
                     'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
+                    'format' => 'raw',
+                    'refreshGrid' => true,
+                ],
+                [
+                    'class' => EditableColumn::className(),
+                    'enableSorting' => true,
+                    'attribute' => 'shared_id',
+                    'editableOptions' => [
+                        'asPopover' => true,
+                        'type' => 'success',
+                        'size' => PopoverX::SIZE_MEDIUM,
+                        'options' => ['class' => 'form-control', 'custom' => true,],
+                        'inputType' => Editable::INPUT_WIDGET,
+                        'widgetClass' => '\kartik\number\NumberControl',
+                        'options' => [
+                            'displayOptions' => [
+                                'placeholder' => 'Enter a unique HPCZ unique location id'
+                            ],
+                            'maskedInputOptions' => [
+                                //  'suffix' => ' User(s)',
+                                'allowMinus' => false,
+                                'min' => 0,
+                                'max' => 10000000,
+                                'digits' => 0
+                            ],
+                        ]
+                    ],
+                    'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+                    'filterWidgetOptions' => [
+                        'pluginOptions' => ['allowClear' => true],
+                    ],
+                    'filter' => \backend\models\Operationstatus::getHPCZIds(),
+                    'filterInputOptions' => ['prompt' => 'Filter by HPCZ id', 'class' => 'form-control',],
                     'format' => 'raw',
                     'refreshGrid' => true,
                 ],
@@ -103,6 +138,21 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?=
                         $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
                             'Name of Location type', 'id' => "province", 'required' => true,])
+                        ?>
+                        <?=
+                        $form->field($model, 'shared_id', ['enableAjaxValidation' => true])->widget(NumberControl::classname(), [
+                            'displayOptions' => [
+                                'placeholder' => 'Enter a unique HPCZ unique location id'
+                            ],
+                            'maskedInputOptions' => [
+                                // 'prefix' => '$ ',
+                                'suffix' => '',
+                                'allowMinus' => false,
+                                'digits' => 0,
+                                'min' => 1,
+                                'max' => 10000000
+                            ],
+                        ])->label("HPCZ id");
                         ?>
                     </div>
                     <div class="col-lg-4">

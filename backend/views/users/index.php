@@ -15,6 +15,7 @@ use \kartik\popover\PopoverX;
 
 $this->title = 'Users';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <div class="card card-primary card-outline">
     <div class="card-body">
@@ -22,9 +23,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             <?php
             if (\backend\models\User::userIsAllowedTo('Manage Users')) {
-                echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
-                    return false;"><i class="fa fa-plus"></i> Add new user</button>';
-                //echo Html::a('<i class="fa fa-plus"></i> Add User', ['create'], ['class' => 'btn btn-primary btn-sm']);
+//                echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
+//                    return false;"><i class="fa fa-plus"></i> Add new user</button>';
+                echo Html::a('<i class="fa fa-plus"></i> Add User', ['create'], ['class' => 'btn btn-primary btn-sm']);
             }
             ?>
         </p>
@@ -40,14 +41,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => 'yii\grid\SerialColumn'],
                 //'id',
                 [
-                    'class' => EditableColumn::className(),
-                    'editableOptions' => [
-                        'asPopover' => true,
-                        'type' => 'primary',
-                        'size' => PopoverX::SIZE_MEDIUM,
-                        'options' => ['data' => \common\models\Role::getRoles()],
-                        'inputType' => Editable::INPUT_SELECT2,
-                    ],
+//                    'class' => EditableColumn::className(),
+//                    'editableOptions' => [
+//                        'asPopover' => true,
+//                        'type' => 'primary',
+//                        'size' => PopoverX::SIZE_MEDIUM,
+//                        'options' => ['data' => \common\models\Role::getRoles()],
+//                        'inputType' => Editable::INPUT_SELECT2,
+//                    ],
                     'attribute' => 'role',
                     'format' => 'raw',
                     'label' => 'Role',
@@ -63,13 +64,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                 ],
                 [
-                    'class' => EditableColumn::className(),
-                    'editableOptions' => [
-                        'type' => 'primary',
-                        'asPopover' => true,
-                        'size' => PopoverX::SIZE_MEDIUM,
-                    ],
-                    'refreshGrid' => true,
+//                    'class' => EditableColumn::className(),
+//                    'editableOptions' => [
+//                        'type' => 'primary',
+//                        'asPopover' => true,
+//                        'size' => PopoverX::SIZE_MEDIUM,
+//                    ],
+//                    'refreshGrid' => true,
                     'attribute' => 'first_name',
                     'label' => 'First name',
                     'format' => 'raw',
@@ -89,12 +90,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 [
-                    'class' => EditableColumn::className(),
-                    'editableOptions' => [
-                        'type' => 'primary',
-                        'asPopover' => true,
-                        'size' => PopoverX::SIZE_MEDIUM,
-                    ],
+//                    'class' => EditableColumn::className(),
+//                    'editableOptions' => [
+//                        'type' => 'primary',
+//                        'asPopover' => true,
+//                        'size' => PopoverX::SIZE_MEDIUM,
+//                    ],
                     'attribute' => 'last_name',
                     'label' => 'Last name',
                     'format' => 'raw',
@@ -114,12 +115,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 [
-                    'class' => EditableColumn::className(),
-                    'editableOptions' => [
-                        'type' => 'primary',
-                        'asPopover' => true,
-                        'size' => PopoverX::SIZE_MEDIUM,
-                    ],
+//                    'class' => EditableColumn::className(),
+//                    'editableOptions' => [
+//                        'type' => 'primary',
+//                        'asPopover' => true,
+//                        'size' => PopoverX::SIZE_MEDIUM,
+//                    ],
                     'attribute' => 'email',
                     'label' => 'Email',
                     'format' => 'raw',
@@ -129,6 +130,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'filter' => \backend\models\User::getEmails(),
                     'filterInputOptions' => ['prompt' => 'Filter by email', 'class' => 'form-control', 'id' => null],
+                ],
+                [
+//                    'class' => EditableColumn::className(),
+//                    'editableOptions' => [
+//                        'type' => 'primary',
+//                        'asPopover' => true,
+//                        'size' => PopoverX::SIZE_MEDIUM,
+//                    ],
+                    'attribute' => 'user_type',
+                    'label' => 'User type',
+                    'format' => 'raw',
+                    'filterType' => GridView::FILTER_SELECT2,
+                    'filterWidgetOptions' => [
+                        'pluginOptions' => ['allowClear' => true],
+                    ],
+                    'filter' => ['National' => "National", "District" => "District", "Province" => "Province"],
+                    'filterInputOptions' => ['prompt' => 'Filter by user type', 'class' => 'form-control', 'id' => null],
                 ],
                 [
                     'class' => EditableColumn::className(),
@@ -164,61 +182,61 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw',
                     'refreshGrid' => true,
                 ],
-            //'created_at',
-            //'updated_at',
-            //'updated_by',
-            //'created_by',
-            /* ['class' => 'yii\grid\ActionColumn',
-              'template' => '{update}{delete}',
-              'buttons' => [
-              'view' => function ($url, $model) {
-              if (User::userIsAllowedTo('View Users') && $model->status == User::STATUS_ACTIVE) {
-              return Html::a(
-              '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
-              'title' => 'View user',
-              'data-toggle' => 'tooltip',
-              'data-placement' => 'top',
-              'data-pjax' => '0',
-              'style' => "padding:5px;",
-              'class' => 'bt btn-lg'
-              ]
-              );
-              }
-              },
-              'update' => function ($url, $model) {
-              if (User::userIsAllowedTo('Manage Users') && $model->status == User::STATUS_ACTIVE) {
-              return Html::a(
-              '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-              'title' => 'Update user',
-              'data-toggle' => 'tooltip',
-              'data-placement' => 'top',
-              // 'target' => '_blank',
-              'data-pjax' => '0',
-              'style' => "padding:5px;",
-              'class' => 'bt btn-lg'
-              ]
-              );
-              }
-              },
-              'delete' => function ($url, $model) {
-              if (User::userIsAllowedTo('Manage Users') && $model->status == User::STATUS_INACTIVE) {
-              return Html::a(
-              '<span class="fa fa-trash"></span>', ['delete', 'id' => $model->id], [
-              'title' => 'Remove user',
-              'data-toggle' => 'tooltip',
-              'data-placement' => 'top',
-              'data' => [
-              'confirm' => 'Are you sure you want to remove this user?',
-              'method' => 'post',
-              ],
-              'style' => "padding:5px;",
-              'class' => 'bt btn-lg'
-              ]
-              );
-              }
-              },
-              ]
-              ] */
+                //'created_at',
+                //'updated_at',
+                //'updated_by',
+                //'created_by',
+                ['class' => 'yii\grid\ActionColumn',
+                    'template' => '{view}{update}',
+                    'buttons' => [
+                        'view' => function ($url, $model) {
+                            if (User::userIsAllowedTo('View Users')|| User::userIsAllowedTo('Manage Users')) {
+                                return Html::a(
+                                                '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
+                                            'title' => 'View user',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
+                        },
+                        'update' => function ($url, $model) {
+                            if (User::userIsAllowedTo('Manage Users') && $model->status == User::STATUS_ACTIVE) {
+                                return Html::a(
+                                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                            'title' => 'Update user',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            // 'target' => '_blank',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
+                        },
+                        'delete' => function ($url, $model) {
+                            if (User::userIsAllowedTo('Manage Users') && $model->status == User::STATUS_INACTIVE) {
+                                return Html::a(
+                                                '<span class="fa fa-trash"></span>', ['delete', 'id' => $model->id], [
+                                            'title' => 'Remove user',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data' => [
+                                                'confirm' => 'Are you sure you want to remove this user?',
+                                                'method' => 'post',
+                                            ],
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
+                        },
+                    ]
+                ]
             ],
         ]);
         ?>

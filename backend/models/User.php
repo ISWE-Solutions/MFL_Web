@@ -36,8 +36,6 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
     const STATUS_ACTIVE = 1;
     const STATUS_OUT_OF_OFFICE = 8;
 
-    public $user_type;
-
     /**
      * {@inheritdoc}
      */
@@ -50,11 +48,29 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
      */
     public function rules() {
         return [
-            [['role', 'username', 'first_name', 'last_name', 'auth_key', 'email'], 'required'],
-            [['role', 'status'], 'integer'],
+            [['role', 'username', 'first_name', 'last_name', 'auth_key', 'email', 'user_type'], 'required'],
+            [['role', 'status', 'district_id', 'province_id'], 'integer'],
             [['username', 'email', 'first_name', 'last_name',
             'password', 'auth_key', 'password_reset_token', 'verification_token'], 'string', 'max' => 255],
-            //[['title', 'sex', 'nrc', 'type_of_user'], 'string'],
+            [['user_type'], 'safe'],
+//            ['district_id', 'required', 'when' => function($model) {
+//                    return ($model->user_type == "District" ? true : false);
+//                }, 'whenClient' => "function (attribute, value) {
+//                    return $('input[type=\"select\"][name=\"Users[user_type]\"]:selected').val() == 'District';
+//                }"
+//            ],
+            [['district_id'], 'required', 'when' => function($model) {
+                    return $this->user_type == "District" ? true : false;
+                }, 'whenClient' => "function (attribute, value) {
+                   return $('input[type=\"select\"][name=\"Users[user_type]\"]:selected').val() == 'District';
+              }"
+            ],
+            [['province_id'], 'required', 'when' => function($model) {
+                    return $this->user_type === "Province" ? true : false;
+                }, 'whenClient' => "function (attribute, value) {
+                   return $('input[type=\"select\"][name=\"Users[user_type]\"]:selected').val() == 'Province';
+              }"
+            ],
             // [['phone'], PhoneInputValidator::className()],
             ['email', 'email', 'message' => "The email isn't correct!"],
             ['email', 'unique', 'when' => function($model) {
@@ -78,6 +94,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
             'email' => 'Email',
             'password' => 'Password',
             'auth_key' => 'Auth Key',
+            'district_id' => "District",
+            'province_id' => "Province",
+            'user_type' => "User type",
             'password_reset_token' => 'Password Reset Token',
             'verification_token' => 'Verification Token',
             'status' => 'Status',
@@ -302,6 +321,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
         $list = ArrayHelper::map($users, 'first_name', 'first_name');
         return $list;
     }
+
     /**
      * @return array
      */
@@ -320,6 +340,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
         $list = ArrayHelper::map($users, 'username', 'username');
         return $list;
     }
+
     /**
      * @return array
      */
@@ -327,6 +348,13 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface {
         $users = self::find()
                         ->orderBy(['email' => SORT_ASC])->all();
         $list = ArrayHelper::map($users, 'email', 'email');
+        return $list;
+    }
+
+    public static function getUserTypes() {
+        $users = self::find()
+                        ->orderBy(['user_type' => SORT_ASC])->all();
+        $list = ArrayHelper::map($users, 'user_type', 'user_type');
         return $list;
     }
 

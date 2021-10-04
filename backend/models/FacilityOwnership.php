@@ -19,7 +19,7 @@ class FacilityOwnership extends \yii\db\ActiveRecord {
      * {@inheritdoc}
      */
     public static function tableName() {
-        return 'MFL_ownership';
+        return 'ownership';
     }
 
     /**
@@ -27,9 +27,19 @@ class FacilityOwnership extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['name'], 'required'],
+            [['name', 'shared_id'], 'required'],
+            [['shared_id'], 'integer'],
             [['name'], 'string', 'max' => 30],
             [['name'], 'unique', 'message' => 'Facility ownership exist already!'],
+            ['shared_id', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('shared_id');
+                }, 'message' => 'Facility ownership with this HPCZ id exist already!'],
+            ['name', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('name');
+                }, 'message' => 'Facility ownership should be unique!'],
+            ['name', 'unique', 'when' => function($model) {
+                    return $model->isAttributeChanged('name') && !empty(self::findOne(['name' => $model->name, "shared_id" => $model->shared_id])) ? TRUE : FALSE;
+                }, 'message' => 'Facility ownership exist already with the same shared id!'],
         ];
     }
 
@@ -38,7 +48,8 @@ class FacilityOwnership extends \yii\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'id' => 'ID',
+            'id' => 'id',
+            'shared_id' => 'HPCZ id',
             'name' => 'Name',
         ];
     }
@@ -60,6 +71,11 @@ class FacilityOwnership extends \yii\db\ActiveRecord {
     public static function getList() {
         $list = self::find()->orderBy(['name' => SORT_ASC])->all();
         return ArrayHelper::map($list, 'id', 'name');
+    }
+
+    public static function getHPCZIds() {
+        $list = self::find()->orderBy(['name' => SORT_ASC])->all();
+        return ArrayHelper::map($list, 'id', 'shared_id');
     }
 
     public static function getById($id) {

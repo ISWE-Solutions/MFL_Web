@@ -60,6 +60,7 @@ class OperationstatusController extends Controller {
                 $post = ['Operationstatus' => $posted];
                 $old = $model->name;
                 $old_desc = $model->description;
+                $old_shared_id = $model->shared_id;
 
                 if ($model->load($post)) {
                     $action = "";
@@ -68,6 +69,9 @@ class OperationstatusController extends Controller {
                     }
                     if ($old != $model->name) {
                         $action = "Updated Facility operation status name from $old to " . $model->name;
+                    }
+                    if ($old_shared_id != $model->shared_id) {
+                        $msg = "Facility operation status shared hpcz id from $old_shared_id to " . $model->shared_id;
                     }
                     if (!empty($action)) {
                         $audit = new AuditTrail();
@@ -89,6 +93,19 @@ class OperationstatusController extends Controller {
                 }
                 return $out;
             }
+            
+             $dataProvider->pagination = ['pageSize' => 15];
+            $dataProvider->setSort([
+                'attributes' => [
+                    'id' => [
+                        'desc' => ['id' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ],
+                ],
+                'defaultOrder' => [
+                    'id' => SORT_DESC
+                ]
+            ]);
             return $this->render('index', [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,

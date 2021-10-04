@@ -8,7 +8,7 @@ use \backend\models\User;
 /* @var $this yii\web\View */
 /* @var $model backend\models\User */
 
-$this->title = $model->title . "" . $model->first_name . " " . $model->other_name . " " . $model->last_name;
+$this->title = $model->first_name . " " .  $model->last_name;
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -27,11 +27,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                 if ($model->status != 0) {
                     echo Html::a('<span class="fas fa-lock fa-2x"></span>', ['block', 'id' => $model->id], [
-                        'title' => 'Block user',
+                        'title' => 'Deactivate user',
                         'data-toggle' => 'tooltip',
                         'data-placement' => 'top',
                         'data' => [
-                            'confirm' => 'Are you sure you want to block this user?',
+                            'confirm' => 'Are you sure you want to deactivate this user?',
                             'method' => 'post',
                         ],
                     ]);
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 //  'id',
                 [
-                    'attribute' => 'type_of_user',
+                    'attribute' => 'user_type',
                     'format' => 'raw',
                     'label' => 'User type',
                 ],
@@ -78,15 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'visible' => !empty($model->district_id) && $model->district_id > 0 ? TRUE : FALSE,
                 ],
-                [
-                    'attribute' => 'camp_id',
-                    'format' => 'raw',
-                    'label' => 'Camp',
-                    'value' => function ($model) {
-                        return !empty($model->camp_id) && $model->camp_id > 0 ?backend\models\Camps::findOne($model->camp_id)->name: "";
-                    },
-                    'visible' => !empty($model->camp_id) && $model->camp_id > 0 ? TRUE : FALSE,
-                ],
+               
                 [
                     'attribute' => 'role',
                     'format' => 'raw',
@@ -104,31 +96,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         $name = "";
                         $user_model = \backend\models\User::findOne(["id" => $model->id]);
                         if (!empty($user_model)) {
-                            $name = $user_model->title . "" . $user_model->first_name . " " . $user_model->other_name . " " . $user_model->last_name;
+                            $name = $user_model->first_name . " " . $user_model->last_name;
                         }
                         return $name;
                     }
                 ],
-                'sex',
-                'phone',
-                'nrc',
-                //'username',
-                'email',
-                //'password_hash',
-                //   'auth_key',
-                // 'password_reset_token',
-                //  'verification_token',
                 [
                     'attribute' => 'status',
                     'value' => function($model) {
                         $str = "";
                         if ($model->status == \backend\models\User::STATUS_ACTIVE) {
-                            $str = "<p style='margin:2px;padding:2px;display:inline-block;' class='alert alert-success'> "
+                            $str = "<p class='badge badge-success'> "
                                     . "<i class='fa fa-check'></i> Active</p><br>";
                         }
                         if ($model->status == \backend\models\User::STATUS_INACTIVE) {
-                            $str = "<p style='margin:2px;padding:2px;display:inline-block;' class='alert alert-warning'> "
-                                    . "<i class='fa fa-times'></i> Blocked</p><br>";
+                            $str = "<p class='badge badge-danger'> "
+                                    . "<i class='fa fa-times'></i> Inactive</p><br>";
                         }
                         return $str;
                     },
@@ -138,14 +121,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Created by',
                     'value' => function($model) {
                         $user = \backend\models\User::findOne(['id' => $model->created_by]);
-                        return !empty($user) ? $user->first_name . " " . $user->other_name . " " . $user->last_name . "-" . $user->email : "";
+                        return !empty($user) ? $user->first_name . " " . $user->last_name . "-" . $user->email : "";
                     }
                 ],
                 [
                     'label' => 'Updated by',
                     'value' => function($model) {
                         $user = \backend\models\User::findOne(['id' => $model->updated_by]);
-                        return !empty($user) ? $user->first_name . " " . $user->other_name . " " . $user->last_name . "-" . $user->email : "";
+                        return !empty($user) ? $user->first_name . " " . $user->last_name . "-" . $user->email : "";
                     }
                 ],
                 [

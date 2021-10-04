@@ -256,7 +256,4 @@ if (!empty($model->latitude) && !empty($model->longitude)) {
         </div>
 
     </div>
-
-
-
 </div>

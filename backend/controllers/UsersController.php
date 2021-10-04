@@ -24,10 +24,10 @@ class UsersController extends Controller {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['index', 'create', 'image',  'profile'],
+                'only' => ['index', 'create', 'view', 'update', 'image', 'profile'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'image', 'profile'],
+                        'actions' => ['index', 'view', 'update', 'create', 'image', 'profile'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -47,12 +47,12 @@ class UsersController extends Controller {
      * @return mixed
      */
     public function actionIndex() {
-        if (User::userIsAllowedTo('View Users')) {
+        if (User::userIsAllowedTo('View Users') || User::userIsAllowedTo('Manage Users')) {
             $model = new User();
             $searchModel = new UserSearch();
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
             $dataProvider->query->andFilterWhere(['NOT IN', 'status', [User::STATUS_DELETED]]);
-            // $dataProvider->query->andFilterWhere(['NOT IN', 'id', [Yii::$app->user->id]]);
+            $dataProvider->query->andFilterWhere(['NOT IN', 'id', [Yii::$app->user->id]]);
             if (Yii::$app->request->post('hasEditable')) {
                 $userId = Yii::$app->request->post('editableKey');
                 $model = User::findOne($userId);
@@ -124,9 +124,14 @@ class UsersController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id) {
-        return $this->render('view', [
-                    'model' => $this->findModel($id),
-        ]);
+        if (User::userIsAllowedTo('View Users') || User::userIsAllowedTo('Manage Users')) {
+            return $this->render('view', [
+                        'model' => $this->findModel($id),
+            ]);
+        } else {
+            Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
+            return $this->redirect(['home/home']);
+        }
     }
 
     /**
@@ -153,8 +158,8 @@ class UsersController extends Controller {
                 $model->username = $model->email;
                 $model->created_by = Yii::$app->user->identity->id;
                 $model->updated_by = Yii::$app->user->identity->id;
-                $model->created_at = new \yii\db\Expression('NOW()');
-                $model->updated_at = new \yii\db\Expression('NOW()');
+//                $model->created_at = new \yii\db\Expression('NOW()');
+//                $model->updated_at = new \yii\db\Expression('NOW()');
 
                 if ($model->save() && $model->validate()) {
                     $resetPasswordModel = new \backend\models\PasswordResetRequestForm();
@@ -166,10 +171,10 @@ class UsersController extends Controller {
                         $audit->user_agent = Yii::$app->request->getUserAgent();
                         $audit->save();
                         Yii::$app->session->setFlash('success', 'User account with email:' . $model->email . ' was successfully created.');
-                        //return $this->redirect(['view', 'id' => $model->id]);
+                        return $this->redirect(['view', 'id' => $model->id]);
                     } else {
                         Yii::$app->session->setFlash('error', "User account created but activation email was not sent!");
-                        //return $this->redirect(['view', 'id' => $model->id]);
+                        return $this->redirect(['view', 'id' => $model->id]);
                     }
                 } else {
                     $message = '';
@@ -177,15 +182,13 @@ class UsersController extends Controller {
                         $message .= $error[0];
                     }
                     Yii::$app->session->setFlash('error', "Error occured while creating user.Please try again.Error::" . $message);
-                    //  return $this->render('create', ['model' => $model, "user_type" => $user_type]);
                 }
-                return $this->redirect(['index']);
             }
 
 
-            /* return $this->render('create', [
-              'model' => $model
-              ]); */
+            return $this->render('create', [
+                        'model' => $model
+            ]);
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
             return $this->redirect(['home/home']);
@@ -199,35 +202,19 @@ class UsersController extends Controller {
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    /*public function actionUpdate($id) {
+    public function actionUpdate($id) {
         if (User::userIsAllowedTo('Manage Users')) {
             $model = $this->findModel($id);
-            $old_user_type = $model->type_of_user;
-            $name = $model->first_name . ' ' . $model->other_name . ' ' . $model->last_name;
+            $name = $model->first_name . ' ' . $model->last_name;
             if (Yii::$app->request->isAjax) {
                 $model->load(Yii::$app->request->post());
                 return Json::encode(\yii\widgets\ActiveForm::validate($model));
             }
+
             if ($model->load(Yii::$app->request->post())) {
-                // var_dump($old_user_type);
-                // var_dump(Yii::$app->request->post()['User']['user_type']);
                 $model->updated_by = Yii::$app->user->identity->id;
                 $model->username = $model->email;
-                if (Yii::$app->request->post()['User']['user_type'] != $old_user_type) {
-                    $model->type_of_user = Yii::$app->request->post()['User']['user_type'];
-                    if ($model->type_of_user === "Other user") {
-                        $model->province_id = 0;
-                        $model->camp_id = 0;
-                        $model->district_id = 0;
-                    }
-                    if ($model->type_of_user === "District user") {
-                        $model->camp_id = 0;
-                    }
-                    if ($model->type_of_user === "Provincial user") {
-                        $model->camp_id = 0;
-                        $model->district_id = 0;
-                    }
-                }
+
                 if ($model->save() && $model->validate()) {
                     $audit = new AuditTrail();
                     $audit->user = Yii::$app->user->id;
@@ -236,6 +223,7 @@ class UsersController extends Controller {
                     $audit->user_agent = Yii::$app->request->getUserAgent();
                     $audit->save();
                     Yii::$app->session->setFlash('success', "$name\'s Details were successfully updated.");
+                    return $this->redirect(['view', 'id' => $model->id]);
                 } else {
                     $message = '';
                     foreach ($model->getErrors() as $error) {
@@ -243,20 +231,17 @@ class UsersController extends Controller {
                     }
                     Yii::$app->session->setFlash('error', "Error occured while updating $name\'s details Please try again.Error:" . $message);
                 }
-                return $this->redirect(['view', 'id' => $model->id]);
             }
 
-            $user_type = $model->type_of_user;
 
             return $this->render('update', [
-                        'model' => $model,
-                        "user_type" => $user_type
+                        'model' => $model
             ]);
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
             return $this->redirect(['home/home']);
         }
-    }*/
+    }
 
     public function actionProfile($id) {
         $model = $this->findModel($id);
@@ -294,31 +279,31 @@ class UsersController extends Controller {
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-     /* public function actionDelete($id) {
-        //For now we just set the user status to User::STATUS_DELETED
-        if (User::userIsAllowedTo('Manage Users')) {
-            $model = $this->findModel($id);
-            $model->status = User::STATUS_DELETED;
-            $email = $model->email;
-            if ($model->save()) {
-                $audit = new AuditTrail();
-                $audit->user = Yii::$app->user->id;
-                $audit->action = "Deleted user account with email " . $email;
-                $audit->ip_address = Yii::$app->request->getUserIP();
-                $audit->user_agent = Yii::$app->request->getUserAgent();
-                $audit->save();
-                Yii::$app->session->setFlash('success', "User was successfully deleted.");
-            } else {
-                Yii::$app->session->setFlash('error', "User could not be deleted. Please try again!");
-            }
-            return $this->redirect(['index']);
-        } else {
-            Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
-            return $this->redirect(['home/home']);
-        }
-    }
+    /* public function actionDelete($id) {
+      //For now we just set the user status to User::STATUS_DELETED
+      if (User::userIsAllowedTo('Manage Users')) {
+      $model = $this->findModel($id);
+      $model->status = User::STATUS_DELETED;
+      $email = $model->email;
+      if ($model->save()) {
+      $audit = new AuditTrail();
+      $audit->user = Yii::$app->user->id;
+      $audit->action = "Deleted user account with email " . $email;
+      $audit->ip_address = Yii::$app->request->getUserIP();
+      $audit->user_agent = Yii::$app->request->getUserAgent();
+      $audit->save();
+      Yii::$app->session->setFlash('success', "User was successfully deleted.");
+      } else {
+      Yii::$app->session->setFlash('error', "User could not be deleted. Please try again!");
+      }
+      return $this->redirect(['index']);
+      } else {
+      Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
+      return $this->redirect(['home/home']);
+      }
+      } */
 
-  public function actionBlock($id) {
+    public function actionBlock($id) {
         //For now we just set the user status to User::STATUS_DELETED
         if (User::userIsAllowedTo('Manage Users')) {
             $model = $this->findModel($id);
@@ -326,20 +311,20 @@ class UsersController extends Controller {
             if ($model->save()) {
                 $audit = new AuditTrail();
                 $audit->user = Yii::$app->user->id;
-                $audit->action = "Blocked user account with email " . $model->email;
+                $audit->action = "Deactivated user account with email " . $model->email;
                 $audit->ip_address = Yii::$app->request->getUserIP();
                 $audit->user_agent = Yii::$app->request->getUserAgent();
                 $audit->save();
-                Yii::$app->session->setFlash('success', "User was successfully blocked.");
+                Yii::$app->session->setFlash('success', "User was successfully deactivated.");
             } else {
-                Yii::$app->session->setFlash('error', "User could not be blocked. Please try again!");
+                Yii::$app->session->setFlash('error', "User could not be deactivated. Please try again!");
             }
             return $this->redirect(['view', 'id' => $id]);
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
             return $this->redirect(['home/home']);
         }
-    }*/
+    }
 
     /**
      * Finds the User model based on its primary key value.

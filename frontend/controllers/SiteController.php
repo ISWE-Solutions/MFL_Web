@@ -73,32 +73,32 @@ class SiteController extends Controller {
      * @return mixed
      */
     public function actionIndex() {
-        $MFLFacility_model = new \frontend\models\MFLFacility();
-        $searchModel = new \frontend\models\MFLFacilitySearch();
+        $Facility_model = new \frontend\models\Facility();
+        $searchModel = new \frontend\models\FacilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        if (!empty(Yii::$app->request->queryParams['MFLFacility']['province_id']) ||
-                !empty(Yii::$app->request->queryParams['MFLFacility']['district_id']) ||
-                !empty(Yii::$app->request->queryParams['MFLFacility']['ownership_id']) ||
-                !empty(Yii::$app->request->queryParams['MFLFacility']['name']) ||
-                !empty(Yii::$app->request->queryParams['MFLFacility']['facility_type_id'])) {
+        if (!empty(Yii::$app->request->queryParams['Facility']['province_id']) ||
+                !empty(Yii::$app->request->queryParams['Facility']['district_id']) ||
+                !empty(Yii::$app->request->queryParams['Facility']['ownership']) ||
+                !empty(Yii::$app->request->queryParams['Facility']['name']) ||
+                !empty(Yii::$app->request->queryParams['Facility']['type'])) {
 
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']['district_id'])) {
-                $dataProvider->query->andFilterWhere(['district_id' => Yii::$app->request->queryParams['MFLFacility']['district_id']]);
+            if (!empty(Yii::$app->request->queryParams['Facility']['district_id'])) {
+                $dataProvider->query->andFilterWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']]);
             }
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']['ownership_id'])) {
-                $dataProvider->query->andFilterWhere(['ownership_id' => Yii::$app->request->queryParams['MFLFacility']['ownership_id']]);
+            if (!empty(Yii::$app->request->queryParams['Facility']['ownership'])) {
+                $dataProvider->query->andFilterWhere(['ownership' => Yii::$app->request->queryParams['Facility']['ownership']]);
             }
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']['facility_type_id'])) {
-                $dataProvider->query->andFilterWhere(['facility_type_id' => Yii::$app->request->queryParams['MFLFacility']['facility_type_id']]);
+            if (!empty(Yii::$app->request->queryParams['Facility']['type'])) {
+                $dataProvider->query->andFilterWhere(['type' => Yii::$app->request->queryParams['Facility']['type']]);
             }
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']['name'])) {
-                $dataProvider->query->andFilterWhere(['LIKE', 'name', Yii::$app->request->queryParams['MFLFacility']['name']]);
+            if (!empty(Yii::$app->request->queryParams['Facility']['name'])) {
+                $dataProvider->query->andFilterWhere(['LIKE', 'name', Yii::$app->request->queryParams['Facility']['name']]);
             }
 
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']['province_id'])) {
+            if (!empty(Yii::$app->request->queryParams['Facility']['province_id'])) {
                 $district_ids = [];
-                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['MFLFacility']['province_id']])->all();
+                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['Facility']['province_id']])->all();
                 if (!empty($districts)) {
                     foreach ($districts as $id) {
                         array_push($district_ids, $id['id']);
@@ -108,7 +108,7 @@ class SiteController extends Controller {
                 $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
             }
         } else {
-            if (!empty(Yii::$app->request->queryParams['MFLFacility']) &&
+            if (!empty(Yii::$app->request->queryParams['Facility']) &&
                     Yii::$app->request->queryParams['filter'] == "true") {
                 Yii::$app->session->setFlash('error', 'Please pick a filter to filter on the map!');
             }
@@ -116,7 +116,7 @@ class SiteController extends Controller {
         }
         //var_dump($dataProvider);
         return $this->render('index', [
-                    'MFLFacility_model' => $MFLFacility_model,
+                    'Facility_model' => $Facility_model,
                     'dataProvider' => $dataProvider,
         ]);
     }

@@ -131,7 +131,7 @@ $session = Yii::$app->session;
                             <?php
                             if (User::userIsAllowedTo("Manage facilities") ||
                                     User::userIsAllowedTo("View facilities")) {
-                                if (Yii::$app->controller->id == "facility") {
+                                if (Yii::$app->controller->id == "facilities") {
                                     echo '<li class="nav-item has-treeview menu-open">'
                                     . ' <a href="#" class="nav-link active">';
                                 } else {
@@ -150,14 +150,14 @@ $session = Yii::$app->session;
                                     if (User::userIsAllowedTo("Manage facilities") ||
                                             User::userIsAllowedTo("View facilities")) {
                                         echo '   <li class="nav-item">';
-                                        if (Yii::$app->controller->id == "facility" &&
+                                        if (Yii::$app->controller->id == "facilities" &&
                                                 (Yii::$app->controller->action->id == "index" ||
                                                 Yii::$app->controller->action->id == "view" ||
                                                 Yii::$app->controller->action->id == "create" ||
                                                 Yii::$app->controller->action->id == "update")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Facilities</p>', ['/facility/index'], ["class" => "nav-link active"]);
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Facilities</p>', ['/facilities/index'], ["class" => "nav-link active"]);
                                         } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Facilities</p>', ['/facility/index'], ["class" => "nav-link"]);
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Facilities</p>', ['/facilities/index'], ["class" => "nav-link"]);
                                         }
                                         echo '</li>';
                                     }
@@ -218,8 +218,11 @@ $session = Yii::$app->session;
                             <?php
                             if (User::userIsAllowedTo("Manage Users") || User::userIsAllowedTo("View Users") ||
                                     User::userIsAllowedTo("View profile") ||
+                                    User::userIsAllowedTo("Manage api users") || User::userIsAllowedTo("View api users") ||
                                     User::userIsAllowedTo("Manage Roles") || User::userIsAllowedTo("View Roles")) {
-                                if (Yii::$app->controller->id == "users" ||
+                                if (
+                                        Yii::$app->controller->id == "users" ||
+                                        Yii::$app->controller->id == "api-users" ||
                                         Yii::$app->controller->id == "role") {
                                     echo '<li class="nav-item has-treeview menu-open">'
                                     . ' <a href="#" class="nav-link active">';
@@ -274,6 +277,20 @@ $session = Yii::$app->session;
                                         }
                                         echo '</li>';
                                     }
+                                    if (User::userIsAllowedTo("Manage api users") || User::userIsAllowedTo("View api users")) {
+                                        echo '   <li class="nav-item">';
+                                        if (Yii::$app->controller->id == "api-users" &&
+                                                (Yii::$app->controller->action->id == "index" ||
+                                                Yii::$app->controller->action->id == "view" ||
+                                                Yii::$app->controller->action->id == "create" ||
+                                                Yii::$app->controller->action->id == "profile" ||
+                                                Yii::$app->controller->action->id == "update")) {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>API Users</p>', ['api-users/index'], ["class" => "nav-link active"]);
+                                        } else {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>API Users</p>', ['api-users/index'], ["class" => "nav-link"]);
+                                        }
+                                        echo '</li>';
+                                    }
                                     ?>
 
                                 </ul>
@@ -284,22 +301,22 @@ $session = Yii::$app->session;
                             <?php
                             if (User::userIsAllowedTo("Manage facility types") ||
                                     User::userIsAllowedTo("Manage MFL services") ||
-                                    User::userIsAllowedTo("Manage MFL operating hours") ||
+//                                    User::userIsAllowedTo("Manage MFL operating hours") ||
                                     User::userIsAllowedTo("Manage MFL operation status") ||
-                                    User::userIsAllowedTo("Manage MFL equipments") ||
-                                    User::userIsAllowedTo("Manage MFL administrative units") ||
-                                    User::userIsAllowedTo("Manage MFL infrastructure") ||
-                                    User::userIsAllowedTo("Manage MFL lab levels") ||
+//                                    User::userIsAllowedTo("Manage MFL equipments") ||
+//                                    User::userIsAllowedTo("Manage MFL administrative units") ||
+//                                    User::userIsAllowedTo("Manage MFL infrastructure") ||
+//                                    User::userIsAllowedTo("Manage MFL lab levels") ||
                                     User::userIsAllowedTo("Manage facility ownerships") //||
                             ) {
                                 if (Yii::$app->controller->id == "facilitytype" ||
                                         Yii::$app->controller->id == "facility-servicecategory" ||
                                         Yii::$app->controller->id == "facility-service" ||
-                                        Yii::$app->controller->id == "operatinghours" ||
-                                        Yii::$app->controller->id == "equipment" ||
-                                        Yii::$app->controller->id == "administrative-unit" ||
-                                        Yii::$app->controller->id == "infrastructure" ||
-                                        Yii::$app->controller->id == "lab-level" ||
+//                                        Yii::$app->controller->id == "operatinghours" ||
+//                                        Yii::$app->controller->id == "equipment" ||
+//                                        Yii::$app->controller->id == "administrative-unit" ||
+//                                        Yii::$app->controller->id == "infrastructure" ||
+//                                        Yii::$app->controller->id == "lab-level" ||
                                         Yii::$app->controller->id == "operationstatus" ||
                                         Yii::$app->controller->id == "facility-ownership"
                                 ) {
@@ -342,9 +359,9 @@ $session = Yii::$app->session;
                                         echo '   <li class="nav-item">';
                                         if (Yii::$app->controller->id == "facility-servicecategory" &&
                                                 (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Service Categories</p>', ['/facility-servicecategory/index',], ["class" => "nav-link active"]);
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Service Areas</p>', ['/facility-servicecategory/index',], ["class" => "nav-link active"]);
                                         } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Service Categories</p>', ['/facility-servicecategory/index',], ["class" => "nav-link"]);
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Service Areas</p>', ['/facility-servicecategory/index',], ["class" => "nav-link"]);
                                         }
                                         echo '</li>';
                                     }
@@ -358,16 +375,16 @@ $session = Yii::$app->session;
                                         }
                                         echo '</li>';
                                     }
-                                    if (User::userIsAllowedTo("Manage MFL operating hours")) {
-                                        echo '   <li class="nav-item">';
-                                        if (Yii::$app->controller->id == "operatinghours" &&
-                                                (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link active"]);
-                                        } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link"]);
-                                        }
-                                        echo '</li>';
-                                    }
+//                                    if (User::userIsAllowedTo("Manage MFL operating hours")) {
+//                                        echo '   <li class="nav-item">';
+//                                        if (Yii::$app->controller->id == "operatinghours" &&
+//                                                (Yii::$app->controller->action->id == "index")) {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link active"]);
+//                                        } else {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link"]);
+//                                        }
+//                                        echo '</li>';
+//                                    }
                                     if (User::userIsAllowedTo("Manage MFL operation status")) {
                                         echo '   <li class="nav-item">';
                                         if (Yii::$app->controller->id == "operationstatus" &&
@@ -378,46 +395,46 @@ $session = Yii::$app->session;
                                         }
                                         echo '</li>';
                                     }
-                                    if (User::userIsAllowedTo("Manage MFL equipments")) {
-                                        echo '   <li class="nav-item">';
-                                        if (Yii::$app->controller->id == "equipment" &&
-                                                (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Equipments</p>', ['/equipment/index',], ["class" => "nav-link active"]);
-                                        } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Equipments</p>', ['/equipment/index',], ["class" => "nav-link"]);
-                                        }
-                                        echo '</li>';
-                                    }
-                                    if (User::userIsAllowedTo("Manage MFL administrative units")) {
-                                        echo '   <li class="nav-item">';
-                                        if (Yii::$app->controller->id == "administrative-unit" &&
-                                                (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Administrative units</p>', ['/administrative-unit/index',], ["class" => "nav-link active"]);
-                                        } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Administrative units</p>', ['/administrative-unit/index',], ["class" => "nav-link"]);
-                                        }
-                                        echo '</li>';
-                                    }
-                                    if (User::userIsAllowedTo("Manage MFL infrastructure")) {
-                                        echo '   <li class="nav-item">';
-                                        if (Yii::$app->controller->id == "infrastructure" &&
-                                                (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Infrastructure</p>', ['/infrastructure/index',], ["class" => "nav-link active"]);
-                                        } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Infrastructure</p>', ['/infrastructure/index',], ["class" => "nav-link"]);
-                                        }
-                                        echo '</li>';
-                                    }
-                                    if (User::userIsAllowedTo("Manage MFL lab levels")) {
-                                        echo '<li class="nav-item">';
-                                        if (Yii::$app->controller->id == "lab-level" &&
-                                                (Yii::$app->controller->action->id == "index")) {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Laboratory levels</p>', ['/lab-level/index',], ["class" => "nav-link active"]);
-                                        } else {
-                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Laboratory levels</p>', ['/lab-level/index',], ["class" => "nav-link"]);
-                                        }
-                                        echo '</li>';
-                                    }
+//                                    if (User::userIsAllowedTo("Manage MFL equipments")) {
+//                                        echo '   <li class="nav-item">';
+//                                        if (Yii::$app->controller->id == "equipment" &&
+//                                                (Yii::$app->controller->action->id == "index")) {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Equipments</p>', ['/equipment/index',], ["class" => "nav-link active"]);
+//                                        } else {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Equipments</p>', ['/equipment/index',], ["class" => "nav-link"]);
+//                                        }
+//                                        echo '</li>';
+//                                    }
+//                                    if (User::userIsAllowedTo("Manage MFL administrative units")) {
+//                                        echo '   <li class="nav-item">';
+//                                        if (Yii::$app->controller->id == "administrative-unit" &&
+//                                                (Yii::$app->controller->action->id == "index")) {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Administrative units</p>', ['/administrative-unit/index',], ["class" => "nav-link active"]);
+//                                        } else {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Administrative units</p>', ['/administrative-unit/index',], ["class" => "nav-link"]);
+//                                        }
+//                                        echo '</li>';
+//                                    }
+//                                    if (User::userIsAllowedTo("Manage MFL infrastructure")) {
+//                                        echo '   <li class="nav-item">';
+//                                        if (Yii::$app->controller->id == "infrastructure" &&
+//                                                (Yii::$app->controller->action->id == "index")) {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Infrastructure</p>', ['/infrastructure/index',], ["class" => "nav-link active"]);
+//                                        } else {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Infrastructure</p>', ['/infrastructure/index',], ["class" => "nav-link"]);
+//                                        }
+//                                        echo '</li>';
+//                                    }
+//                                    if (User::userIsAllowedTo("Manage MFL lab levels")) {
+//                                        echo '<li class="nav-item">';
+//                                        if (Yii::$app->controller->id == "lab-level" &&
+//                                                (Yii::$app->controller->action->id == "index")) {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Laboratory levels</p>', ['/lab-level/index',], ["class" => "nav-link active"]);
+//                                        } else {
+//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Laboratory levels</p>', ['/lab-level/index',], ["class" => "nav-link"]);
+//                                        }
+//                                        echo '</li>';
+//                                    }
                                     ?>
 
                                 </ul>
@@ -431,12 +448,14 @@ $session = Yii::$app->session;
                                     User::userIsAllowedTo("Manage wards") ||
                                     User::userIsAllowedTo("Manage district types") ||
                                     User::userIsAllowedTo("Manage constituencies") ||
+                                    User::userIsAllowedTo("Manage zones") ||
                                     User::userIsAllowedTo("Manage location types")) {
                                 if (Yii::$app->controller->id == "provinces" ||
                                         Yii::$app->controller->id == "districts" ||
                                         Yii::$app->controller->id == "district-type" ||
                                         Yii::$app->controller->id == "location-type" ||
                                         Yii::$app->controller->id == "wards" ||
+                                        Yii::$app->controller->id == "zones" ||
                                         Yii::$app->controller->id == "constituencies") {
                                     echo '<li class="nav-item has-treeview menu-open">'
                                     . ' <a href="#" class="nav-link active">';
@@ -504,6 +523,17 @@ $session = Yii::$app->session;
                                             echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Wards</p>', ['/wards/index'], ["class" => "nav-link active"]);
                                         } else {
                                             echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Wards</p>', ['/wards/index'], ["class" => "nav-link"]);
+                                        }
+                                        echo '</li>';
+                                    }
+                                    if (User::userIsAllowedTo("Manage zones")) {
+                                        echo '   <li class="nav-item">';
+                                        if (Yii::$app->controller->id == "zones" &&
+                                                (
+                                                Yii::$app->controller->action->id == "index")) {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Zones</p>', ['/zones/index'], ["class" => "nav-link active"]);
+                                        } else {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Zones</p>', ['/zones/index'], ["class" => "nav-link"]);
                                         }
                                         echo '</li>';
                                     }
@@ -785,6 +815,23 @@ $session = Yii::$app->session;
                     placement: {from: 'top', align: 'right'}
                 });
             }
+            
+                var myArrWarning = [<?php
+        $flashMessage = Yii::$app->session->getFlash('warning');
+        if ($flashMessage) {
+            echo '"' . $flashMessage . '",';
+        }
+        ?>];
+                for (var j = 0; j < myArrWarning.length; j++) {
+                    $.notify(myArrWarning[j], {
+                        type: 'warning',
+                        offset: 60,
+                        allow_dismiss: true,
+                        newest_on_top: true,
+                        timer: 5000,
+                        placement: {from: 'top', align: 'right'}
+                    });
+                }
         </script>
     </body>
 </html>

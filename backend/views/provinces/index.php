@@ -214,7 +214,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="modal-footer justify-content-between">
                 <?= Html::submitButton('Save province', ['class' => 'btn btn-primary btn-sm']) ?>
-<?php ActiveForm::end() ?>
+                <?php ActiveForm::end() ?>
             </div>
         </div>
         <!-- /.modal-content -->

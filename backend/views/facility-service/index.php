@@ -1,5 +1,6 @@
 <?php
-
+use \kartik\popover\PopoverX;
+use kartik\editable\Editable;
 use kartik\grid\EditableColumn;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -74,6 +75,33 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw',
                     'refreshGrid' => true,
                 ],
+                             [
+                    'class' => EditableColumn::className(),
+                    'enableSorting' => true,
+                    'attribute' => 'comments',
+                    'width' => '600px',
+                    'contentOptions' => [
+                        // 'style' => 'padding:0px 0px 0px 30px;',
+                        'class' => 'text-left',
+                    ],
+                    'editableOptions' => [
+                        'asPopover' => true,
+                        'type' => 'primary',
+                        'inputType' => Editable::INPUT_TEXTAREA,
+                        'submitOnEnter' => false,
+                        'placement' => \kartik\popover\PopoverX::ALIGN_TOP,
+                        'size' => PopoverX::SIZE_LARGE,
+                        'options' => [
+                            'class' => 'form-control',
+                            'rows' => 6,
+                            'placeholder' => 'Enter description...',
+                            'style' => 'width:460px;',
+                        ]
+                    ],
+                    'filter' => false,
+                    'format' => 'raw',
+                    'refreshGrid' => true,
+                ],
                 ['class' => ActionColumn::className(),
                     'options' => ['style' => 'width:130px;'],
                     'template' => '{delete}',
@@ -130,6 +158,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?=
                         $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
                             'Name of service', 'id' => "province", 'required' => true,])
+                        ?>
+                         <?=
+                        $form->field($model, 'comments')->textarea(['rows' => 4, 'placeholder' =>
+                            'Enter service comments'])->label("Comment ");
                         ?>
                     </div>
                     <div class="col-lg-4">

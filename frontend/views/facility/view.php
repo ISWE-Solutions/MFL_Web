@@ -71,23 +71,10 @@ $facility_operating_hours = new ActiveDataProvider([
                                     <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Details</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="contact-tab" data-toggle="pill" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact info</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" id="location-tab" data-toggle="pill" href="#location" role="tab" aria-controls="location" aria-selected="false">Location</a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link" id="operating-hours-tab" data-toggle="pill" href="#operating-hours" role="tab" aria-controls="operating-hours" aria-selected="false">Operating hours</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Services</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">Infrastructure</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-one-settings-tab" data-toggle="pill" href="#custom-tabs-one-settings" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false">Equipment</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-facility-rating-tab" data-toggle="pill" href="#custom-tabs-facility-rating" role="tab" aria-controls="custom-tabs-facility-rating" aria-selected="false">Rate facility</a>
@@ -103,49 +90,82 @@ $facility_operating_hours = new ActiveDataProvider([
                                             DetailView::widget([
                                                 'model' => $model,
                                                 'attributes' => [
-                                                    'name',
-                                                    // 'HMIS_code',
-                                                    // 'smartcare_GUID',
-                                                    // 'eLMIS_ID',
-                                                    //  'iHRIS_ID',
+                                                    [
+                                                        'enableSorting' => true,
+                                                        'attribute' => 'name',
+                                                        'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+                                                        'filterWidgetOptions' => [
+                                                            'pluginOptions' => ['allowClear' => true],
+                                                        ],
+                                                        'filter' => \backend\models\MFLFacility::getNames(),
+                                                        'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
+                                                        'format' => 'raw',
+                                                    ],
+                                                    [
+                                                        'attribute' => 'type',
+                                                        'filterType' => GridView::FILTER_SELECT2,
+                                                        'filterWidgetOptions' => [
+                                                            'pluginOptions' => ['allowClear' => true],
+                                                        ],
+                                                        'filter' => \backend\models\Facilitytype::getList(),
+                                                        'filterInputOptions' => ['prompt' => 'Filter by facility type', 'class' => 'form-control', 'id' => null],
+                                                        'value' => function ($model) {
+                                                            $name = backend\models\Facilitytype::findOne($model->type)->name;
+                                                            return $name;
+                                                        },
+                                                    ],
+                                                    [
+                                                        'attribute' => 'ownership',
+                                                        'filterType' => GridView::FILTER_SELECT2,
+                                                        'filterWidgetOptions' => [
+                                                            'pluginOptions' => ['allowClear' => true],
+                                                        ],
+                                                        'filter' => \backend\models\FacilityOwnership::getList(),
+                                                        'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
+                                                        'value' => function ($model) {
+                                                            $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
+                                                            return $name;
+                                                        },
+                                                    ],
+                                                    [
+                                                        'format' => 'raw',
+                                                        'attribute' => 'operational_status',
+                                                        'filterType' => GridView::FILTER_SELECT2,
+                                                        'filterWidgetOptions' => [
+                                                            'pluginOptions' => ['allowClear' => true],
+                                                        ],
+                                                        'filter' => \backend\models\Operationstatus::getList(),
+                                                        'filterInputOptions' => ['prompt' => 'Filter by status', 'class' => 'form-control', 'id' => null],
+                                                        'value' => function ($model) {
+                                                            $name = backend\models\Operationstatus::findOne($model->operational_status)->name;
+                                                            return $name;
+                                                        },
+                                                    ],
+                                                    [
+                                                        'format' => 'raw',
+                                                        'attribute' => 'mobility_status',
+                                                        'value' => function ($model) {
+                                                            $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                                                            return $status_arr[$model->mobility_status];
+                                                        },
+                                                    ],
+                                                    [
+                                                        'format' => 'raw',
+                                                        'attribute' => 'ownership_type',
+                                                        'value' => function ($model) {
+                                                            $status_arr = [1 => "Public", 2 => "Private"];
+                                                            return $status_arr[$model->ownership_type];
+                                                        },
+                                                    ],
+                                                    'accesibility',
+                                                    'hims_code',
+                                                    'smartcare_code',
+                                                    'elmis_code',
+                                                    'hpcz_code',
+                                                    'disa_code',
                                                     'catchment_population_head_count',
                                                     'catchment_population_cso',
-                                                    [
-                                                        'attribute' => 'administrative_unit_id',
-                                                        'value' => function ($model) {
-                                                            $name = !empty($model->administrative_unit_id) ? backend\models\MFLAdministrativeunit::findOne($model->administrative_unit_id)->name : "";
-                                                            return $name;
-                                                        },
-                                                    ],
-                                                    [
-                                                        'format' => "raw",
-                                                        'attribute' => 'operation_status_id',
-                                                        'value' => function ($model) {
-                                                            $name = !empty($model->operation_status_id) ? backend\models\Operationstatus::findOne($model->operation_status_id)->name : "";
-                                                            return "<p style='color:green;'> $name </p>";
-                                                        },
-                                                    ],
-                                                    [
-                                                        'attribute' => 'facility_type_id',
-                                                        'value' => function ($model) {
-                                                            $name = backend\models\Facilitytype::findOne($model->facility_type_id)->name;
-                                                            return $name;
-                                                        },
-                                                    ],
-                                                    [
-                                                        'attribute' => 'ownership_id',
-                                                        'value' => function ($model) {
-                                                            $name = backend\models\FacilityOwnership::findOne($model->ownership_id)->name;
-                                                            return $name;
-                                                        },
-                                                    ],
-                                                    // 'name',
-                                                    'number_of_beds',
-                                                    'number_of_cots',
-                                                    'number_of_nurses',
-                                                    'number_of_doctors',
-                                                    'number_of_paramedics',
-                                                    'number_of_midwives'
+                                                    'number_of_households',
                                                 ],
                                             ])
                                             ?>
@@ -153,26 +173,10 @@ $facility_operating_hours = new ActiveDataProvider([
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact">
-                                    <?=
-                                    DetailView::widget([
-                                        'model' => $model,
-                                        'attributes' => [
-                                            'address_line1',
-                                            'address_line2',
-                                            'postal_address',
-                                            'web_address',
-                                            'email:email',
-                                            'phone',
-                                            'mobile',
-                                            'fax',
-                                        ],
-                                    ])
-                                    ?>
-                                </div>
+
                                 <div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location">
                                     <div class="row">
-                                        <div class="col-lg-5">
+                                        <div class="col-lg-6">
                                             <?=
                                             DetailView::widget([
                                                 'model' => $model,
@@ -207,16 +211,22 @@ $facility_operating_hours = new ActiveDataProvider([
                                                         },
                                                     ],
                                                     [
-                                                        'attribute' => 'location_type_id',
+                                                        'attribute' => 'zone_id',
                                                         'value' => function ($model) {
-                                                            $name = backend\models\LocationType::findOne($model->location_type_id)->name;
+                                                            $name = !empty($model->zone_id) ? backend\models\Zones::findOne($model->zone_id)->name : "";
+                                                            return $name;
+                                                        },
+                                                    ],
+                                                    [
+                                                        'attribute' => 'location',
+                                                        'value' => function ($model) {
+                                                            $name = backend\models\LocationType::findOne($model->location)->name;
                                                             return $name;
                                                         },
                                                     ],
                                                     [
                                                         'label' => 'Latitude/Longitude',
                                                         'value' => function ($model) {
-                                                            $name = backend\models\LocationType::findOne($model->location_type_id)->name;
                                                             return $model->longitude . "/" . $model->latitude;
                                                         },
                                                     ],
@@ -225,7 +235,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             ?>
 
                                         </div>
-                                        <div class="col-lg-7">
+                                        <div class="col-lg-6">
                                             <?php
                                             $coords = [];
                                             $center_coords = [];
@@ -272,41 +282,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="operating-hours" role="tabpanel" aria-labelledby="operating-hours">
-                                    <div class="row"> 
-                                        <div class="col-md-10"> 
-                                            <!-- /.card-header -->
-                                            <div class="card-body p-0">
-
-                                                <?php
-                                                if ($facility_operating_hours->getCount() > 0) {
-                                                    echo GridView::widget([
-                                                        'dataProvider' => $facility_operating_hours,
-                                                        //  'filterModel' => $searchModel,
-                                                        'condensed' => true,
-                                                        'responsive' => true,
-                                                        'hover' => true,
-                                                        'columns' => [
-                                                            ['class' => 'yii\grid\SerialColumn'],
-                                                            //'id',
-                                                            [
-                                                                'attribute' => 'operatinghours_id',
-                                                                'filter' => false,
-                                                                'value' => function ($facility_operating_hours) {
-                                                                    $name = !empty($facility_operating_hours->operatinghours_id) ? \backend\models\Operatinghours::findOne($facility_operating_hours->operatinghours_id)->name : "";
-                                                                    return $name;
-                                                                },
-                                                            ],
-                                                        ],
-                                                    ]);
-                                                } else {
-                                                    echo "No operating hours have been set for this facility!";
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                                 <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
                                     <div class="row"> 
                                         <div class="col-md-10"> 
@@ -352,81 +328,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
-                                    <div class="row"> 
-                                        <div class="col-md-10"> 
-                                            <!-- /.card-header -->
-                                            <div class="card-body p-0">
-                                                <?php
-                                                if ($facility_infrastructure->getCount() > 0) {
-                                                    echo GridView::widget([
-                                                        'dataProvider' => $facility_infrastructure,
-                                                        //  'filterModel' => $searchModel,
-                                                        'condensed' => true,
-                                                        'responsive' => true,
-                                                        'hover' => true,
-                                                        'columns' => [
-                                                            ['class' => 'yii\grid\SerialColumn'],
-                                                            //'id',
-                                                            [
-                                                                'attribute' => 'infrastructure_id',
-                                                                'filter' => false,
-                                                                'value' => function ($facility_infrastructure) {
-                                                                    return !empty($facility_infrastructure->infrastructure_id) ? \backend\models\MFLInfrastructure::findOne($facility_infrastructure->infrastructure_id)->name : "";
-                                                                },
-                                                            ],
-                                                            [
-                                                                'attribute' => 'value',
-                                                                'filter' => false,
-                                                            ],
-                                                        ],
-                                                    ]);
-                                                } else {
-                                                    echo "No facility infrastructure was found for this facility!";
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="custom-tabs-one-settings" role="tabpanel" aria-labelledby="custom-tabs-one-settings-tab">
-                                    <div class="row"> 
-                                        <div class="col-md-10"> 
-                                            <!-- /.card-header -->
-                                            <div class="card-body p-0">
-
-                                                <?php
-                                                if ($facility_equipment->getCount() > 0) {
-                                                    echo GridView::widget([
-                                                        'dataProvider' => $facility_equipment,
-                                                        //  'filterModel' => $searchModel,
-                                                        'condensed' => true,
-                                                        'responsive' => true,
-                                                        'hover' => true,
-                                                        'columns' => [
-                                                            ['class' => 'yii\grid\SerialColumn'],
-                                                            //'id',
-                                                            [
-                                                                'attribute' => 'equipment_id',
-                                                                'filter' => false,
-                                                                'value' => function ($facility_equipment) {
-                                                                    return !empty($facility_equipment->equipment_id) ? \backend\models\Equipment::findOne($facility_equipment->equipment_id)->name : "";
-                                                                },
-                                                            ],
-                                                            [
-                                                                'attribute' => 'value',
-                                                                'filter' => false,
-                                                            ],
-                                                        ],
-                                                    ]);
-                                                } else {
-                                                    echo "No facility equipment was found for this facility!";
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                                 <div class="tab-pane fade" id="custom-tabs-facility-rating" role="tabpanel" aria-labelledby="custom-tabs-facility-rating">
                                     <?php
                                     $facility_rate_count = \backend\models\MFLFacilityRatings::find()

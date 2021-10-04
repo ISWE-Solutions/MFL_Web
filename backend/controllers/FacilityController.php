@@ -71,6 +71,19 @@ class FacilityController extends Controller {
 
                 $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
             }
+
+            $dataProvider->pagination = ['pageSize' => 15];
+            $dataProvider->setSort([
+                'attributes' => [
+                    'id' => [
+                        'desc' => ['id' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ],
+                ],
+                'defaultOrder' => [
+                    'id' => SORT_DESC
+                ]
+            ]);
             return $this->render('index', [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,

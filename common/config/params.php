@@ -34,4 +34,5 @@ return [
     'amqQueues' => [
         'HPCZ', 'MFL'
     ],
+    'api_url' => "http://localhost:8082/mfl/v2/encode/{key}",
 ];

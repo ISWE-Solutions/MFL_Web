@@ -29,10 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => \backend\models\MFLFacility::getList(),
+                'filter' => \backend\models\Facility::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by facility', 'class' => 'form-control',],
                 'value' => function ($model) {
-                    return backend\models\MFLFacility::findOne($model->facility_id)->name;
+                    return backend\models\Facility::findOne($model->facility_id)->name;
                 }
             ],
             [
@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'data-toggle' => 'tooltip',
                                         'data-placement' => 'top',
                                         'data' => [
-                                            'confirm' => 'Are you sure you want to remove MFL facility rating?<br>'
+                                            'confirm' => 'Are you sure you want to remove facility rating?<br>'
                                             . 'Rating will only be removed if its not being used by the system!',
                                             'method' => 'post',
                                         ],
@@ -170,7 +170,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]);
         } else {
-            echo "<p class='text-sm'>There are currently no wards in the system</p>";
+            echo "<p class='text-sm'>There are currently no facility ratings in the system</p>";
         }
         ?>
     </div>

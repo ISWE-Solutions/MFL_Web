@@ -59,16 +59,23 @@ class FacilitytypeController extends Controller {
                 $posted = current($_POST['Facilitytype']);
                 $post = ['Facilitytype' => $posted];
                 $old = $model->name;
+                $old_shared_id = $model->shared_id;
 
                 if ($model->load($post)) {
+                    $msg = "";
                     if ($old != $model->name) {
-                        $audit = new AuditTrail();
-                        $audit->user = Yii::$app->user->id;
-                        $audit->action = "Updated Facility type name from $old to " . $model->name;
-                        $audit->ip_address = Yii::$app->request->getUserIP();
-                        $audit->user_agent = Yii::$app->request->getUserAgent();
-                        $audit->save();
+                        $msg = "Updated Facility type name from $old to " . $model->name;
                     }
+                    if ($old_shared_id != $model->shared_id) {
+                        $msg = "Updated Facility type shared id from $old_shared_id to " . $model->shared_id;
+                    }
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = $msg;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+
                     $message = '';
                     if (!$model->save()) {
                         foreach ($model->getErrors() as $error) {
@@ -81,6 +88,19 @@ class FacilitytypeController extends Controller {
                 }
                 return $out;
             }
+
+             $dataProvider->pagination = ['pageSize' => 15];
+            $dataProvider->setSort([
+                'attributes' => [
+                    'id' => [
+                        'desc' => ['id' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ],
+                ],
+                'defaultOrder' => [
+                    'id' => SORT_DESC
+                ]
+            ]);
             return $this->render('index', [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
