@@ -116,6 +116,14 @@ $facility_operating_hours = new ActiveDataProvider([
                                                         },
                                                     ],
                                                     [
+                                                        'format' => 'raw',
+                                                        'attribute' => 'ownership_type',
+                                                        'value' => function ($model) {
+                                                            $status_arr = [1 => "Public", 2 => "Private"];
+                                                            return $status_arr[$model->ownership_type];
+                                                        },
+                                                    ],
+                                                    [
                                                         'attribute' => 'ownership',
                                                         'filterType' => GridView::FILTER_SELECT2,
                                                         'filterWidgetOptions' => [
@@ -126,14 +134,6 @@ $facility_operating_hours = new ActiveDataProvider([
                                                         'value' => function ($model) {
                                                             $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
                                                             return $name;
-                                                        },
-                                                    ],
-                                                    [
-                                                        'format' => 'raw',
-                                                        'attribute' => 'ownership_type',
-                                                        'value' => function ($model) {
-                                                            $status_arr = [1 => "Public", 2 => "Private"];
-                                                            return $status_arr[$model->ownership_type];
                                                         },
                                                     ],
                                                     [

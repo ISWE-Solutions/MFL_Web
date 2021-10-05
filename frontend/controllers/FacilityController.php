@@ -34,6 +34,7 @@ class FacilityController extends Controller {
     public function actionIndex($type = "", $ownership = "") {
         $searchModel = new FacilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+         $dataProvider->query->andFilterWhere(['status' => 1]);
 
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
             $district_ids = [];

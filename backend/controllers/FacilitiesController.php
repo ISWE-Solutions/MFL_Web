@@ -186,8 +186,10 @@ class FacilitiesController extends Controller {
                 } else {
 
                     //Send notification to creator 
+                    $model->national_approval_status = 0;
                     $user = User::findOne($model->created_by);
-                    if ($model->save()) {
+
+                    if ($model->save(false)) {
                         if ($user) {
                             $subject = "Attention: MFL Facility:" . $model->name;
                             $msg = "";
@@ -200,6 +202,10 @@ class FacilitiesController extends Controller {
                         }
                         Yii::$app->session->setFlash('success', 'Facility creator was notified to provide more information');
                     } else {
+                        $message = "";
+                        foreach ($model->getErrors() as $error) {
+                            $message .= $error[0];
+                        }
                         Yii::$app->session->setFlash('error', 'Error occured while approving facility. Error::' . $message);
                     }
                 }
@@ -244,8 +250,8 @@ class FacilitiesController extends Controller {
                     }
                 } else {
                     $model->province_approval_status = 2;
-                    $model->national_approval_status = 0;
-                    if ($model->save()) {
+                    $model->national_approval_status = 2;
+                    if ($model->save(false)) {
                         //Send notification to creator 
                         $user = User::findOne($model->created_by);
                         if ($user) {
@@ -267,6 +273,10 @@ class FacilitiesController extends Controller {
                         'model' => $model,
             ]);
         } else {
+            $message = "";
+            foreach ($model->getErrors() as $error) {
+                $message .= $error[0];
+            }
             Yii::$app->session->setFlash('error', 'Error occured while approving facility. Error::' . $message);
         }
         return $this->redirect(['home/home']);
@@ -320,7 +330,8 @@ class FacilitiesController extends Controller {
                     //We notify province that a facility has been approved for their review
                     $role_model = \common\models\RightAllocation::findOne(['right' => "Approve facility - Province"]);
                     if (!empty($role_model)) {
-                        $user = User::findOne(["role" => $role_model->role]);
+                        $facility_province = \backend\models\Districts::findOne($model->district_id);
+                        $user = User::findOne(["role" => $role_model->role, "province_id" => $facility_province->province_id]);
                         if ($user) {
                             $subject = "New MFL Facility:" . $model->name;
                             $msg = "";
@@ -396,6 +407,8 @@ class FacilitiesController extends Controller {
             $old_lat = $model->latitude;
             $old_lng = $model->longitude;
             $old_geom = $model->geom;
+            $old_provincial_status = $model->province_approval_status;
+
             if ($model->load(Yii::$app->request->post())) {
                 if (!empty($model->coordinates)) {
                     $arr = explode(",", $model->coordinates);
@@ -421,8 +434,8 @@ class FacilitiesController extends Controller {
                 $model->date_updated = new Expression('NOW()');
                 $model->updated_by = Yii::$app->user->identity->id;
 
-                $old_provincial_status = $model->province_approval_status;
-                if ($model->province_approval_status === 2) {
+
+                if ($old_provincial_status === 2) {
                     $model->province_approval_status = 0;
                 }
                 if ($model->save()) {

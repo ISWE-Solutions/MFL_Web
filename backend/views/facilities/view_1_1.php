@@ -307,6 +307,22 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                                             }
                                         ],
                                         [
+                                            'attribute' => 'province_approval_status',
+                                            'format' => 'raw',
+                                            'value' => function($model) {
+                                                if ($model->province_approval_status === 1) {
+                                                    return "<span class='badge badge-pill badge-success'> "
+                                                            . "<i class='ti-check'></i> Approved</span>";
+                                                } elseif ($model->province_approval_status === 2) {
+                                                    return "<span class='badge badge-pill badge-danger'> "
+                                                            . "<i class='ti-times'></i> Rejected</span>";
+                                                } else {
+                                                    return "<span class='badge badge-pill badge-dark'> "
+                                                            . "<i class='fas fa-hourglass-half'></i> Pending</span>";
+                                                }
+                                            },
+                                        ],
+                                        [
                                             'attribute' => 'approver_comments',
                                         ],
                                         [
@@ -324,7 +340,7 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                                 <div class="col-lg-6">
                                     <p class=" text-center">Take action by clicking the button below</p>
                                     <?php
-                                  //  $model1 = new \backend\models\Facility();
+                                    //  $model1 = new \backend\models\Facility();
                                     $form = ActiveForm::begin(['action' => 'approve-facility-national?id=' . $model->id,])
                                     ?>
                                     <?php
@@ -333,7 +349,7 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                                                     [1 => "Accept & make facility active", 2 => "Send back for more information"], ['custom' => true, 'prompt' => 'Select Action', 'required' => true]
                                     );
 
-                                   echo $form->field($model, 'approver_comments', ['enableAjaxValidation' => true])->textarea(['rows' => 5, 'placeholder' =>
+                                    echo $form->field($model, 'approver_comments', ['enableAjaxValidation' => true])->textarea(['rows' => 5, 'placeholder' =>
                                         'Enter any comments'])->label("Comments ");
                                     ?>
                                 </div>

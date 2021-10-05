@@ -9,7 +9,6 @@ use kartik\grid\GridView;
 $this->title = 'Home';
 $this->params['breadcrumbs'][] = $this->title;
 //GRZ Facilities
-
 $public_count = backend\models\Facility::find()
         ->cache(Yii::$app->params['cache_duration'])
         ->where(['ownership_type' => 1])
@@ -35,17 +34,30 @@ $_private_count_active = backend\models\Facility::find()
 $count = 0;
 $facilityDataProviderNationalApproval = "";
 $provinceApprovalDataProvider = "";
-if (User::userIsAllowedTo('Approve facility - Province')) {
-    $query = \backend\models\Facility::find()
-            ->where(['status' => 0])
-            ->andWhere(['province_approval_status' => 0]);
-    $provinceApprovalDataProvider = new ActiveDataProvider([
-        'query' => $query,
-    ]);
-    if ($provinceApprovalDataProvider->count > 0) {
-        $count++;
+
+if (User::userIsAllowedTo('Approve facility - Province') && Yii::$app->user->identity->user_type == "Province") {
+    $distric_model = backend\models\Districts::find()
+                    ->where(['province_id' => Yii::$app->user->identity->province_id])
+                    ->asArray()->all();
+    if (!empty($distric_model)) {
+        $district_arr = [];
+        foreach ($distric_model as $district) {
+            array_push($district_arr, $district['id']);
+        }
+
+        $query = \backend\models\Facility::find()
+                ->where(['status' => 0])
+                ->andWhere(['province_approval_status' => 0])
+                ->andWhere(['IN', 'district_id', $district_arr]);
+        $provinceApprovalDataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+        if ($provinceApprovalDataProvider->count > 0) {
+            $count++;
+        }
     }
 }
+
 if (User::userIsAllowedTo('Approve facility - National')) {
     $query = \backend\models\Facility::find()
             ->where(['status' => 0,])
@@ -140,18 +152,18 @@ if (User::userIsAllowedTo('Approve facility - National')) {
         </div>
     </div>
 
-        <div>
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Your tasks</h5>
-                </div>
-                <div class="card-body">
-                    <?php
-                    if ($count > 0) {
-                        //Company partners
-                        //Review
-                        if (!empty($provinceApprovalDataProvider) && $provinceApprovalDataProvider->count > 0) {
-                            echo '<h5>New facilities for province approval</h5>
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Your tasks</h5>
+            </div>
+            <div class="card-body">
+                <?php
+                if ($count > 0) {
+                    //Company partners
+                    //Review
+                    if (!empty($provinceApprovalDataProvider) && $provinceApprovalDataProvider->count > 0) {
+                        echo '<h5>New facilities for province approval</h5>
                         <p>Instructions</p>
                         <ol>
                             <li>Below facilities need province verification and approval</li>
@@ -159,62 +171,62 @@ if (User::userIsAllowedTo('Approve facility - National')) {
                         </ol>
                         <hr class="dotted short">';
 
-                            echo GridView::widget([
-                                'dataProvider' => $provinceApprovalDataProvider,
-                                'hover' => true,
-                                'columns' => [
-                                    ['class' => 'yii\grid\SerialColumn'],
-                                    [
-                                        'attribute' => 'name',
-                                        'filter' => false,
-                                        'format' => 'raw',
-                                    ],
-                                    [
-                                        'attribute' => 'district_id',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Districts::findOne($model->district_id)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'type',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Facilitytype::findOne($model->type)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'ownership',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'operational_status',
-                                        'filter' => \false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Operationstatus::findOne($model->operational_status)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'Action',
-                                        'format' => 'raw',
-                                        'value' => function($model) {
-                                            return Html::a("Verify", ["facilities/approve-facility-province", 'id' => $model->id]);
-                                        }
-                                    ]
+                        echo GridView::widget([
+                            'dataProvider' => $provinceApprovalDataProvider,
+                            'hover' => true,
+                            'columns' => [
+                                ['class' => 'yii\grid\SerialColumn'],
+                                [
+                                    'attribute' => 'name',
+                                    'filter' => false,
+                                    'format' => 'raw',
                                 ],
-                            ]);
-                        }
-                        //Approval
-                        if (!empty($facilityDataProviderNationalApproval) && $facilityDataProviderNationalApproval->count > 0) {
-                            echo '<h5>New facilities for National approval</h5>
+                                [
+                                    'attribute' => 'district_id',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Districts::findOne($model->district_id)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'type',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Facilitytype::findOne($model->type)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'ownership',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'operational_status',
+                                    'filter' => \false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Operationstatus::findOne($model->operational_status)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'Action',
+                                    'format' => 'raw',
+                                    'value' => function($model) {
+                                        return Html::a("Verify", ["facilities/approve-facility-province", 'id' => $model->id]);
+                                    }
+                                ]
+                            ],
+                        ]);
+                    }
+                    //Approval
+                    if (!empty($facilityDataProviderNationalApproval) && $facilityDataProviderNationalApproval->count > 0) {
+                        echo '<h5>New facilities for National approval</h5>
                 <p>Instructions</p>
                 <ol>
                     <li>Below facilities need national approval for them to be active</li>
@@ -222,66 +234,66 @@ if (User::userIsAllowedTo('Approve facility - National')) {
                 </ol>
                 <hr class="dotted short">';
 
-                            echo GridView::widget([
-                                'dataProvider' => $facilityDataProviderNationalApproval,
-                                'hover' => true,
-                                'columns' => [
-                                    ['class' => 'yii\grid\SerialColumn'],
-                                    [
-                                        'attribute' => 'name',
-                                        'filter' => false,
-                                        'format' => 'raw',
-                                    ],
-                                    [
-                                        'attribute' => 'district_id',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Districts::findOne($model->district_id)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'type',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Facilitytype::findOne($model->type)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'ownership',
-                                        'filter' => false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'operational_status',
-                                        'filter' => \false,
-                                        'value' => function ($model) {
-                                            $name = backend\models\Operationstatus::findOne($model->operational_status)->name;
-                                            return $name;
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'Action',
-                                        'format' => 'raw',
-                                        'value' => function($model) {
-                                            return Html::a("Approve", ["facilities/approve-facility-national", 'id' => $model->id]);
-                                        }
-                                    ]
+                        echo GridView::widget([
+                            'dataProvider' => $facilityDataProviderNationalApproval,
+                            'hover' => true,
+                            'columns' => [
+                                ['class' => 'yii\grid\SerialColumn'],
+                                [
+                                    'attribute' => 'name',
+                                    'filter' => false,
+                                    'format' => 'raw',
                                 ],
-                            ]);
-                        }
-                    }else{
-                       echo "You currently have no tasks"; 
+                                [
+                                    'attribute' => 'district_id',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Districts::findOne($model->district_id)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'type',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Facilitytype::findOne($model->type)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'ownership',
+                                    'filter' => false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'operational_status',
+                                    'filter' => \false,
+                                    'value' => function ($model) {
+                                        $name = backend\models\Operationstatus::findOne($model->operational_status)->name;
+                                        return $name;
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'Action',
+                                    'format' => 'raw',
+                                    'value' => function($model) {
+                                        return Html::a("Approve", ["facilities/approve-facility-national", 'id' => $model->id]);
+                                    }
+                                ]
+                            ],
+                        ]);
                     }
-                    ?>
-                </div>
+                } else {
+                    echo "You currently have no tasks";
+                }
+                ?>
             </div>
-    
+        </div>
+
     </div>
 
 </div>

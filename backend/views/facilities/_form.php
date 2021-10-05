@@ -156,6 +156,8 @@ $province_user_province_id = "";
                     <div class="row">
                         <div class="col-lg-4">
                             <?php
+                            echo $form->field($model, 'province_approval_status')->hiddenInput(['value' => 0])->label(false);
+                            echo $form->field($model, 'national_approval_status')->hiddenInput(['value' => 0])->label(false);
                             if ($user_type == "District") {
                                 $district_user_district_id = Yii::$app->user->identity->district_id;
                                 $distric_model = backend\models\Districts::findOne($district_user_district_id);

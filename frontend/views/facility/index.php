@@ -84,19 +84,6 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             },
                         ],
                         [
-                            'attribute' => 'ownership',
-                            'filterType' => GridView::FILTER_SELECT2,
-                            'filterWidgetOptions' => [
-                                'pluginOptions' => ['allowClear' => true],
-                            ],
-                            'filter' => \backend\models\FacilityOwnership::getList(),
-                            'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
-                            'value' => function ($model) {
-                                $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
-                                return $name;
-                            },
-                        ],
-                        [
                             'attribute' => 'ownership_type',
                             'filterType' => GridView::FILTER_SELECT2,
                             'filterWidgetOptions' => [
@@ -108,6 +95,19 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'value' => function ($model) {
                                 $status_arr = [1 => "Public", 2 => "Private"];
                                 return $status_arr[$model->ownership_type];
+                            },
+                        ],
+                        [
+                            'attribute' => 'ownership',
+                            'filterType' => GridView::FILTER_SELECT2,
+                            'filterWidgetOptions' => [
+                                'pluginOptions' => ['allowClear' => true],
+                            ],
+                            'filter' => \backend\models\FacilityOwnership::getList(),
+                            'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
+                            'value' => function ($model) {
+                                $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
+                                return $name;
                             },
                         ],
                         ['class' => ActionColumn::className(),

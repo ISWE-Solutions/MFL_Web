@@ -25,18 +25,18 @@ $query_service = backend\models\MFLFacilityServices::find()->where(['facility_id
 $facility_services = new ActiveDataProvider([
     'query' => $query_service,
         ]);
- $facility_services->pagination = ['pageSize' => 15];
-            $facility_services->setSort([
-                'attributes' => [
-                    'service_area_id' => [
-                        'desc' => ['service_area_id' => SORT_DESC],
-                        'default' => SORT_DESC
-                    ],
-                ],
-                'defaultOrder' => [
-                    'service_area_id' => SORT_DESC
-                ]
-            ]);
+$facility_services->pagination = ['pageSize' => 15];
+$facility_services->setSort([
+    'attributes' => [
+        'service_area_id' => [
+            'desc' => ['service_area_id' => SORT_DESC],
+            'default' => SORT_DESC
+        ],
+    ],
+    'defaultOrder' => [
+        'service_area_id' => SORT_DESC
+    ]
+]);
 
 \yii\web\YiiAsset::register($this);
 
@@ -71,7 +71,7 @@ if ($user_type == "Province") {
         <h3 class="card-title">
             <?php
             if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
-                if ($user_type == "District" && $model->status === 2) {
+                if ($user_type == "District" && in_array($model->province_approval_status, [0, 2])) {
                     if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
                         echo Html::a(
                                 '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
@@ -85,7 +85,8 @@ if ($user_type == "Province") {
                         );
                     }
                 }
-                if ($user_type == "Province" && $model->status === 2) {
+
+                if ($user_type == "Province" && in_array($model->province_approval_status, [0, 2])) {
                     $distric_model = backend\models\Districts::findOne($model->district_id);
                     if (!empty($distric_model) && $distric_model->province_id == $province_user_province_id) {
                         echo Html::a(
@@ -100,6 +101,7 @@ if ($user_type == "Province") {
                         );
                     }
                 }
+
                 if ($user_type == "National") {
                     echo Html::a(
                             '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
@@ -113,18 +115,23 @@ if ($user_type == "Province") {
                     );
                 }
             }
-            if (User::userIsAllowedTo('Remove facility') && $model->status === 2) {
-                echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                echo Html::a('<i class="fas fa-trash fa-2x"></i>', ['delete', 'id' => $model->id], [
-                    'title' => 'Remove facility',
-                    'data-placement' => 'top',
-                    'data-toggle' => 'tooltip',
-                    'data' => [
-                        'confirm' => 'Are you sure you want to delete facility: ' . $model->name . '?<br>'
-                        . 'Facility will only be removed if it is not being used by the system!',
-                        'method' => 'post',
-                    ],
-                ]);
+            if (User::userIsAllowedTo('Remove facility') && $model->ownership_type == 1) {
+                if (in_array($model->province_approval_status, [0, 2])) {
+                    echo Html::a(
+                            '<span class="fa fa-trash"></span>', ['delete', 'id' => $model->id], [
+                        'title' => 'Remove facility',
+                        'data-toggle' => 'tooltip',
+                        'data-placement' => 'top',
+                        'data' => [
+                            'confirm' => 'Are you sure you want to delete facility: ' . $model->name . '?<br>'
+                            . 'Facility will only be removed if it is not being used by the system!',
+                            'method' => 'post',
+                        ],
+                        'style' => "padding:5px;",
+                        'class' => 'bt btn-lg'
+                            ]
+                    );
+                }
             }
             ?>
         </h3>
@@ -304,9 +311,13 @@ if ($user_type == "Province") {
                                                             $str = "<span class='badge badge-pill badge-info'> "
                                                                     . "<i class='fas fa-hourglass-half'></i> Pending National approval";
                                                         }
-                                                        if ($model->province_approval_status === 2) {
+                                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
                                                             $str = "<span class='badge badge-pill badge-danger'> "
-                                                                    . "<i class='fas fa-times'></i> Rejected,need more infor!<br> See approval comments";
+                                                                    . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
+                                                        }
+                                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
+                                                            $str = "<span class='badge badge-pill badge-danger'> "
+                                                                    . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
                                                         }
                                                     }
                                                 } else {
@@ -351,6 +362,22 @@ if ($user_type == "Province") {
                                             }
                                         ],
                                         [
+                                            'attribute' => 'province_approval_status',
+                                            'format' => 'raw',
+                                            'value' => function($model) {
+                                                if ($model->province_approval_status === 1) {
+                                                    return "<span class='badge badge-pill badge-success'> "
+                                                            . "<i class='ti-check'></i> Approved</span>";
+                                                } elseif ($model->province_approval_status === 2) {
+                                                    return "<span class='badge badge-pill badge-danger'> "
+                                                            . "<i class='ti-times'></i> Rejected</span>";
+                                                } else {
+                                                    return "<span class='badge badge-pill badge-dark'> "
+                                                            . "<i class='fas fa-hourglass-half'></i> Pending</span>";
+                                                }
+                                            },
+                                        ],
+                                        [
                                             'attribute' => 'verifier_comments',
                                         ],
                                         [
@@ -365,6 +392,22 @@ if ($user_type == "Province") {
                                                 $user = \backend\models\User::findOne(['id' => $model->approved_by]);
                                                 return !empty($user) ? $user->email : "";
                                             }
+                                        ],
+                                        [
+                                            'attribute' => 'national_approval_status',
+                                            'format' => 'raw',
+                                            'value' => function($model) {
+                                                if ($model->national_approval_status === 1) {
+                                                    return "<span class='badge badge-pill badge-success'> "
+                                                            . "<i class='ti-check'></i> Approved</span>";
+                                                } elseif ($model->national_approval_status === 2) {
+                                                    return "<span class='badge badge-pill badge-danger'> "
+                                                            . "<i class='ti-times'></i> Rejected</span>";
+                                                } else {
+                                                    return "<span class='badge badge-pill badge-dark'> "
+                                                            . "<i class='fas fa-hourglass-half'></i> Pending</span>";
+                                                }
+                                            },
                                         ],
                                         [
                                             'attribute' => 'approver_comments',

@@ -46,7 +46,15 @@ $form = ActiveForm::begin([
                 $form->field($model, 'type')
                 ->dropDownList(
                         \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
-        )->label("Facility type");
+                )->label("Facility type");
+        ?>
+    </div>
+    <div class="col-lg-3">
+        <?=
+                $form->field($model, 'ownership_type')
+                ->dropDownList(
+                        [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Filter by ownership type', 'required' => false]
+        );
         ?>
     </div>
     <div class="col-lg-3">
@@ -57,14 +65,7 @@ $form = ActiveForm::begin([
         );
         ?>
     </div>
-    <div class="col-lg-3">
-        <?=
-        $form->field($model, 'ownership_type')
-                ->dropDownList(
-                        [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Filter by ownership type', 'required' => false]
-        );
-        ?>
-    </div>
+
     <div class="col-lg-3">
         <?=
                 $form->field($model, 'operational_status')
@@ -73,7 +74,7 @@ $form = ActiveForm::begin([
         );
         ?>
     </div>
-    
+
     <div class="col-lg-3">
         <?php
         echo
