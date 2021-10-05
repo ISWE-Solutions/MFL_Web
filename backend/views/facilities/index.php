@@ -19,6 +19,18 @@ $this->title = 'Facilities';
 $this->params['breadcrumbs'][] = $this->title;
 $provinceId = "";
 $districtId = "";
+$user_type = Yii::$app->user->identity->user_type;
+$district_user_district_id = "";
+$province_user_province_id = "";
+
+if ($user_type == "District") {
+    $district_user_district_id = Yii::$app->user->identity->district_id;
+}
+
+if ($user_type == "Province") {
+    $province_user_province_id = Yii::$app->user->identity->province_id;
+}
+
 
 if (!empty($_GET['FacilitySearch']['province_id'])) {
     $provinceId = $_GET['FacilitySearch']['province_id'];
@@ -193,18 +205,47 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                         ]
                         );
                     },
-                    'update' => function ($url, $model) {
+                    'update' => function ($url, $model) use ($district_user_district_id, $user_type, $province_user_province_id) {
                         if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
-                            return Html::a(
-                                            '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-                                        'title' => 'Update facility',
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top',
-                                        'data-pjax' => '0',
-                                        'style' => "padding:5px;",
-                                        'class' => 'bt btn-lg'
-                                            ]
-                            );
+                            if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
+                                return Html::a(
+                                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                            'title' => 'Update facility',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
+                            if ($user_type == "Province") {
+                                $distric_model = backend\models\Districts::findOne($model->district_id);
+                                if (!empty($distric_model) && $distric_model->province_id == $province_user_province_id) {
+                                    return Html::a(
+                                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                                'title' => 'Update facility',
+                                                'data-toggle' => 'tooltip',
+                                                'data-placement' => 'top',
+                                                'data-pjax' => '0',
+                                                'style' => "padding:5px;",
+                                                'class' => 'bt btn-lg'
+                                                    ]
+                                    );
+                                }
+                            }
+                            if ($user_type == "National") {
+                                return Html::a(
+                                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                            'title' => 'Update facility',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
                         }
                     },
                     'delete' => function ($url, $model) {

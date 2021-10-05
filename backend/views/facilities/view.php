@@ -41,17 +41,63 @@ $rating_model = new \backend\models\MFLFacilityRatings();
 $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
         ->cache(Yii::$app->params['cache_duration'])
         ->all();
+
+$user_type = Yii::$app->user->identity->user_type;
+$district_user_district_id = "";
+$province_user_province_id = "";
+
+if ($user_type == "District") {
+    $district_user_district_id = Yii::$app->user->identity->district_id;
+}
+
+if ($user_type == "Province") {
+    $province_user_province_id = Yii::$app->user->identity->province_id;
+}
 ?>
 <div class="card card-primary card-outline">
     <div class="card-header border-transparent">
         <h3 class="card-title">
             <?php
             if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
-                echo Html::a('<i class="fas fa-pencil-alt fa-2x"></i>', ['update', 'id' => $model->id], [
-                    'title' => 'Update facility',
-                    'data-placement' => 'top',
-                    'data-toggle' => 'tooltip'
-                ]);
+                if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
+                    echo Html::a(
+                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                'title' => 'Update facility',
+                                'data-toggle' => 'tooltip',
+                                'data-placement' => 'top',
+                                'data-pjax' => '0',
+                                'style' => "padding:5px;",
+                                'class' => 'bt btn-lg'
+                                    ]
+                    );
+                }
+                if ($user_type == "Province") {
+                    $distric_model = backend\models\Districts::findOne($model->district_id);
+                    if (!empty($distric_model) && $distric_model->province_id == $province_user_province_id) {
+                        echo Html::a(
+                                        '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                    'title' => 'Update facility',
+                                    'data-toggle' => 'tooltip',
+                                    'data-placement' => 'top',
+                                    'data-pjax' => '0',
+                                    'style' => "padding:5px;",
+                                    'class' => 'bt btn-lg'
+                                        ]
+                        );
+                    }
+                }
+                if ($user_type == "National") {
+                    echo Html::a(
+                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                'title' => 'Update facility',
+                                'data-toggle' => 'tooltip',
+                                'data-placement' => 'top',
+                                'data-pjax' => '0',
+                                'style' => "padding:5px;",
+                                'class' => 'bt btn-lg'
+                                    ]
+                    );
+                }
             }
             if (User::userIsAllowedTo('Remove facility') && $model->status === 2) {
                 echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";

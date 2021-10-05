@@ -103,6 +103,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                                     ],
                                                     [
                                                         'attribute' => 'type',
+                                                        'label' => 'Facility type',
                                                         'filterType' => GridView::FILTER_SELECT2,
                                                         'filterWidgetOptions' => [
                                                             'pluginOptions' => ['allowClear' => true],
@@ -129,6 +130,14 @@ $facility_operating_hours = new ActiveDataProvider([
                                                     ],
                                                     [
                                                         'format' => 'raw',
+                                                        'attribute' => 'ownership_type',
+                                                        'value' => function ($model) {
+                                                            $status_arr = [1 => "Public", 2 => "Private"];
+                                                            return $status_arr[$model->ownership_type];
+                                                        },
+                                                    ],
+                                                    [
+                                                        'format' => 'raw',
                                                         'attribute' => 'operational_status',
                                                         'filterType' => GridView::FILTER_SELECT2,
                                                         'filterWidgetOptions' => [
@@ -149,20 +158,12 @@ $facility_operating_hours = new ActiveDataProvider([
                                                             return $status_arr[$model->mobility_status];
                                                         },
                                                     ],
-                                                    [
-                                                        'format' => 'raw',
-                                                        'attribute' => 'ownership_type',
-                                                        'value' => function ($model) {
-                                                            $status_arr = [1 => "Public", 2 => "Private"];
-                                                            return $status_arr[$model->ownership_type];
-                                                        },
-                                                    ],
                                                     'accesibility',
-                                                    'hims_code',
-                                                    'smartcare_code',
-                                                    'elmis_code',
-                                                    'hpcz_code',
-                                                    'disa_code',
+//                                                    'hims_code',
+//                                                    'smartcare_code',
+//                                                    'elmis_code',
+//                                                    'hpcz_code',
+//                                                    'disa_code',
                                                     'catchment_population_head_count',
                                                     'catchment_population_cso',
                                                     'number_of_households',
@@ -282,7 +283,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
                                     <div class="row"> 
                                         <div class="col-md-10"> 
@@ -328,7 +329,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="tab-pane fade" id="custom-tabs-facility-rating" role="tabpanel" aria-labelledby="custom-tabs-facility-rating">
                                     <?php
                                     $facility_rate_count = \backend\models\MFLFacilityRatings::find()

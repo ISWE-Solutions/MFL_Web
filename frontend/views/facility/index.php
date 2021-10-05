@@ -70,6 +70,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             },
                         ],
                         [
+                            'label' => 'Facility type',
                             'attribute' => 'type',
                             'filterType' => GridView::FILTER_SELECT2,
                             'filterWidgetOptions' => [

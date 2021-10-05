@@ -30,6 +30,10 @@ if (!empty($model->latitude) && !empty($model->longitude)) {
         'longitude' => Yii::$app->params['center_lng'],
     ];
 }
+
+$user_type = Yii::$app->user->identity->user_type;
+$district_user_district_id = "";
+$province_user_province_id = "";
 ?>
 
 <div class="mflfacility-form">
@@ -152,53 +156,113 @@ if (!empty($model->latitude) && !empty($model->longitude)) {
                     <div class="row">
                         <div class="col-lg-4">
                             <?php
-                            echo
-                                    $form->field($model, 'province_id')
-                                    ->dropDownList(
-                                            \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Please select a province', 'required' => true]
-                            );
-                            echo Html::hiddenInput('selected_id', $model->isNewRecord ? '' : $model->district_id, ['id' => 'selected_id']);
-                            echo $form->field($model, 'district_id')->widget(DepDrop::classname(), [
-                                'options' => ['id' => 'dist_id', 'custom' => true, 'required' => TRUE],
-                                'type' => DepDrop::TYPE_SELECT2,
-                                'pluginOptions' => [
-                                    'depends' => ['prov_id'],
-                                    'initialize' => $model->isNewRecord ? false : true,
-                                    'placeholder' => 'Please select a district',
-                                    'url' => Url::to(['/constituencies/district']),
-                                    'params' => ['selected_id'],
-                                    'loadingText' => 'Loading districts....',
-                                ]
-                            ]);
-                            echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
+                            if ($user_type == "District") {
+                                $district_user_district_id = Yii::$app->user->identity->district_id;
+                                $distric_model = backend\models\Districts::findOne($district_user_district_id);
 
-                            echo $form->field($model, 'constituency_id')->widget(DepDrop::classname(), [
-                                'options' => ['id' => 'constituency_id', 'custom' => true,],
-                                'type' => DepDrop::TYPE_SELECT2,
-                                'pluginOptions' => [
-                                    'depends' => ['dist_id'],
-                                    'initialize' => $model->isNewRecord ? false : true,
-                                    'placeholder' => 'Please select a constituency',
-                                    'url' => Url::to(['/constituencies/constituency']),
-                                    'params' => ['selected_id2'],
-                                    'loadingText' => 'Loading constituencies....',
-                                ]
-                            ]);
+                                echo $form->field($model, 'province_id')->hiddenInput(['value' => $distric_model->province_id])->label(false);
+                                echo $form->field($model, 'district_id')->hiddenInput(['value' => $district_user_district_id])->label(false);
+                                echo
+                                        $form->field($model, 'constituency_id')
+                                        ->dropDownList(
+                                                \backend\models\Constituency::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => false]
+                                );
+                                echo
+                                        $form->field($model, 'ward_id')
+                                        ->dropDownList(
+                                                \backend\models\Wards::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => false]
+                                );
+                            }
 
-                            echo Html::hiddenInput('selected_id3', $model->isNewRecord ? '' : $model->ward_id, ['id' => 'selected_id3']);
+                            if ($user_type == "Province") {
+                                $province_user_province_id = Yii::$app->user->identity->province_id;
+                                echo $form->field($model, 'province_id')->hiddenInput(['value' => $province_user_province_id, 'id' => 'prov_id',])->label(false);
 
-                            echo $form->field($model, 'ward_id')->widget(DepDrop::classname(), [
-                                'options' => ['id' => 'w_id', 'custom' => true,],
-                                'type' => DepDrop::TYPE_SELECT2,
-                                'pluginOptions' => [
-                                    'depends' => ['dist_id'],
-                                    'initialize' => $model->isNewRecord ? false : true,
-                                    'placeholder' => 'Please select a ward',
-                                    'url' => Url::to(['/constituencies/ward']),
-                                    'params' => ['selected_id3'],
-                                    'loadingText' => 'Loading wards....',
-                                ]
-                            ]);
+                                echo
+                                        $form->field($model, 'district_id')
+                                        ->dropDownList(
+                                                \backend\models\Districts::getListByProvinceID($province_user_province_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => true]
+                                );
+                                echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
+
+                                echo $form->field($model, 'constituency_id')->widget(DepDrop::classname(), [
+                                    'options' => ['id' => 'constituency_id', 'custom' => true,],
+                                    'type' => DepDrop::TYPE_SELECT2,
+                                    'pluginOptions' => [
+                                        'depends' => ['dist_id'],
+                                        'initialize' => $model->isNewRecord ? false : true,
+                                        'placeholder' => 'Please select a constituency',
+                                        'url' => Url::to(['/constituencies/constituency']),
+                                        'params' => ['selected_id2'],
+                                        'loadingText' => 'Loading constituencies....',
+                                    ]
+                                ]);
+
+                                echo Html::hiddenInput('selected_id3', $model->isNewRecord ? '' : $model->ward_id, ['id' => 'selected_id3']);
+
+                                echo $form->field($model, 'ward_id')->widget(DepDrop::classname(), [
+                                    'options' => ['id' => 'w_id', 'custom' => true,],
+                                    'type' => DepDrop::TYPE_SELECT2,
+                                    'pluginOptions' => [
+                                        'depends' => ['dist_id'],
+                                        'initialize' => $model->isNewRecord ? false : true,
+                                        'placeholder' => 'Please select a ward',
+                                        'url' => Url::to(['/constituencies/ward']),
+                                        'params' => ['selected_id3'],
+                                        'loadingText' => 'Loading wards....',
+                                    ]
+                                ]);
+                            }
+
+                            if ($user_type == "National") {
+                                echo
+                                        $form->field($model, 'province_id')
+                                        ->dropDownList(
+                                                \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Please select a province', 'required' => true]
+                                );
+                                echo Html::hiddenInput('selected_id', $model->isNewRecord ? '' : $model->district_id, ['id' => 'selected_id']);
+                                echo $form->field($model, 'district_id')->widget(DepDrop::classname(), [
+                                    'options' => ['id' => 'dist_id', 'custom' => true, 'required' => TRUE],
+                                    'type' => DepDrop::TYPE_SELECT2,
+                                    'pluginOptions' => [
+                                        'depends' => ['prov_id'],
+                                        'initialize' => $model->isNewRecord ? false : true,
+                                        'placeholder' => 'Please select a district',
+                                        'url' => Url::to(['/constituencies/district']),
+                                        'params' => ['selected_id'],
+                                        'loadingText' => 'Loading districts....',
+                                    ]
+                                ]);
+                                echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
+
+                                echo $form->field($model, 'constituency_id')->widget(DepDrop::classname(), [
+                                    'options' => ['id' => 'constituency_id', 'custom' => true,],
+                                    'type' => DepDrop::TYPE_SELECT2,
+                                    'pluginOptions' => [
+                                        'depends' => ['dist_id'],
+                                        'initialize' => $model->isNewRecord ? false : true,
+                                        'placeholder' => 'Please select a constituency',
+                                        'url' => Url::to(['/constituencies/constituency']),
+                                        'params' => ['selected_id2'],
+                                        'loadingText' => 'Loading constituencies....',
+                                    ]
+                                ]);
+
+                                echo Html::hiddenInput('selected_id3', $model->isNewRecord ? '' : $model->ward_id, ['id' => 'selected_id3']);
+
+                                echo $form->field($model, 'ward_id')->widget(DepDrop::classname(), [
+                                    'options' => ['id' => 'w_id', 'custom' => true,],
+                                    'type' => DepDrop::TYPE_SELECT2,
+                                    'pluginOptions' => [
+                                        'depends' => ['dist_id'],
+                                        'initialize' => $model->isNewRecord ? false : true,
+                                        'placeholder' => 'Please select a ward',
+                                        'url' => Url::to(['/constituencies/ward']),
+                                        'params' => ['selected_id3'],
+                                        'loadingText' => 'Loading wards....',
+                                    ]
+                                ]);
+                            }
                             echo
                                     $form->field($model, 'location')
                                     ->dropDownList(
@@ -209,6 +273,14 @@ if (!empty($model->latitude) && !empty($model->longitude)) {
                                     ->dropDownList(
                                             \backend\models\Zones::getList(), ['custom' => true, 'prompt' => 'Please select zone', 'required' => false]
                             );
+                            ?>
+                            <?=
+                            $form->field($model, 'latitude')->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter Latitude'])
+                            ?>
+                            <?=
+                            $form->field($model, 'longitude')->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter Longitude'])
                             ?>
                         </div>
                         <div class="col-lg-8">

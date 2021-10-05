@@ -293,11 +293,17 @@ class FacilitiesController extends Controller {
                     $model->geom = new Expression("ST_SetSRID(ST_GeomFromText(:point),4326)",
                             array(':point' => 'POINT(' . $model->longitude . ' ' . $model->latitude . ')'));
                 }
+                if (empty($model->coordinates) && (!empty($model->latitude) && !empty($model->longitude))) {
+                    $model->geom = new Expression("ST_SetSRID(ST_GeomFromText(:point),4326)",
+                            array(':point' => 'POINT(' . $model->longitude . ' ' . $model->latitude . ')'));
+                }
+
                 $model->date_created = new Expression('NOW()');
                 $model->date_updated = new Expression('NOW()');
                 $model->created_by = Yii::$app->user->identity->id;
                 $model->updated_by = Yii::$app->user->identity->id;
-                $model->approval_status = 0;
+                $model->province_approval_status = 0;
+                $model->national_approval_status = 0;
                 $model->status = 0; //pending provincial approval
                 //all facilities created through MFL are public=1
                 //All those from HPCZ are private=2
@@ -404,7 +410,12 @@ class FacilitiesController extends Controller {
                         }
                     }
                 } else {
-                    $model->geom = $old_geom;
+                    if (empty($model->coordinates) && (!empty($model->latitude) && !empty($model->longitude))) {
+                        $model->geom = new Expression("ST_SetSRID(ST_GeomFromText(:point),4326)",
+                                array(':point' => 'POINT(' . $model->longitude . ' ' . $model->latitude . ')'));
+                    } else {
+                        $model->geom = $old_geom;
+                    }
                 }
 
                 $model->date_updated = new Expression('NOW()');
