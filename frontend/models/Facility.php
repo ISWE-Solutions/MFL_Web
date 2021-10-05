@@ -64,7 +64,8 @@ class Facility extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['district_id', 'name', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'accesibility', 'date_created', 'created_by'], 'required'],
+            [[  'mobility_status', 'location', 'ownership_type', 'accesibility', 'date_created', 'created_by'], 'required'],
+           // [['district_id', 'name', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'accesibility', 'date_created', 'created_by'], 'required'],
             [['district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by'], 'default', 'value' => null],
             [['district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by', 'province_approval_status', 'national_approval_status'], 'integer'],
             [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code', 'name', 'catchment_population_head_count', 'catchment_population_cso', 'number_of_households', 'accesibility', 'latitude', 'longitude'], 'string'],
