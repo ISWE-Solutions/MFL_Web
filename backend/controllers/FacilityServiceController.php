@@ -183,4 +183,41 @@ class FacilityServiceController extends Controller {
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    public function actionServices() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+            $selected_id = $_POST['depdrop_all_params']['selected_id2'];
+            if ($parents != null) {
+                $facility_services = \backend\models\MFLFacilityServices::find()->where(['facility_id' => $selected_id])->asArray()->all();
+                $dist_id = $parents[0];
+                if (!empty($facility_services)) {
+                    $service_arr = [];
+                    foreach ($facility_services as $service) {
+                        array_push($service_arr, $service['service_id']);
+                    }
+                    $out = \backend\models\FacilityService::find()
+                            ->select(['id', 'name'])
+                            ->where(['category_id' => $dist_id])
+                            ->andWhere(['NOT IN', 'id', $service_arr])
+                            ->asArray()
+                            ->all();
+
+                    return ['output' => $out, 'selected' => $selected_id];
+                } else {
+
+                    $out = \backend\models\FacilityService::find()
+                            ->select(['id', 'name'])
+                            ->where(['category_id' => $dist_id])
+                            ->asArray()
+                            ->all();
+
+                    return ['output' => $out, 'selected' => $selected_id];
+                }
+            }
+        }
+        return ['output' => '', 'selected' => ''];
+    }
+
 }

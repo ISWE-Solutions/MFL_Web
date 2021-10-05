@@ -4,6 +4,7 @@ namespace backend\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+
 /**
  * This is the model class for table "MFL_service".
  *
@@ -30,7 +31,7 @@ class FacilityService extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['name', 'category_id'], 'required'],
-            [['category_id','comments'], 'default', 'value' => null],
+            [['category_id', 'comments'], 'default', 'value' => null],
             [['category_id'], 'integer'],
             [['comments'], 'safe'],
             ['name', 'unique', 'when' => function($model) {
@@ -83,7 +84,7 @@ class FacilityService extends \yii\db\ActiveRecord {
         return $this->hasOne(FacilityServicecategory::className(), ['id' => 'category_id']);
     }
 
-       public static function getNames() {
+    public static function getNames() {
         $names = self::find()->orderBy(['name' => SORT_ASC])->all();
         return ArrayHelper::map($names, 'name', 'name');
     }
@@ -91,6 +92,21 @@ class FacilityService extends \yii\db\ActiveRecord {
     public static function getList() {
         $list = self::find()->orderBy(['name' => SORT_ASC])->all();
         return ArrayHelper::map($list, 'id', 'name');
+    }
+
+    public static function getListFacility($id) {
+        $facility_services = MFLFacilityServices::find()->where(['facility_id' => $id])->asArray()->all();
+        if (!empty($facility_services)) {
+            $service_arr = [];
+            foreach ($facility_services as $service) {
+                array_push($service_arr, $service['service_id']);
+            }
+            $list = self::find()->where(['NOT IN', 'id', $service_arr])->orderBy(['name' => SORT_ASC])->all();
+            return ArrayHelper::map($list, 'id', 'name');
+        } else {
+            $list = self::find()->orderBy(['name' => SORT_ASC])->all();
+            return ArrayHelper::map($list, 'id', 'name');
+        }
     }
 
     public static function getById($id) {

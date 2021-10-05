@@ -206,20 +206,22 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                         );
                     },
                     'update' => function ($url, $model) use ($district_user_district_id, $user_type, $province_user_province_id) {
-                        if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
-                            if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
-                                return Html::a(
-                                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-                                            'title' => 'Update facility',
-                                            'data-toggle' => 'tooltip',
-                                            'data-placement' => 'top',
-                                            'data-pjax' => '0',
-                                            'style' => "padding:5px;",
-                                            'class' => 'bt btn-lg'
-                                                ]
-                                );
+                        if ($user_type == "District" && $model->status === 2) {
+                            if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
+                                if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
+                                    return Html::a(
+                                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                                'title' => 'Update facility',
+                                                'data-toggle' => 'tooltip',
+                                                'data-placement' => 'top',
+                                                'data-pjax' => '0',
+                                                'style' => "padding:5px;",
+                                                'class' => 'bt btn-lg'
+                                                    ]
+                                    );
+                                }
                             }
-                            if ($user_type == "Province") {
+                            if ($user_type == "Province" && $model->status === 2) {
                                 $distric_model = backend\models\Districts::findOne($model->district_id);
                                 if (!empty($distric_model) && $distric_model->province_id == $province_user_province_id) {
                                     return Html::a(

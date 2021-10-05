@@ -30,7 +30,7 @@ class MFLFacilityServices extends \yii\db\ActiveRecord {
         return [
             [['facility_id', 'service_id'], 'required'],
             [['facility_id', 'service_id'], 'default', 'value' => null],
-            [['facility_id', 'service_id'], 'integer'],
+            [['facility_id', 'service_id', 'service_area_id'], 'integer'],
             // [['facility_id', 'service_id'], 'unique', 'targetAttribute' => ['facility_id', 'service_id']],
             ['service_id', 'unique', 'when' => function($model) {
                     return $model->isAttributeChanged('service_id') && !empty(self::findOne(['service_id' => $model->service_id, "facility_id" => $model->facility_id])) ? TRUE : FALSE;
@@ -48,6 +48,7 @@ class MFLFacilityServices extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'facility_id' => 'Facility',
             'service_id' => 'Service',
+            'service_area_id' => 'Service area',
         ];
     }
 

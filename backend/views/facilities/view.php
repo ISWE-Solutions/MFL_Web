@@ -12,6 +12,7 @@ use kartik\form\ActiveForm;
 use \yii\data\ActiveDataProvider;
 use yii\grid\ActionColumn;
 use kartik\widgets\StarRating;
+use kartik\depdrop\DepDrop;
 
 /* @var $this yii\web\View */
 /* @var $model backend\models\MFLFacility */
@@ -24,7 +25,18 @@ $query_service = backend\models\MFLFacilityServices::find()->where(['facility_id
 $facility_services = new ActiveDataProvider([
     'query' => $query_service,
         ]);
-
+ $facility_services->pagination = ['pageSize' => 15];
+            $facility_services->setSort([
+                'attributes' => [
+                    'service_area_id' => [
+                        'desc' => ['service_area_id' => SORT_DESC],
+                        'default' => SORT_DESC
+                    ],
+                ],
+                'defaultOrder' => [
+                    'service_area_id' => SORT_DESC
+                ]
+            ]);
 
 \yii\web\YiiAsset::register($this);
 
@@ -59,43 +71,45 @@ if ($user_type == "Province") {
         <h3 class="card-title">
             <?php
             if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
-                if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
-                    echo Html::a(
-                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-                                'title' => 'Update facility',
-                                'data-toggle' => 'tooltip',
-                                'data-placement' => 'top',
-                                'data-pjax' => '0',
-                                'style' => "padding:5px;",
-                                'class' => 'bt btn-lg'
-                                    ]
-                    );
+                if ($user_type == "District" && $model->status === 2) {
+                    if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
+                        echo Html::a(
+                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                            'title' => 'Update facility',
+                            'data-toggle' => 'tooltip',
+                            'data-placement' => 'top',
+                            'data-pjax' => '0',
+                            'style' => "padding:5px;",
+                            'class' => 'bt btn-lg'
+                                ]
+                        );
+                    }
                 }
-                if ($user_type == "Province") {
+                if ($user_type == "Province" && $model->status === 2) {
                     $distric_model = backend\models\Districts::findOne($model->district_id);
                     if (!empty($distric_model) && $distric_model->province_id == $province_user_province_id) {
                         echo Html::a(
-                                        '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-                                    'title' => 'Update facility',
-                                    'data-toggle' => 'tooltip',
-                                    'data-placement' => 'top',
-                                    'data-pjax' => '0',
-                                    'style' => "padding:5px;",
-                                    'class' => 'bt btn-lg'
-                                        ]
+                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                            'title' => 'Update facility',
+                            'data-toggle' => 'tooltip',
+                            'data-placement' => 'top',
+                            'data-pjax' => '0',
+                            'style' => "padding:5px;",
+                            'class' => 'bt btn-lg'
+                                ]
                         );
                     }
                 }
                 if ($user_type == "National") {
                     echo Html::a(
-                                    '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
-                                'title' => 'Update facility',
-                                'data-toggle' => 'tooltip',
-                                'data-placement' => 'top',
-                                'data-pjax' => '0',
-                                'style' => "padding:5px;",
-                                'class' => 'bt btn-lg'
-                                    ]
+                            '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                        'title' => 'Update facility',
+                        'data-toggle' => 'tooltip',
+                        'data-placement' => 'top',
+                        'data-pjax' => '0',
+                        'style' => "padding:5px;",
+                        'class' => 'bt btn-lg'
+                            ]
                     );
                 }
             }
@@ -487,8 +501,15 @@ if ($user_type == "Province") {
                                         <?php
                                         if (User::userIsAllowedTo('Manage facilities') && !empty(\backend\models\FacilityService::getList())) {
                                             if ($model->status == 1) {
-                                                echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
+                                                $count1 = \backend\models\MFLFacilityServices::find()->where(['facility_id' => $model->id])->count();
+                                                $count2 = \backend\models\FacilityService::find()->count();
+
+                                                if ($count1 == $count2) {
+                                                    echo "<div class='alert alert-warning'>Facility already has all system services!</div>";
+                                                } else {
+                                                    echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
                                                   return false;"><i class="fa fa-plus"></i> Add service</button>';
+                                                }
                                             }
                                         }
                                         ?>
@@ -505,20 +526,22 @@ if ($user_type == "Province") {
                                                 ['class' => 'yii\grid\SerialColumn'],
                                                 //'id',
                                                 [
-                                                    'attribute' => 'service_id',
-                                                    'filter' => false,
-                                                    'value' => function ($facility_services) {
-                                                        return !empty($facility_services->service_id) ? \backend\models\FacilityService::findOne($facility_services->service_id)->name : "";
-                                                        ;
-                                                    },
-                                                ],
-                                                [
+                                                    'attribute' => 'service_area_id',
                                                     'label' => 'Service area',
+                                                    'group' => true,
                                                     'filter' => false,
                                                     'value' => function ($facility_services) {
                                                         $type_id = \backend\models\FacilityService::findOne($facility_services->service_id)->category_id;
                                                         $type = !empty($type_id) ? \backend\models\FacilityServicecategory::findOne($type_id)->name : "";
                                                         return $type;
+                                                    },
+                                                ],
+                                                [
+                                                    'attribute' => 'service_id',
+                                                    'filter' => false,
+                                                    'value' => function ($facility_services) {
+                                                        return !empty($facility_services->service_id) ? \backend\models\FacilityService::findOne($facility_services->service_id)->name : "";
+                                                        ;
                                                     },
                                                 ],
                                                 ['class' => ActionColumn::className(),
@@ -580,17 +603,30 @@ if ($user_type == "Province") {
                         $service_model = new backend\models\MFLFacilityServices();
                         $form = ActiveForm::begin([
                                     'action' => 'services',
-                                ])
-                        ?>
-                        <?=
-                        $form->field($service_model, 'facility_id')->hiddenInput(['value' => $model->id])->label(false);
-                        ?>
-                        <?=
-                                $form->field($service_model, 'service_id', ['enableAjaxValidation' => true])
+                        ]);
+
+                        echo
+                                $form->field($service_model, 'service_area_id')
                                 ->dropDownList(
-                                        \backend\models\FacilityService::getList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Select Service', 'required' => true]
+                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => true]
                         );
+                        echo $form->field($service_model, 'service_id')->widget(DepDrop::classname(), [
+                            'options' => ['id' => 'constituency_id', 'custom' => true,],
+                            'type' => DepDrop::TYPE_SELECT2,
+                            'pluginOptions' => [
+                                'depends' => ['dist_id'],
+                                'initialize' => $service_model->isNewRecord ? false : true,
+                                'placeholder' => 'Please select a service',
+                                'url' => yii\helpers\Url::to(['/facility-service/services']),
+                                'params' => ['selected_id2'],
+                                'loadingText' => 'Loading services....',
+                            ]
+                        ]);
                         ?>
+                        <?=
+                        $form->field($service_model, 'facility_id')->hiddenInput(['value' => $model->id, 'id' => 'selected_id2'])->label(false);
+                        ?>
+
                     </div>
                     <div class="col-lg-4">
                         <h4>Instructions</h4>
