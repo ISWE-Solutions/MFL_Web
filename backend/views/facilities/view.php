@@ -25,18 +25,18 @@ $query_service = backend\models\MFLFacilityServices::find()->where(['facility_id
 $facility_services = new ActiveDataProvider([
     'query' => $query_service,
         ]);
-$facility_services->pagination = ['pageSize' => 15];
-$facility_services->setSort([
-    'attributes' => [
-        'service_area_id' => [
-            'desc' => ['service_area_id' => SORT_DESC],
-            'default' => SORT_DESC
-        ],
-    ],
-    'defaultOrder' => [
-        'service_area_id' => SORT_DESC
-    ]
-]);
+//$facility_services->pagination = ['pageSize' => 15];
+//$facility_services->setSort([
+//    'attributes' => [
+//        'service_area_id' => [
+//            'desc' => ['service_area_id' => SORT_DESC],
+//            'default' => SORT_DESC
+//        ],
+//    ],
+//    'defaultOrder' => [
+//        'service_area_id' => SORT_DESC
+//    ]
+//]);
 
 \yii\web\YiiAsset::register($this);
 
@@ -65,6 +65,11 @@ if ($user_type == "District") {
 if ($user_type == "Province") {
     $province_user_province_id = Yii::$app->user->identity->province_id;
 }
+
+$query_foh = backend\models\MFLFacilityOperatingHours::find()->where(['facility_id' => $model->id]);
+$facility_operating_hours = new ActiveDataProvider([
+    'query' => $query_foh,
+        ]);
 ?>
 <div class="card card-primary card-outline">
     <div class="card-header border-transparent">
@@ -200,7 +205,9 @@ if ($user_type == "Province") {
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Services</a>
                     </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" id="operating-hours-tab" data-toggle="pill" href="#operating-hours" role="tab" aria-controls="operating-hours" aria-selected="false">Operating hours</a>
+                    </li>
                 </ul>
             </div>
             <div class="card-body">
@@ -584,7 +591,7 @@ if ($user_type == "Province") {
                                                     'filter' => false,
                                                     'value' => function ($facility_services) {
                                                         return !empty($facility_services->service_id) ? \backend\models\FacilityService::findOne($facility_services->service_id)->name : "";
-                                                        ;
+                                                        
                                                     },
                                                 ],
                                                 ['class' => ActionColumn::className(),
@@ -619,7 +626,70 @@ if ($user_type == "Province") {
                             </div>
                         </div>
                     </div>
-
+                    <div class="tab-pane fade" id="operating-hours" role="tabpanel" aria-labelledby="operating-hours">
+                        <div class="row"> 
+                            <div class="col-md-8"> 
+                                <!-- /.card-header -->
+                                <div class="card-body p-0">
+                                    <p>
+                                        <?php
+                                        if (User::userIsAllowedTo('Manage facilities') && !empty(\backend\models\Operatinghours::getList())) {
+                                            echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addOperatingHourModal\').modal(); 
+                                     return false;"><i class="fa fa-plus"></i> Add operating hour</button>';
+                                        }
+                                        ?>  
+                                    </p>
+                                    <?php
+                                    if ($facility_operating_hours->getCount() > 0) {
+                                        echo GridView::widget([
+                                            'dataProvider' => $facility_operating_hours,
+                                            //  'filterModel' => $searchModel,
+                                            'condensed' => true,
+                                            'responsive' => true,
+                                            'hover' => true,
+                                            'columns' => [
+                                                ['class' => 'yii\grid\SerialColumn'],
+                                                //'id',
+                                                [
+                                                    'attribute' => 'operatinghours_id',
+                                                    'filter' => false,
+                                                    'value' => function ($facility_operating_hours) {
+                                                        $name = !empty($facility_operating_hours->operatinghours_id) ? \backend\models\Operatinghours::findOne($facility_operating_hours->operatinghours_id)->name : "";
+                                                        return $name;
+                                                    },
+                                                ],
+                                                ['class' => ActionColumn::className(),
+                                                    'template' => '{delete}',
+                                                    'buttons' => [
+                                                        'delete' => function ($url, $facility_operating_hours) {
+                                                            if (User::userIsAllowedTo('Manage facilities')) {
+                                                                return Html::a(
+                                                                                '<span class="fa fa-trash"></span>', ['/facilities/delete-operatinghour', 'id' => $facility_operating_hours->id], [
+                                                                            'title' => 'Delete',
+                                                                            'data-toggle' => 'tooltip',
+                                                                            'data-placement' => 'top',
+                                                                            'data' => [
+                                                                                'confirm' => 'Are you sure you want to remove operating hour from this facility?',
+                                                                                'method' => 'post',
+                                                                            ],
+                                                                            'style' => "padding:5px;",
+                                                                            'class' => 'bt btn-lg'
+                                                                                ]
+                                                                );
+                                                            }
+                                                        },
+                                                    ]
+                                                ],
+                                            ],
+                                        ]);
+                                    } else {
+                                        echo "No operating hours have been set for this facility!";
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -651,7 +721,7 @@ if ($user_type == "Province") {
                         echo
                                 $form->field($service_model, 'service_area_id')
                                 ->dropDownList(
-                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => true]
+                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select service area', 'required' => true]
                         );
                         echo $form->field($service_model, 'service_id')->widget(DepDrop::classname(), [
                             'options' => ['id' => 'constituency_id', 'custom' => true,],
@@ -689,5 +759,49 @@ if ($user_type == "Province") {
     <!-- /.modal-dialog -->
 </div>
 
-
+<div class="modal fade card-primary card-outline" id="addOperatingHourModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Operating hour for facility: <?= $model->name ?></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <?php
+                        $ophour_model = new backend\models\MFLFacilityOperatingHours();
+                        $form = ActiveForm::begin([
+                                    'action' => 'operatinghour',
+                                ])
+                        ?>
+                        <?=
+                        $form->field($ophour_model, 'facility_id')->hiddenInput(['value' => $model->id])->label(false);
+                        ?>
+                        <?=
+                                $form->field($ophour_model, 'operatinghours_id', ['enableAjaxValidation' => true])
+                                ->dropDownList(
+                                        \backend\models\Operatinghours::getList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Select operating hour', 'required' => true]
+                        );
+                        ?>
+                    </div>
+                    <div class="col-lg-4">
+                        <h4>Instructions</h4>
+                        <ol>
+                            <li>Fields marked with <span style="color: red;">*</span> are required</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <?= Html::submitButton('Add Operating hour', ['class' => 'btn btn-primary btn-sm']) ?>
+                <?php ActiveForm::end() ?>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
 

@@ -13,6 +13,8 @@ use yii\helpers\Json;
 use backend\models\AuditTrail;
 use backend\models\User;
 use yii\db\Expression;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  * FacilitiesController implements the CRUD actions for Facility model.
@@ -601,6 +603,65 @@ class FacilitiesController extends Controller {
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    
+        public function actionDeleteOperatinghour($id) {
+        if (User::userIsAllowedTo('Manage facilities')) {
+            $model = \backend\models\MFLFacilityOperatingHours::findOne($id);
+            $facility_id = $model->facility_id;
+            try {
+                if ($model->delete()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Removed Facility operating hour from the system.";
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', "Facility operating hour was successfully removed.");
+                } else {
+                    Yii::$app->session->setFlash('error', "Facility operating hour could not be removed. Please try again!");
+                }
+            } catch (yii\db\IntegrityException $ex) {
+                Yii::$app->session->setFlash('error', "Facility operating hour could not be removed. Please try again!");
+            }
+
+            return $this->redirect(['view', 'id' => $facility_id]);
+        } else {
+            Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
+            return $this->redirect(['home/home']);
+        }
+    }
+     public function actionOperatinghour() {
+        if (User::userIsAllowedTo('Manage facilities')) {
+            $model = new \backend\models\MFLFacilityOperatingHours();
+            if (Yii::$app->request->isAjax) {
+                $model->load(Yii::$app->request->post());
+                return Json::encode(\yii\widgets\ActiveForm::validate($model));
+            }
+            if ($model->load(Yii::$app->request->post())) {
+                if ($model->save()) {
+                    $op_hour = \backend\models\Operatinghours::findOne($model->operatinghours_id)->name;
+                    $facility = \backend\models\MFLFacility::findOne($model->facility_id)->name;
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Added operating hour '" . $op_hour . "' to facility: " . $facility;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', 'Facility operating hour was successfully added.');
+                } else {
+                    $message = '';
+                    foreach ($model->getErrors() as $error) {
+                        $message .= $error[0];
+                    }
+                    Yii::$app->session->setFlash('error', 'Error occured while adding operating hour to facility. Error:' . $message);
+                }
+                return $this->redirect(['view', 'id' => $model->facility_id]);
+            }
+        } else {
+            Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
+            return $this->redirect(['home/home']);
+        }
     }
 
 }

@@ -18,7 +18,7 @@ $session = Yii::$app->session;
         <meta charset="<?= Yii::$app->charset ?>">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" type="image/png" sizes="96x96" href="<?= Url::to('@web/img/coa.png') ?>">
+        <link rel="icon" type="image/png" sizes="96x96" href="<?= Url::to('@web/img/coas.png') ?>">
         <?php $this->registerCsrfMetaTags() ?>
         <title>MFL | <?= Html::encode($this->title) ?></title>
 
@@ -96,7 +96,7 @@ $session = Yii::$app->session;
                 <!-- Brand Logo -->
                 <a style="background: #158239" class="brand-link" href="https://www.moh.gov.zm/" target="blank">
                     <?=
-                    Html::img('@web/img/coa.png', ["class" => "brand-image",
+                    Html::img('@web/img/coas.png', ["class" => "brand-image",
                         'style' => 'opacity: .9;width:40px;height:40px;']);
                     ?>
                     <span class="brand-text text-white font-weight-light">MFL</span>
@@ -301,7 +301,7 @@ $session = Yii::$app->session;
                             <?php
                             if (User::userIsAllowedTo("Manage facility types") ||
                                     User::userIsAllowedTo("Manage MFL services") ||
-//                                    User::userIsAllowedTo("Manage MFL operating hours") ||
+                                    User::userIsAllowedTo("Manage MFL operating hours") ||
                                     User::userIsAllowedTo("Manage MFL operation status") ||
 //                                    User::userIsAllowedTo("Manage MFL equipments") ||
 //                                    User::userIsAllowedTo("Manage MFL administrative units") ||
@@ -312,7 +312,7 @@ $session = Yii::$app->session;
                                 if (Yii::$app->controller->id == "facilitytype" ||
                                         Yii::$app->controller->id == "facility-servicecategory" ||
                                         Yii::$app->controller->id == "facility-service" ||
-//                                        Yii::$app->controller->id == "operatinghours" ||
+                                        Yii::$app->controller->id == "operatinghours" ||
 //                                        Yii::$app->controller->id == "equipment" ||
 //                                        Yii::$app->controller->id == "administrative-unit" ||
 //                                        Yii::$app->controller->id == "infrastructure" ||
@@ -375,16 +375,16 @@ $session = Yii::$app->session;
                                         }
                                         echo '</li>';
                                     }
-//                                    if (User::userIsAllowedTo("Manage MFL operating hours")) {
-//                                        echo '   <li class="nav-item">';
-//                                        if (Yii::$app->controller->id == "operatinghours" &&
-//                                                (Yii::$app->controller->action->id == "index")) {
-//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link active"]);
-//                                        } else {
-//                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link"]);
-//                                        }
-//                                        echo '</li>';
-//                                    }
+                                    if (User::userIsAllowedTo("Manage MFL operating hours")) {
+                                        echo '   <li class="nav-item">';
+                                        if (Yii::$app->controller->id == "operatinghours" &&
+                                                (Yii::$app->controller->action->id == "index")) {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link active"]);
+                                        } else {
+                                            echo Html::a('<i class="far fa-circle nav-icon"></i> <p>Operating hours</p>', ['/operatinghours/index',], ["class" => "nav-link"]);
+                                        }
+                                        echo '</li>';
+                                    }
                                     if (User::userIsAllowedTo("Manage MFL operation status")) {
                                         echo '   <li class="nav-item">';
                                         if (Yii::$app->controller->id == "operationstatus" &&

@@ -16,7 +16,7 @@ AppAsset::register($this);
         <meta charset="<?= Yii::$app->charset ?>">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" type="image/png" sizes="96x96" href="<?= Url::to('@web/img/coa.png') ?>">
+        <link rel="icon" type="image/png" sizes="96x96" href="<?= Url::to('@web/img/coas.png') ?>">
         <?php $this->registerCsrfMetaTags() ?>
         <title>NIDS | <?= Html::encode($this->title) ?></title>
         <!-- Leaflet kernel -->
@@ -47,7 +47,7 @@ AppAsset::register($this);
 
                     <a class="navbar-brand" href="" target="blank">
                         <?=
-                        Html::img('@web/img/coa.png', ["class" => "brand-image",
+                        Html::img('@web/img/coas.png', ["class" => "brand-image",
                             'style' => 'opacity: .9']);
                         ?>
                         <span class="brand-text text-white text-md font-weight-light">NIDS</span>

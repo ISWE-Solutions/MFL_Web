@@ -98,7 +98,9 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Services</a>
                     </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" id="operating-hours-tab" data-toggle="pill" href="#operating-hours" role="tab" aria-controls="operating-hours" aria-selected="false">Operating hours</a>
+                    </li>
                 </ul>
             </div>
             <div class="card-body">
@@ -508,6 +510,41 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                                         ]);
                                     } else {
                                         echo "No Facility services found!";
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="operating-hours" role="tabpanel" aria-labelledby="operating-hours">
+                        <div class="row"> 
+                            <div class="col-md-8"> 
+                                <!-- /.card-header -->
+                                <div class="card-body p-0">
+
+                                    <?php
+                                    if ($facility_operating_hours->getCount() > 0) {
+                                        echo GridView::widget([
+                                            'dataProvider' => $facility_operating_hours,
+                                            //  'filterModel' => $searchModel,
+                                            'condensed' => true,
+                                            'responsive' => true,
+                                            'hover' => true,
+                                            'columns' => [
+                                                ['class' => 'yii\grid\SerialColumn'],
+                                                //'id',
+                                                [
+                                                    'attribute' => 'operatinghours_id',
+                                                    'filter' => false,
+                                                    'value' => function ($facility_operating_hours) {
+                                                        $name = !empty($facility_operating_hours->operatinghours_id) ? \backend\models\Operatinghours::findOne($facility_operating_hours->operatinghours_id)->name : "";
+                                                        return $name;
+                                                    },
+                                                ],
+                                            ],
+                                        ]);
+                                    } else {
+                                        echo "No operating hours have been set for this facility!";
                                     }
                                     ?>
                                 </div>
