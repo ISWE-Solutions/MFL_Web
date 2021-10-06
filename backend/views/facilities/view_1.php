@@ -93,6 +93,9 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                         <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Details</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="contact-tab" data-toggle="pill" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact info</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="location-tab" data-toggle="pill" href="#location" role="tab" aria-controls="location" aria-selected="false">Location</a>
                     </li>
                     <li class="nav-item">
@@ -333,7 +336,24 @@ $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
                             </div>
                         </div>
                     </div>
-
+                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact">
+                        <?=
+                        DetailView::widget([
+                            'model' => $model,
+                            'attributes' => [
+                                'mobile',
+                                'phone',
+                                'fax',
+                                'email:email',
+                                'postal_address',
+                                'town',
+                                'street',
+                                'plot_no',
+                                'physical_address',
+                            ],
+                        ])
+                        ?>
+                    </div>
                     <div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location">
                         <div class="row">
                             <div class="col-lg-6">

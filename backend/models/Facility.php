@@ -4,6 +4,7 @@ namespace backend\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use borales\extensions\phoneInput\PhoneInputValidator;
 
 /**
  * This is the model class for table "facility".
@@ -82,7 +83,10 @@ class Facility extends \yii\db\ActiveRecord {
                    return $('input[type=\"select\"][name=\"Facility[national_approval_status]\"]:selected').val() == 2;
               }", 'message' => 'Please provide reason for not approving facility!'
             ],
-            [['coordinates'], 'safe'],
+            [['coordinates', 'physical_address', 'postal_address', 'phone',
+            'fax', 'plot_no', 'street', 'town','mobile'], 'safe'],
+            ['email', 'email', 'message' => "The email isn't correct!"],
+            //[['mobile'], PhoneInputValidator::className()],
             [['operational_status'], 'exist', 'skipOnError' => true, 'targetClass' => Operationstatus::className(), 'targetAttribute' => ['operational_status' => 'id']],
             [['type'], 'exist', 'skipOnError' => true, 'targetClass' => Facilitytype::className(), 'targetAttribute' => ['type' => 'id']],
             [['district_id'], 'exist', 'skipOnError' => true, 'targetClass' => Districts::className(), 'targetAttribute' => ['district_id' => 'id']],
@@ -121,6 +125,15 @@ class Facility extends \yii\db\ActiveRecord {
             'longitude' => 'Longitude',
             'geom' => 'Geom',
             'status' => 'Status',
+            'physical_address' => 'Address',
+            'postal_address' => 'Postal address',
+            'email' => 'Email',
+            'phone' => 'Phone',
+            'mobile' => 'Mobile',
+            'fax' => 'Fax',
+            'plot_no' => "Plot no",
+            'street' => "Street",
+            'town' => "Town",
             'date_approved' => 'Date approved',
             'approved_by' => 'Approved by',
             'date_created' => 'Date created',

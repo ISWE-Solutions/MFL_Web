@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\grid\ActionColumn;
 use backend\models\User;
+use kartik\number\NumberControl;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\FacilityServicecategorySearch */
@@ -50,6 +51,30 @@ $this->params['breadcrumbs'][] = $this->title;
                     'filterInputOptions' => ['prompt' => 'Filter by area', 'class' => 'form-control',],
                     'format' => 'raw',
                     'refreshGrid' => true,
+                ],
+                [
+                    'class' => EditableColumn::className(),
+                    'attribute' => 'shared_id',
+                    //'readonly' => false,
+                    'refreshGrid' => true,
+                    'filter' => false,
+                    'editableOptions' => [
+                        'asPopover' => true,
+                        'type' => 'success',
+                        'size' => kartik\popover\PopoverX::SIZE_MEDIUM,
+                        'options' => ['class' => 'form-control', 'custom' => true,],
+                        'inputType' => \kartik\editable\Editable::INPUT_WIDGET,
+                        'widgetClass' => '\kartik\number\NumberControl',
+                        'options' => [
+                            'maskedInputOptions' => [
+                                //  'suffix' => ' User(s)',
+                                'allowMinus' => false,
+                                'min' => 1,
+                                'max' => 10000000,
+                                'digits' => 0
+                            ],
+                        ]
+                    ],
                 ],
                 ['class' => ActionColumn::className(),
                     'options' => ['style' => 'width:130px;'],
@@ -101,6 +126,19 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?=
                         $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
                             'Name of service category', 'id' => "province", 'required' => true,])
+                        ?>
+                        <?php
+                        echo $form->field($model, 'shared_id', ['enableAjaxValidation' => true])->widget(NumberControl::classname(), [
+                            'options' => ['placeholder' => "Shared id with hpcz"],
+                            'maskedInputOptions' => [
+                                // 'prefix' => '$ ',
+                                //'suffix' => ' days',
+                                'allowMinus' => false,
+                                'digits' => 0,
+                                'min' => 1,
+                                'max' => 1000000
+                            ],
+                        ]);
                         ?>
                     </div>
                     <div class="col-lg-4">

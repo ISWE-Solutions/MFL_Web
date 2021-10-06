@@ -5,6 +5,7 @@ use kartik\form\ActiveForm;
 use kartik\depdrop\DepDrop;
 use yii\helpers\Url;
 use yii\web\JsExpression;
+use borales\extensions\phoneInput\PhoneInput;
 
 /* @var $this yii\web\View */
 /* @var $model backend\models\Facility */
@@ -48,7 +49,7 @@ $province_user_province_id = "";
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <?php $form = ActiveForm::begin(); ?>
                             <?=
                             $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
@@ -92,13 +93,46 @@ $province_user_province_id = "";
                                             ["Open" => "Open", "Restricted" => "Restricted"], ['custom' => true, 'prompt' => 'Select accessibility',]
                             );
                             ?>
+                            <?= $form->field($model, 'postal_address')->textInput(['placeholder' => 'Enter facility postal address']) ?>
+
+                        </div>
+                        <div class="col-lg-4">
+                            <?=
+                            $form->field($model, 'email', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility email'])
+                            ?>
+                         
+                            <?=
+                            $form->field($model, 'mobile', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility Mobile no'])
+                            ?>
+                            <?=
+                            $form->field($model, 'phone', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility telephone no'])
+                            ?>
+                            <?=
+                            $form->field($model, 'town', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility town'])
+                            ?>
+                            <?=
+                            $form->field($model, 'plot_no', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility plot no'])
+                            ?>
+                            <?=
+                            $form->field($model, 'street', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility street'])
+                            ?>
+                            <?=
+                            $form->field($model, 'fax', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
+                                'Enter facility fax'])
+                            ?>
+
+                        </div>
+                        <div class="col-lg-4">
                             <?=
                             $form->field($model, 'disa_code')->textInput(['maxlength' => true, 'placeholder' =>
                                 'Enter disa code'])
                             ?>
-                        </div>
-                        <div class="col-lg-6">
-
                             <?=
                             $form->field($model, 'hims_code')->textInput(['maxlength' => true, 'placeholder' =>
                                 'Enter hims Code'])
@@ -127,7 +161,14 @@ $province_user_province_id = "";
                             $form->field($model, 'catchment_population_cso')->textInput(['placeholder' =>
                                 'Enter population cso'])
                             ?>
+                        </div>
+                        <div class="col-lg-4">
                             <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of beds']) ?>
+                        </div>
+                        <div class="col-lg-8">
+                            <?=
+                            $form->field($model, 'physical_address')->textarea(['rows' => 3, "placeholder" => "Enter physical address"])->label("Physical address");
+                            ?>
                         </div>
                     </div>
                 </div>
@@ -156,8 +197,6 @@ $province_user_province_id = "";
                     <div class="row">
                         <div class="col-lg-4">
                             <?php
-//                            echo $form->field($model, 'province_approval_status')->hiddenInput(['value' => 0])->label(false);
-//                            echo $form->field($model, 'national_approval_status')->hiddenInput(['value' => 0])->label(false);
                             if ($user_type == "District") {
                                 $district_user_district_id = Yii::$app->user->identity->district_id;
                                 $distric_model = backend\models\Districts::findOne($district_user_district_id);

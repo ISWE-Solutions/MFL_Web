@@ -1,4 +1,5 @@
 <?php
+
 use \kartik\popover\PopoverX;
 use kartik\editable\Editable;
 use kartik\grid\EditableColumn;
@@ -7,6 +8,7 @@ use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\grid\ActionColumn;
 use backend\models\User;
+use kartik\number\NumberControl;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\FacilityServiceSearch */
@@ -37,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'class' => EditableColumn::className(),
                     'attribute' => 'category_id',
-                    //'readonly' => false,
+                    'group' => true,
                     'refreshGrid' => true,
                     'filterType' => GridView::FILTER_SELECT2,
                     'filterWidgetOptions' => [
@@ -71,15 +73,39 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => ['allowClear' => true],
                     ],
                     'filter' => \backend\models\FacilityService::getNames(),
-                    'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
+                    'filterInputOptions' => ['prompt' => 'Filter by scope', 'class' => 'form-control',],
                     'format' => 'raw',
                     'refreshGrid' => true,
                 ],
-                             [
+                [
+                    'class' => EditableColumn::className(),
+                    'attribute' => 'shared_id',
+                    //'readonly' => false,
+                    'refreshGrid' => true,
+                    'filter' => false,
+                    'editableOptions' => [
+                        'asPopover' => true,
+                        'type' => 'success',
+                        'size' => PopoverX::SIZE_MEDIUM,
+                        'options' => ['class' => 'form-control', 'custom' => true,],
+                        'inputType' => Editable::INPUT_WIDGET,
+                        'widgetClass' => '\kartik\number\NumberControl',
+                        'options' => [
+                            'maskedInputOptions' => [
+                                //  'suffix' => ' User(s)',
+                                'allowMinus' => false,
+                                'min' => 1,
+                                'max' => 10000000,
+                                'digits' => 0
+                            ],
+                        ]
+                    ],
+                ],
+                [
                     'class' => EditableColumn::className(),
                     'enableSorting' => true,
                     'attribute' => 'comments',
-                    'width' => '600px',
+                    'width' => '400px',
                     'contentOptions' => [
                         // 'style' => 'padding:0px 0px 0px 30px;',
                         'class' => 'text-left',
@@ -159,7 +185,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
                             'Name of service', 'id' => "province", 'required' => true,])
                         ?>
-                         <?=
+                        <?php
+                        echo $form->field($model, 'shared_id', ['enableAjaxValidation' => true])->widget(NumberControl::classname(), [
+                            'options' => ['placeholder' => "Shared id with hpcz"],
+                            'maskedInputOptions' => [
+                                // 'prefix' => '$ ',
+                                //'suffix' => ' days',
+                                'allowMinus' => false,
+                                'digits' => 0,
+                                'min' => 1,
+                                'max' => 1000000
+                            ],
+                        ]);
+                        ?>
+                        <?=
                         $form->field($model, 'comments')->textarea(['rows' => 4, 'placeholder' =>
                             'Enter service comments'])->label("Comment ");
                         ?>

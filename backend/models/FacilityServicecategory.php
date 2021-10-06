@@ -27,9 +27,11 @@ class FacilityServicecategory extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['name'], 'required'],
+            [['name','shared_id'], 'required'],
             [['name'], 'string', 'max' => 100],
-            [['name'], 'unique', 'message' => 'Facility service category exist already!'],
+            [['shared_id'], 'integer'],
+            [['name'], 'unique', 'message' => 'Facility service area exist already!'],
+            [['shared_id'], 'unique', 'message' => 'Shared code is already in use!'],
         ];
     }
 
@@ -39,6 +41,7 @@ class FacilityServicecategory extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
+            'shared_id' => 'Shared code',
             'name' => 'Area',
         ];
     }

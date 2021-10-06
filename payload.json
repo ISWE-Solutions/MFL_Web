@@ -1,0 +1,21 @@
+{
+    "accessibility": "Open",
+    "district": "Chibombo",
+    "facilityLocation": 2,
+    "facilityType": 6,
+    "hpczCode": "3",
+    "mobilityStatus": 2,
+    "facilityName": "Test Private nine",
+    "operationalStatus": 1,
+    "ownership": 1,
+    "email": "chulu1francis@gmail.com",
+    "mobileNumber": "260978981576",
+    "telephone": "+211 33332222",
+    "postalAddress": "postal",
+    "plotNo": "plot no 1",
+    "street": "street 2",
+    "town": "town 1",
+    "fax": "f28877",
+    "physicalAddress": "Lusaka",
+    "services": "1,2,25"
+}

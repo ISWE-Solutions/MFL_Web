@@ -200,6 +200,9 @@ $facility_operating_hours = new ActiveDataProvider([
                         <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Details</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="contact-tab" data-toggle="pill" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact info</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="location-tab" data-toggle="pill" href="#location" role="tab" aria-controls="location" aria-selected="false">Location</a>
                     </li>
                     <li class="nav-item">
@@ -362,6 +365,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             }
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Verified by',
                                             'value' => function($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->verified_by]);
@@ -369,6 +373,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             }
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'province_approval_status',
                                             'format' => 'raw',
                                             'value' => function($model) {
@@ -385,15 +390,18 @@ $facility_operating_hours = new ActiveDataProvider([
                                             },
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'verifier_comments',
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Date verified',
                                             'value' => function($model) {
                                                 return $model->date_verified;
                                             }
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Approved by',
                                             'value' => function($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->approved_by]);
@@ -401,6 +409,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             }
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'national_approval_status',
                                             'format' => 'raw',
                                             'value' => function($model) {
@@ -417,9 +426,11 @@ $facility_operating_hours = new ActiveDataProvider([
                                             },
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'approver_comments',
                                         ],
                                         [
+                                            'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Date approved',
                                             'value' => function($model) {
                                                 return $model->date_approved;
@@ -431,6 +442,24 @@ $facility_operating_hours = new ActiveDataProvider([
 
                             </div>
                         </div>
+                    </div>
+                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact">
+                        <?=
+                        DetailView::widget([
+                            'model' => $model,
+                            'attributes' => [
+                                'mobile',
+                                'phone',
+                                'fax',
+                                'email:email',
+                                'postal_address',
+                                'town',
+                                'street',
+                                'plot_no',
+                                'physical_address',
+                            ],
+                        ])
+                        ?>
                     </div>
 
                     <div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location">
@@ -591,14 +620,13 @@ $facility_operating_hours = new ActiveDataProvider([
                                                     'filter' => false,
                                                     'value' => function ($facility_services) {
                                                         return !empty($facility_services->service_id) ? \backend\models\FacilityService::findOne($facility_services->service_id)->name : "";
-                                                        
                                                     },
                                                 ],
                                                 ['class' => ActionColumn::className(),
                                                     'template' => '{delete}',
                                                     'buttons' => [
-                                                        'delete' => function ($url, $facility_services) {
-                                                            if (User::userIsAllowedTo('Manage facilities')) {
+                                                        'delete' => function ($url, $facility_services) use ($model) {
+                                                            if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
                                                                 return Html::a(
                                                                                 '<span class="fa fa-trash"></span>', ['/facilities/delete-service', 'id' => $facility_services->id], [
                                                                             'title' => 'Delete',

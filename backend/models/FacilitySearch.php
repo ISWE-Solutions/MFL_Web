@@ -16,8 +16,17 @@ class FacilitySearch extends Facility {
      */
     public function rules() {
         return [
-            [['id', 'district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by', 'province_approval_status', 'national_approval_status','province_approval_status','national_approval_status'], 'integer'],
-            [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code', 'name', 'catchment_population_head_count', 'catchment_population_cso', 'number_of_households', 'accesibility', 'latitude', 'longitude', 'geom', 'date_approved', 'date_created', 'date_updated', 'province_id'], 'safe'],
+            [['id', 'district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status',
+            'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status',
+            'approved_by', 'created_by', 'updated_by', 'province_approval_status',
+            'national_approval_status', 'province_approval_status', 'national_approval_status'], 'integer'],
+            [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code',
+            'name', 'catchment_population_head_count', 'catchment_population_cso',
+            'number_of_households', 'accesibility', 'latitude', 'longitude', 'geom',
+            'date_approved', 'date_created', 'date_updated', 'province_id'
+            , 'physical_address', 'postal_address', 'phone',
+            'mobile', 'fax', 'plot_no', 'street', 'town'], 'safe'],
+            [['email'], 'email'],
         ];
     }
 
@@ -75,7 +84,17 @@ class FacilitySearch extends Facility {
             'updated_by' => $this->updated_by,
         ]);
 
+
         $query->andFilterWhere(['ilike', 'hims_code', $this->hims_code])
+                ->andFilterWhere(['ilike', 'physical_address', $this->physical_address])
+                ->andFilterWhere(['ilike', 'postal_address', $this->postal_address])
+                ->andFilterWhere(['ilike', 'email', $this->email])
+                ->andFilterWhere(['ilike', 'phone', $this->phone])
+                ->andFilterWhere(['ilike', 'mobile', $this->mobile])
+                ->andFilterWhere(['ilike', 'fax', $this->fax])
+                ->andFilterWhere(['ilike', 'plot_no', $this->plot_no])
+                ->andFilterWhere(['ilike', 'town', $this->town])
+                ->andFilterWhere(['ilike', 'street', $this->street])
                 ->andFilterWhere(['ilike', 'smartcare_code', $this->smartcare_code])
                 ->andFilterWhere(['ilike', 'elmis_code', $this->elmis_code])
                 ->andFilterWhere(['ilike', 'hpcz_code', $this->hpcz_code])

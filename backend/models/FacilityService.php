@@ -30,17 +30,18 @@ class FacilityService extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['name', 'category_id'], 'required'],
+            [['name', 'category_id', 'shared_id'], 'required'],
             [['category_id', 'comments'], 'default', 'value' => null],
-            [['category_id'], 'integer'],
+            [['category_id', 'shared_id'], 'integer'],
             [['comments'], 'safe'],
+            [['shared_id'], 'unique', 'message' => 'Shared code is already in use!'],
             ['name', 'unique', 'when' => function($model) {
                     return $model->isAttributeChanged('name') &&
                             empty($model->category_id) ? TRUE : FALSE;
-                }, 'message' => 'Service name already exist!'],
+                }, 'message' => 'Service scope already exist!'],
             ['name', 'unique', 'when' => function($model) {
                     return $model->isAttributeChanged('name') && !empty(self::findOne(['name' => $model->name, "category_id" => $model->category_id])) ? TRUE : FALSE;
-                }, 'message' => 'Service name already exist for this category!'],
+                }, 'message' => 'Service scope already exist for this service area!'],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => FacilityServicecategory::className(), 'targetAttribute' => ['category_id' => 'id']],
         ];
     }
@@ -53,6 +54,7 @@ class FacilityService extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'name' => 'Scope',
             'category_id' => 'Service Area',
+            'shared_id' => 'Shared code',
             'comments' => 'Comment',
         ];
     }

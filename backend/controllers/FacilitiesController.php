@@ -412,6 +412,7 @@ class FacilitiesController extends Controller {
             $old_provincial_status = $model->province_approval_status;
 
             if ($model->load(Yii::$app->request->post())) {
+                
                 if (!empty($model->coordinates)) {
                     $arr = explode(",", $model->coordinates);
                     $model->latitude = $arr[0];
