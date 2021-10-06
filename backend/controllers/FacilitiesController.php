@@ -241,6 +241,52 @@ class FacilitiesController extends Controller {
                     $model->date_approved = new Expression('NOW()');
                     $model->status = 1; //Active
                     if ($model->save()) {
+                        if (!empty(Yii::$app->params['amqQueues'])) {
+                            $district_model = \backend\models\Districts::findOne($model->district_id);
+                            $province = !empty($district_model) ? \backend\models\Provinces::findOne($district_model->province_id)->name : "";
+                            $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                            $mobility = $status_arr[$model->mobility_status];
+                            //We publish the facility to rabbitMQ
+                            $msg = [
+                                'action' => "CREATE",
+                                'facilityId' => $model->id,
+                                'hims_code' => $model->hims_code,
+                                'smartcare_code' => $model->smartcare_code,
+                                'elmis_code' => $model->elmis_code,
+                                'hpcz_code' => $model->hpcz_code,
+                                'disa_code' => $model->disa_code,
+                                'name' => $model->name,
+                                'number_of_households' => $model->number_of_households,
+                                'accesibility' => $model->accesibility,
+                                'plot_no' => $model->plot_no,
+                                'street' => $model->street,
+                                'town' => $model->town,
+                                'postalAddress' => $model->postal_address,
+                                'physical_address' => $model->physical_address,
+                                'email' => $model->email,
+                                'phone' => $model->phone,
+                                'mobile' => $model->mobile,
+                                'fax' => $model->fax,
+                                'catchmentPopulationHeadCount' => $model->catchment_population_head_count,
+                                'catchmentPopulationCso' => $model->catchment_population_cso,
+                                'longitude' => $model->longitude,
+                                'latitude' => $model->latitude,
+                                'mobilityStatus' => $mobility,
+                                'facilityType' => !empty($model->type) ? \backend\models\Facilitytype::findOne($model->type)->name : "",
+                                'locationType' => !empty($model->location) ? \backend\models\LocationType::findOne($model->location)->name : "",
+                                'operationStatus' => !empty($model->operational_status) ? \backend\models\Operationstatus::findOne($model->operational_status)->name : "",
+                                'ownership' => !empty($model->ownership) ? \backend\models\FacilityOwnership::findOne($model->ownership)->name : "",
+                                'ownershipType' => $model->ownership_type == 1 ? "Public" : "Private",
+                                'province' => $province,
+                                'district' => !empty($district_model) ? $district_model->name : "",
+                                'constituency' => !empty($model->constituency_id) ? \backend\models\Constituency::findOne($model->constituency_id)->name : "",
+                                'ward' => !empty($model->ward_id) ? \backend\models\Wards::findOne($model->ward_id)->name : "",
+                            ];
+
+                            foreach (Yii::$app->params['amqQueues'] as $queue) {
+                                self::publishAMQMsg($msg, $queue);
+                            }
+                        }
                         Yii::$app->session->setFlash('success', 'Facility was approved successfully');
                         return $this->redirect(['home/home']);
                     } else {
@@ -412,7 +458,7 @@ class FacilitiesController extends Controller {
             $old_provincial_status = $model->province_approval_status;
 
             if ($model->load(Yii::$app->request->post())) {
-                
+
                 if (!empty($model->coordinates)) {
                     $arr = explode(",", $model->coordinates);
                     $model->latitude = $arr[0];
@@ -442,6 +488,7 @@ class FacilitiesController extends Controller {
                     $model->province_approval_status = 0;
                 }
                 if ($model->save()) {
+
                     //We log action taken
                     $audit = new AuditTrail();
                     $audit->user = Yii::$app->user->id;
@@ -473,6 +520,52 @@ class FacilitiesController extends Controller {
                             Yii::$app->session->setFlash('warning', 'Facility was updated successfully. But notification was not sent to province user for verification!');
                         }
                     } else {
+                        if (!empty(Yii::$app->params['amqQueues'])) {
+                            $district_model = \backend\models\Districts::findOne($model->district_id);
+                            $province = !empty($district_model) ? \backend\models\Provinces::findOne($district_model->province_id)->name : "";
+                            $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                            $mobility = $status_arr[$model->mobility_status];
+                            //We publish the facility to rabbitMQ
+                            $msg = [
+                                'action' => "UPDATE",
+                                'facilityId' => $model->id,
+                                'hims_code' => $model->hims_code,
+                                'smartcare_code' => $model->smartcare_code,
+                                'elmis_code' => $model->elmis_code,
+                                'hpcz_code' => $model->hpcz_code,
+                                'disa_code' => $model->disa_code,
+                                'name' => $model->name,
+                                'number_of_households' => $model->number_of_households,
+                                'accesibility' => $model->accesibility,
+                                'plot_no' => $model->plot_no,
+                                'street' => $model->street,
+                                'town' => $model->town,
+                                'postalAddress' => $model->postal_address,
+                                'physical_address' => $model->physical_address,
+                                'email' => $model->email,
+                                'phone' => $model->phone,
+                                'mobile' => $model->mobile,
+                                'fax' => $model->fax,
+                                'catchmentPopulationHeadCount' => $model->catchment_population_head_count,
+                                'catchmentPopulationCso' => $model->catchment_population_cso,
+                                'longitude' => $model->longitude,
+                                'latitude' => $model->latitude,
+                                'mobilityStatus' => $mobility,
+                                'facilityType' => !empty($model->type) ? \backend\models\Facilitytype::findOne($model->type)->name : "",
+                                'locationType' => !empty($model->location) ? \backend\models\LocationType::findOne($model->location)->name : "",
+                                'operationStatus' => !empty($model->operational_status) ? \backend\models\Operationstatus::findOne($model->operational_status)->name : "",
+                                'ownership' => !empty($model->ownership) ? \backend\models\FacilityOwnership::findOne($model->ownership)->name : "",
+                                'ownershipType' => $model->ownership_type == 1 ? "Public" : "Private",
+                                'province' => $province,
+                                'district' => !empty($district_model) ? $district_model->name : "",
+                                'constituency' => !empty($model->constituency_id) ? \backend\models\Constituency::findOne($model->constituency_id)->name : "",
+                                'ward' => !empty($model->ward_id) ? \backend\models\Wards::findOne($model->ward_id)->name : "",
+                            ];
+
+                            foreach (Yii::$app->params['amqQueues'] as $queue) {
+                                self::publishAMQMsg($msg, $queue);
+                            }
+                        }
                         Yii::$app->session->setFlash('success', 'Facility was updated successfully');
                     }
                     return $this->redirect(['view', 'id' => $model->id]);
@@ -605,8 +698,8 @@ class FacilitiesController extends Controller {
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-    
-        public function actionDeleteOperatinghour($id) {
+
+    public function actionDeleteOperatinghour($id) {
         if (User::userIsAllowedTo('Manage facilities')) {
             $model = \backend\models\MFLFacilityOperatingHours::findOne($id);
             $facility_id = $model->facility_id;
@@ -632,7 +725,8 @@ class FacilitiesController extends Controller {
             return $this->redirect(['home/home']);
         }
     }
-     public function actionOperatinghour() {
+
+    public function actionOperatinghour() {
         if (User::userIsAllowedTo('Manage facilities')) {
             $model = new \backend\models\MFLFacilityOperatingHours();
             if (Yii::$app->request->isAjax) {
@@ -663,6 +757,19 @@ class FacilitiesController extends Controller {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
             return $this->redirect(['home/home']);
         }
+    }
+
+    public static function publishAMQMsg($message, $queue) {
+        $connection = new AMQPStreamConnection(Yii::$app->params['amqHost'], Yii::$app->params['amqPort'], Yii::$app->params['amqUsername'], Yii::$app->params['amqPassword']);
+        $channel = $connection->channel();
+
+        $channel->queue_declare($queue, false, TRUE, false, false);
+        //We send json encoded messages
+        $msg = new AMQPMessage(\GuzzleHttp\json_encode($message));
+        $channel->basic_publish($msg, '', $queue);
+        //We close the channel and connection 
+        $channel->close();
+        $connection->close();
     }
 
 }
