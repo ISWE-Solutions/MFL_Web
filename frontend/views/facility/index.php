@@ -218,19 +218,6 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             },
                         ],
                         'accesibility',
-                        [
-                            'attribute' => 'DHIS2_UID',
-                        // 'visible' => false
-                        ],
-                        [
-                            'attribute' => 'HMIS_code',
-                            'filter' => false,
-                        ],
-                        'hims_code',
-                        'smartcare_code',
-                        'elmis_code',
-                        'hpcz_code',
-                        'disa_code',
                         'catchment_population_head_count',
                         'catchment_population_cso',
                         'number_of_households',

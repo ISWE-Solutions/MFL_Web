@@ -25,18 +25,18 @@ $query_service = backend\models\MFLFacilityServices::find()->where(['facility_id
 $facility_services = new ActiveDataProvider([
     'query' => $query_service,
         ]);
-//$facility_services->pagination = ['pageSize' => 15];
-//$facility_services->setSort([
-//    'attributes' => [
-//        'service_area_id' => [
-//            'desc' => ['service_area_id' => SORT_DESC],
-//            'default' => SORT_DESC
-//        ],
-//    ],
-//    'defaultOrder' => [
-//        'service_area_id' => SORT_DESC
-//    ]
-//]);
+$facility_services->pagination = ['pageSize' => 15];
+$facility_services->setSort([
+    'attributes' => [
+        'service_area_id' => [
+            'desc' => ['service_area_id' => SORT_ASC],
+            'default' => SORT_ASC
+        ],
+    ],
+    'defaultOrder' => [
+        'service_area_id' => SORT_ASC
+    ]
+]);
 
 \yii\web\YiiAsset::register($this);
 
@@ -598,7 +598,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                                     'template' => '{delete}',
                                                     'buttons' => [
                                                         'delete' => function ($url, $facility_services) {
-                                                            if (User::userIsAllowedTo('Remove facility')) {
+                                                            if (User::userIsAllowedTo('Manage facilities')) {
                                                                 return Html::a(
                                                                                 '<span class="fa fa-trash"></span>', ['/facilities/delete-service', 'id' => $facility_services->id], [
                                                                             'title' => 'Delete',
