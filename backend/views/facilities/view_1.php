@@ -41,6 +41,12 @@ $rating_model = new \backend\models\MFLFacilityRatings();
 $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
         ->cache(Yii::$app->params['cache_duration'])
         ->all();
+
+$query_foh = backend\models\MFLFacilityOperatingHours::find()->where(['facility_id' => $model->id]);
+$facility_operating_hours = new ActiveDataProvider([
+    'query' => $query_foh,
+        ]);
+?>
 ?>
 <div class="card card-primary card-outline">
     <div class="card-header border-transparent">
