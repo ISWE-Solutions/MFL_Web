@@ -116,8 +116,8 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filter' => \backend\models\FacilityOwnership::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
-                    $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
-                    return $name;
+                    $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
+                    return !empty($name)? $name->name:"";
                 },
             ],
             [
@@ -175,11 +175,11 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                 $str = "<span class='badge badge-pill badge-info'> "
                                         . "<i class='fas fa-hourglass-half'></i> Pending National approval";
                             }
-                            if ($model->province_approval_status === 2 && $model->national_approval_status==2) {
+                            if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
                                 $str = "<span class='badge badge-pill badge-danger'> "
                                         . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
                             }
-                            if ($model->province_approval_status === 2 && $model->national_approval_status==0) {
+                            if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
                                 $str = "<span class='badge badge-pill badge-danger'> "
                                         . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
                             }
