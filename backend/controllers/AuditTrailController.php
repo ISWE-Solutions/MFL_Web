@@ -46,8 +46,8 @@ class AuditTrailController extends Controller {
             $audit->user_agent = Yii::$app->request->getUserAgent();
             $audit->save();*/
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-            if (!empty(Yii::$app->request->queryParams['AuditTrailHeaSearch']['date'])) {
-                $date_arry = explode("-", Yii::$app->request->queryParams['AuditTrailHeaSearch']['date']);
+            if (!empty(Yii::$app->request->queryParams['AuditTrailSearch']['date'])) {
+                $date_arry = explode("-", Yii::$app->request->queryParams['AuditTrailSearch']['date']);
                 $start_date = $date_arry[0];
                 $end_date = $date_arry[1];
                 $dataProvider->query->andFilterWhere(["BETWEEN", 'date', strtotime($start_date), strtotime($end_date)]);

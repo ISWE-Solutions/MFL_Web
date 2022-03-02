@@ -117,7 +117,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
                     $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
-                    return !empty($name)? $name->name:"";
+                    return !empty($name) ? $name->name : "";
                 },
             ],
             [
@@ -504,6 +504,11 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 $fullExportMenu,
             ]
         ]);
+
+
+
+
+       
         ?>
 
     </div>
