@@ -17,7 +17,7 @@ AppAsset::register($this);
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" type="image/png" sizes="96x96" href="<?= Url::to('@web/img/coas.png') ?>">
-<?php $this->registerCsrfMetaTags() ?>
+        <?php $this->registerCsrfMetaTags() ?>
         <title>MFL | <?= Html::encode($this->title) ?></title>
         <!-- Leaflet kernel -->
       <!--<link  href="<?= Url::to('@web/leaflet/leaflet.css') ?>" rel="stylesheet" />
@@ -34,11 +34,11 @@ AppAsset::register($this);
       <script src="<?= Url::to('@web/leaflet/leaflet.filelayer.js') ?>"></script>
 
       <script src="<?= Url::to('@web/leaflet/Control.Draw.Plus.js') ?>"></script>-->
-<?php $this->head() ?>
+        <?php $this->head() ?>
 
     </head>
     <body class="hold-transition layout-top-nav layout-navbar-fixed">
-<?php $this->beginBody() ?>
+        <?php $this->beginBody() ?>
         <div class="wrapper">
 
             <!-- Navbar -->
@@ -141,7 +141,7 @@ AppAsset::register($this);
                 <div class="content">
                     <div class="container" >
                         <div class="row">
-<?= $content ?>
+                            <?= $content ?>
                         </div>
                     </div>
                 </div>
@@ -203,14 +203,14 @@ AppAsset::register($this);
             </footer>
         </div>
 
-<?php $this->endBody() ?>
+        <?php $this->endBody() ?>
         <script>
             var myArrSuccess = [<?php
-$flashMessage = Yii::$app->session->getFlash('success');
-if ($flashMessage) {
-    echo '"' . $flashMessage . '",';
-}
-?>];
+        $flashMessage = Yii::$app->session->getFlash('success');
+        if ($flashMessage) {
+            echo '"' . $flashMessage . '",';
+        }
+        ?>];
             for (var i = 0; i < myArrSuccess.length; i++) {
                 $.notify(myArrSuccess[i], {
                     type: 'success',
@@ -222,11 +222,11 @@ if ($flashMessage) {
                 });
             }
             var myArrError = [<?php
-$flashMessage = Yii::$app->session->getFlash('error');
-if ($flashMessage) {
-    echo '"' . $flashMessage . '",';
-}
-?>];
+        $flashMessage = Yii::$app->session->getFlash('error');
+        if ($flashMessage) {
+            echo '"' . $flashMessage . '",';
+        }
+        ?>];
             for (var j = 0; j < myArrError.length; j++) {
                 $.notify(myArrError[j], {
                     type: 'danger',
