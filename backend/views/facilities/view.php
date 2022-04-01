@@ -40,7 +40,6 @@ $facility_services->setSort([
 
 \yii\web\YiiAsset::register($this);
 
-
 $facility_rate_count = \backend\models\MFLFacilityRatings::find()
                 ->cache(Yii::$app->params['cache_duration'])
                 ->where(['facility_id' => $model->id])->count();
@@ -75,7 +74,7 @@ $facility_operating_hours = new ActiveDataProvider([
     <div class="card-header border-transparent">
         <h3 class="card-title">
             <?php
-            if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
+            if (User::userIsAllowedTo('Manage facilities')) {
                 if ($user_type == "District" && in_array($model->province_approval_status, [0, 2])) {
                     if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
                         echo Html::a(
@@ -147,7 +146,7 @@ $facility_operating_hours = new ActiveDataProvider([
                         <?php
                         echo StarRating::widget([
                             'name' => 'facility_rating',
-                            'value' => $rating,
+                            'value' => round($rating),
                             'pluginOptions' => [
                                 'min' => 0,
                                 'max' => 5,
@@ -222,6 +221,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                 DetailView::widget([
                                     'model' => $model,
                                     'attributes' => [
+                                        'id',
                                         [
                                             'enableSorting' => true,
                                             'attribute' => 'name',
@@ -229,7 +229,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'filterWidgetOptions' => [
                                                 'pluginOptions' => ['allowClear' => true],
                                             ],
-                                            'filter' => \backend\models\MFLFacility::getNames(),
+                                            'filter' => \backend\models\Facility::getNames(),
                                             'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                                             'format' => 'raw',
                                         ],
@@ -277,7 +277,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'format' => 'raw',
                                             'attribute' => 'mobility_status',
                                             'value' => function ($model) {
-                                                $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                                                $status_arr = [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"];
                                                 return $status_arr[$model->mobility_status];
                                             },
                                         ],
@@ -300,7 +300,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         'number_of_households',
                                         [
                                             'attribute' => 'status',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 $str = "";
                                                 if ($model->ownership_type == 1) {
                                                     if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
@@ -340,34 +340,34 @@ $facility_operating_hours = new ActiveDataProvider([
                                         ],
                                         [
                                             'label' => 'Created by',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->created_by]);
                                                 return !empty($user) ? $user->email : "";
                                             }
                                         ],
                                         [
                                             'label' => 'Updated by',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->updated_by]);
                                                 return !empty($user) ? $user->email : "";
                                             }
                                         ],
                                         [
                                             'label' => 'Updated at',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 return $model->date_updated;
                                             }
                                         ],
                                         [
                                             'label' => 'Created at',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 return $model->date_created;
                                             }
                                         ],
                                         [
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Verified by',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->verified_by]);
                                                 return !empty($user) ? $user->email : "";
                                             }
@@ -376,7 +376,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'province_approval_status',
                                             'format' => 'raw',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 if ($model->province_approval_status === 1) {
                                                     return "<span class='badge badge-pill badge-success'> "
                                                             . "<i class='ti-check'></i> Approved</span>";
@@ -396,14 +396,14 @@ $facility_operating_hours = new ActiveDataProvider([
                                         [
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Date verified',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 return $model->date_verified;
                                             }
                                         ],
                                         [
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Approved by',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 $user = \backend\models\User::findOne(['id' => $model->approved_by]);
                                                 return !empty($user) ? $user->email : "";
                                             }
@@ -412,7 +412,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'attribute' => 'national_approval_status',
                                             'format' => 'raw',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 if ($model->national_approval_status === 1) {
                                                     return "<span class='badge badge-pill badge-success'> "
                                                             . "<i class='ti-check'></i> Approved</span>";
@@ -432,7 +432,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                         [
                                             'visible' => $model->ownership_type == 1 ? true : false,
                                             'label' => 'Date approved',
-                                            'value' => function($model) {
+                                            'value' => function ($model) {
                                                 return $model->date_approved;
                                             }
                                         ],
@@ -527,11 +527,11 @@ $facility_operating_hours = new ActiveDataProvider([
                                 <?php
                                 $coords = [];
                                 $center_coords = [];
-                                if (empty($model->geom)) {
+                                if (empty($model->longitude) && empty($model->latitude)) {
                                     echo "<div class='alert alert-warning'>There are no location coordinates for facility:" . $model->name . "</div>";
                                 } else {
-                                    $coordinate = json_decode($model->geom, true)['coordinates'];
-                                    $coord = new LatLng(['lat' => $coordinate[1], 'lng' => $coordinate[0]]);
+                                    // $coordinate = json_decode($model->geom, true)['coordinates'];
+                                    $coord = new LatLng(['lat' => $model->latitude, 'lng' => $model->longitude]);
                                     //$center = round(count($coord) / 2);
                                     $center_coords = $coord;
                                 }
@@ -626,7 +626,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                                     'template' => '{delete}',
                                                     'buttons' => [
                                                         'delete' => function ($url, $facility_services) use ($model) {
-                                                            if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
+                                                            if (User::userIsAllowedTo('Manage facilities')) {
                                                                 return Html::a(
                                                                                 '<span class="fa fa-trash"></span>', ['/facilities/delete-service', 'id' => $facility_services->id], [
                                                                             'title' => 'Delete',
@@ -729,56 +729,73 @@ $facility_operating_hours = new ActiveDataProvider([
 
 
 <div class="modal fade card-primary card-outline" id="addNewModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Service for facility: <?= $model->name ?></h5>
+                <h5 class="modal-title">Add Services for facility: <?= $model->name ?></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-lg-8">
-                        <?php
-                        $service_model = new backend\models\MFLFacilityServices();
-                        $form = ActiveForm::begin([
-                                    'action' => 'services',
-                        ]);
-
-                        echo
-                                $form->field($service_model, 'service_area_id')
-                                ->dropDownList(
-                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select service area', 'required' => true]
-                        );
-                        echo $form->field($service_model, 'service_id')->widget(DepDrop::classname(), [
-                            'options' => ['id' => 'constituency_id', 'custom' => true,],
-                            'type' => DepDrop::TYPE_SELECT2,
-                            'pluginOptions' => [
-                                'depends' => ['dist_id'],
-                                'initialize' => $service_model->isNewRecord ? false : true,
-                                'placeholder' => 'Please select a service',
-                                'url' => yii\helpers\Url::to(['/facility-service/services']),
-                                'params' => ['selected_id2'],
-                                'loadingText' => 'Loading services....',
-                            ]
-                        ]);
-                        ?>
-                        <?=
-                        $form->field($service_model, 'facility_id')->hiddenInput(['value' => $model->id, 'id' => 'selected_id2'])->label(false);
-                        ?>
-
-                    </div>
-                    <div class="col-lg-4">
+                      <div class="col-lg-12">
                         <h4>Instructions</h4>
                         <ol>
                             <li>Fields marked with <span style="color: red;">*</span> are required</li>
+                            <li>You can select multiple services at the same time</li>
+                            <li>The system will only show the services which have not been added to the facility</li>
                         </ol>
                     </div>
+                    <div class="col-lg-12">
+                        <?php
+                        $service_model = new backend\models\MFLFacilityServices();
+                        $form1 = ActiveForm::begin([
+                                    'action' => 'services',
+                        ]);
+
+//                        echo
+//                                $form1->field($service_model, 'service_area_id')
+//                                ->dropDownList(
+//                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select service area', 'required' => true]
+//                        );
+
+//                        echo $form1->field($service_model, 'service_id')->widget(DepDrop::classname(), [
+//                            'options' => ['id' => 'constituency_id', 'custom' => true,],
+//                            'type' => DepDrop::TYPE_SELECT2,
+//                            'pluginOptions' => [
+//                                'depends' => ['dist_id'],
+//                                'initialize' => $service_model->isNewRecord ? false : true,
+//                                'placeholder' => 'Please select a service',
+//                                'url' => yii\helpers\Url::to(['/facility-service/services']),
+//                                'params' => ['selected_id2'],
+//                                'loadingText' => 'Loading services....',
+//                            ]
+//                        ]);
+
+                        echo $form1->field($service_model, 'service_id')->widget(kartik\select2\Select2::classname(), [
+                            'data' => \backend\models\MFLFacilityServices::getServices($model->id),
+                            'name' => 'kv_theme_classic_1',
+                            'options' => ['placeholder' => 'Select a services ....', 'multiple' => true],
+                            'theme' => kartik\select2\Select2::THEME_DEFAULT,
+                            //'size' => kartik\select2\Select2::SMALL,
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'tags' => true,
+                               // 'tokenSeparators' => [','],
+                            ],
+                        ])->label("Services")->hint("Select multiple services at the same time");
+                        ?>
+                        <?=
+                        $form1->field($service_model, 'facility_id')->hiddenInput(['value' => $model->id, 'id' => 'selected_id2'])->label(false);
+                        ?>
+
+                    </div>
+                  
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
-                <?= Html::submitButton('Add service', ['class' => 'btn btn-primary btn-sm']) ?>
+                <?= Html::submitButton('Save services', ['class' => 'btn btn-primary btn-sm']) ?>
                 <?php ActiveForm::end() ?>
             </div>
         </div>

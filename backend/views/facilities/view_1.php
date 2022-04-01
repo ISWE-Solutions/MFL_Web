@@ -128,7 +128,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'filterWidgetOptions' => [
                                                 'pluginOptions' => ['allowClear' => true],
                                             ],
-                                            'filter' => \backend\models\MFLFacility::getNames(),
+                                            'filter' => \backend\models\Facility::getNames(),
                                             'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                                             'format' => 'raw',
                                         ],
@@ -425,11 +425,11 @@ $facility_operating_hours = new ActiveDataProvider([
                                 <?php
                                 $coords = [];
                                 $center_coords = [];
-                                if (empty($model->geom)) {
+                                if (empty($model->longitude) && empty($model->latitude)) {
                                     echo "<div class='alert alert-warning'>There are no location coordinates for facility:" . $model->name . "</div>";
                                 } else {
-                                    $coordinate = json_decode($model->geom, true)['coordinates'];
-                                    $coord = new LatLng(['lat' => $coordinate[1], 'lng' => $coordinate[0]]);
+//                                    $coordinate = json_decode($model->geom, true)['coordinates'];
+                                    $coord = new LatLng(['lat' => $model->latitude, 'lng' => $model->longitude]);
                                     //$center = round(count($coord) / 2);
                                     $center_coords = $coord;
                                 }

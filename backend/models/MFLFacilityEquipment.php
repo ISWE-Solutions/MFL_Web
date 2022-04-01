@@ -39,7 +39,7 @@ class MFLFacilityEquipment extends \yii\db\ActiveRecord {
                 }, 'message' => 'Equipment already exist for this facility with the same value!'],
             //[['facility_id', 'equipment_id'], 'unique', 'targetAttribute' => ['facility_id', 'equipment_id']],
             [['equipment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Equipment::className(), 'targetAttribute' => ['equipment_id' => 'id']],
-            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => MFLFacility::className(), 'targetAttribute' => ['facility_id' => 'id']],
+            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => Facility::className(), 'targetAttribute' => ['facility_id' => 'id']],
         ];
     }
 
@@ -70,7 +70,7 @@ class MFLFacilityEquipment extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getFacility() {
-        return $this->hasOne(MFLFacility::className(), ['id' => 'facility_id']);
+        return $this->hasOne(Facility::className(), ['id' => 'facility_id']);
     }
 
 }

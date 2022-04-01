@@ -229,11 +229,11 @@ $facility_operating_hours = new ActiveDataProvider([
                                             <?php
                                             $coords = [];
                                             $center_coords = [];
-                                            if (empty($model->geom)) {
+                                            if (empty($model->longitude) && empty($model->latitude)) {
                                                 echo "<div class='alert alert-warning'>There are no location coordinates for facility:" . $model->name . "</div>";
                                             } else {
-                                                $coordinate = json_decode($model->geom, true)['coordinates'];
-                                                $coord = new LatLng(['lat' => $coordinate[1], 'lng' => $coordinate[0]]);
+                                                //$coordinate = json_decode($model->geom, true)['coordinates'];
+                                                $coord = new LatLng(['lat' => $model->latitude, 'lng' => $model->longitude]);
                                                 //$center = round(count($coord) / 2);
                                                 $center_coords = $coord;
                                             }
@@ -585,7 +585,6 @@ $facility_operating_hours = new ActiveDataProvider([
                                                             ],
                                                         ]
                                                     ]);
-
 
                                                     echo $form->field($facility_rating_model, 'email')->textInput(['maxlength' => true, 'placeholder' =>
                                                         'Your email address', 'required' => false,]);

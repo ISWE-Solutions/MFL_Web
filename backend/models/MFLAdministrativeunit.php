@@ -49,7 +49,7 @@ class MFLAdministrativeunit extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getMFLFacilities() {
-        return $this->hasMany(MFLFacility::className(), ['administrative_unit_id' => 'id']);
+        return $this->hasMany(Facility::className(), ['administrative_unit_id' => 'id']);
     }
 
     public static function getNames() {

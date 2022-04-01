@@ -38,7 +38,7 @@ class MFLFacilityInfrastructure extends \yii\db\ActiveRecord {
                                         "facility_id" => $model->facility_id, "value" => $model->value])) ? TRUE : FALSE;
                 }, 'message' => 'Infrastructure already exist for this facility with the same value!'],
             //[['facility_id', 'infrastructure_id'], 'unique', 'targetAttribute' => ['facility_id', 'infrastructure_id']],
-            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => MFLFacility::className(), 'targetAttribute' => ['facility_id' => 'id']],
+            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => Facility::className(), 'targetAttribute' => ['facility_id' => 'id']],
             [['infrastructure_id'], 'exist', 'skipOnError' => true, 'targetClass' => MFLInfrastructure::className(), 'targetAttribute' => ['infrastructure_id' => 'id']],
         ];
     }
@@ -61,7 +61,7 @@ class MFLFacilityInfrastructure extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getFacility() {
-        return $this->hasOne(MFLFacility::className(), ['id' => 'facility_id']);
+        return $this->hasOne(Facility::className(), ['id' => 'facility_id']);
     }
 
     /**

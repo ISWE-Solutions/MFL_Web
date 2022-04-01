@@ -54,7 +54,10 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
 
         <?php
         $gridColumns = [
-            //'id',
+            [
+                'attribute' => "id",
+                'filter' => false
+            ],
             [
                 'enableSorting' => true,
                 'attribute' => 'name',
@@ -145,7 +148,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'class' => EditableColumn::className(),
                 'enableSorting' => true,
                 'format' => 'raw',
-                'readonly' => function($model) {
+                'readonly' => function ($model) {
                     return in_array($model->province_approval_status, [0]) || User::userIsAllowedTo("View facilities") || $model->ownership_type === 2 ? true : false;
                 },
                 'editableOptions' => [
@@ -154,7 +157,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     'inputType' => Editable::INPUT_DROPDOWN_LIST,
                     'data' => [1 => 'Active', 0 => 'Inactive'],
                 ],
-                'value' => function($model) {
+                'value' => function ($model) {
                     $str = "";
                     if ($model->ownership_type == 1) {
                         if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
@@ -199,18 +202,18 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(
-                                        '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
-                                    'title' => 'View facility',
-                                    'data-toggle' => 'tooltip',
-                                    'data-placement' => 'top',
-                                    'data-pjax' => '0',
-                                    'style' => "padding:5px;",
-                                    'class' => 'bt btn-lg'
-                                        ]
+                                '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
+                            'title' => 'View facility',
+                            'data-toggle' => 'tooltip',
+                            'data-placement' => 'top',
+                            'data-pjax' => '0',
+                            'style' => "padding:5px;",
+                            'class' => 'bt btn-lg'
+                                ]
                         );
                     },
                     'update' => function ($url, $model) use ($district_user_district_id, $user_type, $province_user_province_id) {
-                        if (User::userIsAllowedTo('Manage facilities') && $model->ownership_type == 1) {
+                        if (User::userIsAllowedTo('Manage facilities')) {
                             if ($user_type == "District" && in_array($model->province_approval_status, [0, 2])) {
 
                                 if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
@@ -281,7 +284,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
             ],
         ];
         $gridColumns2 = [
-            //'id',
+            'id',
             [
                 'enableSorting' => true,
                 'attribute' => 'name',
@@ -289,7 +292,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => \backend\models\MFLFacility::getNames(),
+                'filter' => \backend\models\Facility::getNames(),
                 'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                 'format' => 'raw',
             ],
@@ -426,7 +429,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
             'longitude',
             [
                 'attribute' => 'status',
-                'value' => function($model) {
+                'value' => function ($model) {
                     $str = "";
                     if ($model->status === 1) {
                         $str = "<span class='badge badge-pill badge-success'> "
@@ -504,11 +507,6 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 $fullExportMenu,
             ]
         ]);
-
-
-
-
-       
         ?>
 
     </div>

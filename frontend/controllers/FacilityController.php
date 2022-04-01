@@ -34,7 +34,7 @@ class FacilityController extends Controller {
     public function actionIndex($type = "", $ownership = "") {
         $searchModel = new FacilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-         $dataProvider->query->andFilterWhere(['status' => 1]);
+        $dataProvider->query->andFilterWhere(['status' => 1]);
 
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
             $district_ids = [];
@@ -181,6 +181,68 @@ class FacilityController extends Controller {
         ]);
     }
 
+    /**
+     * 
+     * @return type
+     */
+    public function actionServices() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+            $selected_id = $_POST['depdrop_all_params']['selected_id_s'];
+            if ($parents != null) {
+
+                $dist_id = $parents[0];
+
+                $out = \backend\models\FacilityService::find()
+                        ->select(['id', 'name'])
+                        ->where(['category_id' => $dist_id])
+                        ->asArray()
+                        ->all();
+
+                return ['output' => $out, 'selected' => $selected_id];
+            }
+        }
+        return ['output' => '', 'selected' => ''];
+    }
+
+    /**
+     * 
+     * @return type
+     */
+    public function actionOwnerships() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+            $selected_id = $_POST['depdrop_all_params']['selected_id_o'];
+            if ($parents != null) {
+                $dist_id = $parents[0];
+                if ($dist_id == 2) {
+                    $out = \backend\models\FacilityOwnership::find()
+                            ->select(['shared_id as id', 'name'])
+                            ->where(['shared_id' => 9])
+                            ->asArray()
+                            ->all();
+                } else {
+                    $out = \backend\models\FacilityOwnership::find()
+                            ->select(['shared_id as id', 'name'])
+                            ->where(["NOT IN", 'shared_id', [9]])
+                            ->asArray()
+                            ->all();
+                }
+
+                return ['output' => $out, 'selected' => $selected_id];
+            }
+        }
+        return ['output' => '', 'selected' => ''];
+    }
+
+    /**
+     * 
+     * @return type
+     */
     public function actionRating() {
         $model = new \backend\models\MFLFacilityRatings();
         if ($model->load(Yii::$app->request->post())) {
@@ -195,8 +257,6 @@ class FacilityController extends Controller {
                 5 => 'Very Good',
             ];
             $model->rating = $ratings[$rating];
-            //  Yii::warning('**********************', var_export("RATTTTIINNNG:::::", true));
-            //  Yii::warning('**********************', var_export($model->rating, true));
 
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Facility rating was successful.');

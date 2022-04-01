@@ -84,7 +84,7 @@ $province_user_province_id = "";
                             <?=
                                     $form->field($model, 'mobility_status')
                                     ->dropDownList(
-                                            [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"], ['custom' => true, 'prompt' => 'Select mobility status',]
+                                            [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"], ['custom' => true, 'prompt' => 'Select mobility status',]
                             );
                             ?>
                             <?=

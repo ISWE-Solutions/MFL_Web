@@ -28,7 +28,7 @@ $districts = backend\models\Districts::find()->where(['province_id' => $model->i
 
 //We assume facility operation status name "Operational" 
 //will never be renamed/deleted otherwise the system breaks
-$operation_status_model = \backend\models\Operationstatus::findOne(['name' => "Operational"]);
+$operation_status_model = \backend\models\Operationstatus::findOne(['name' => "Functional"]);
 //We get all districts in the province
 $districts_model = backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
         ->where(['province_id' => $model->id])
@@ -46,12 +46,12 @@ if (!empty($districts_model)) {
 if (!empty($operation_status_model) && !empty($district_ids)) {
     $opstatus_id = $operation_status_model->id;
     //We now get the facilities in the province
-    $facilities_counts = backend\models\MFLFacility::find()
+    $facilities_counts = backend\models\Facility::find()
                     ->cache(Yii::$app->params['cache_duration'])
-                    ->select(["COUNT(*) as count", "facility_type_id"])
-                    ->where(['operation_status_id' => $opstatus_id])
+                    ->select(["COUNT(*) as count", "type"])
+                    ->where(['operational_status' => $opstatus_id])
                     ->andWhere(['IN', 'district_id', $district_ids])
-                    ->groupBy(['facility_type_id'])
+                    ->groupBy(['type'])
                     ->createCommand()->queryAll();
 }
 
@@ -59,9 +59,11 @@ if (!empty($operation_status_model) && !empty($district_ids)) {
 
 //We build the window string
 $type_str = "";
+if(!empty($facilities_counts)){
 foreach ($facilities_counts as $f_model) {
-    $facility_type = !empty($f_model['facility_type_id']) ? backend\models\Facilitytype::findOne($f_model['facility_type_id'])->name : "";
+    $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
     $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
+}
 }
 ?>
 <div class="card card-primary card-outline">
@@ -194,5 +196,5 @@ if (!empty($model->geom)) {
 ?> 
 
 var poly = L.polygon(polygon,{color: 'red'}).addTo(map);
-poly.bindPopup("<p><strong><span class='text-center'>"+myvar+" Province operational facilities</span></strong></p><hr>"+facility_types);
+poly.bindPopup("<p><strong><span class='text-center'>"+myvar+" Province functional facilities</span></strong></p><hr>"+facility_types);
 </script>

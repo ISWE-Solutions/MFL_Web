@@ -195,7 +195,8 @@ class DistrictsController extends Controller {
             }
 
             if ($model->load(Yii::$app->request->post())) {
-                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']['coordinates'];
+                $_post_decodeded = json_decode(Yii::$app->request->post()['geom'], true)['features'];
+                $coordinates = !empty($_post_decodeded) ? $_post_decodeded[0]['geometry']['coordinates'] : "";
 
                 if (!empty($coordinates)) {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);

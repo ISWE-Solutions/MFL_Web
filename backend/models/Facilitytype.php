@@ -59,7 +59,7 @@ class Facilitytype extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getMFLFacilities() {
-        return $this->hasMany(MFLFacility::className(), ['facility_type_id' => 'id']);
+        return $this->hasMany(Facility::className(), ['facility_type_id' => 'id']);
     }
 
     public static function getNames() {

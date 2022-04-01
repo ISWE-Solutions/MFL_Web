@@ -59,7 +59,7 @@ class Equipment extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getFacilities() {
-        return $this->hasMany(MFLFacility::className(), ['id' => 'facility_id'])->viaTable('MFL_facility_equipment', ['equipment_id' => 'id']);
+        return $this->hasMany(Facility::className(), ['id' => 'facility_id'])->viaTable('MFL_facility_equipment', ['equipment_id' => 'id']);
     }
 
     public static function getNames() {

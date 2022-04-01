@@ -183,7 +183,7 @@ class ProvincesController extends Controller {
         if (User::userIsAllowedTo('Manage provinces')) {
             $model = Provinces::find()
                             ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km',
-                                 'ST_AsGeoJSON(geom) as geom'])
+                                'ST_AsGeoJSON(geom) as geom'])
                             ->where(["id" => $id])->one();
             if (Yii::$app->request->isAjax) {
                 $model->load(Yii::$app->request->post());
@@ -191,7 +191,8 @@ class ProvincesController extends Controller {
             }
 
             if ($model->load(Yii::$app->request->post())) {
-                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']['coordinates'];
+                $_post_decodeded = json_decode(Yii::$app->request->post()['geom'], true)['features'];
+                $coordinates = !empty($_post_decodeded) ? $_post_decodeded[0]['geometry']['coordinates'] : "";
                 if (!empty($coordinates)) {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",

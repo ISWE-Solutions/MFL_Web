@@ -64,6 +64,10 @@ class FacilityServicecategory extends \yii\db\ActiveRecord {
         $list = self::find()->orderBy(['name' => SORT_ASC])->all();
         return ArrayHelper::map($list, 'id', 'name');
     }
+    public static function getCategoryList() {
+        $list = self::find()->orderBy(['name' => SORT_ASC])->all();
+        return $list;
+    }
 
     public static function getById($id) {
         $data = self::find()->where(['id' => $id])->one();

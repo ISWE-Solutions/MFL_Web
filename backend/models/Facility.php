@@ -99,7 +99,7 @@ class Facility extends \yii\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'id' => 'ID',
+            'id' => 'Code',
             'district_id' => 'District',
             'province_id' => 'Province',
             'constituency_id' => 'Constituency',

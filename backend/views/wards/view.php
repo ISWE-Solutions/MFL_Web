@@ -26,17 +26,17 @@ $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 //We assume facility operation status name "Operational" 
 //will never be renamed/deleted otherwise the system breaks
-$operation_status_model = \backend\models\Operationstatus::findOne(['name' => "Operational"]);
+$operation_status_model = \backend\models\Operationstatus::findOne(['name' => "Functional"]);
 
 if (!empty($operation_status_model)) {
     $opstatus_id = $operation_status_model->id;
     //We now get the facilities in the ward
-    $facilities_counts = backend\models\MFLFacility::find()
+    $facilities_counts = backend\models\Facility::find()
                     ->cache(Yii::$app->params['cache_duration'])
-                    ->select(["COUNT(*) as count", "facility_type_id"])
-                    ->where(['operation_status_id' => $opstatus_id])
+                    ->select(["COUNT(*) as count", "type"])
+                    ->where(['operational_status' => $opstatus_id])
                     ->andWhere(['ward_id' => $model->id])
-                    ->groupBy(['facility_type_id'])
+                    ->groupBy(['type'])
                     ->createCommand()->queryAll();
 }
 
@@ -44,11 +44,12 @@ if (!empty($operation_status_model)) {
 
 //We build the window string
 $type_str = "";
-foreach ($facilities_counts as $f_model) {
-    $facility_type = !empty($f_model['facility_type_id']) ? backend\models\Facilitytype::findOne($f_model['facility_type_id'])->name : "";
-    $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
+if (!empty($facilities_counts)) {
+    foreach ($facilities_counts as $f_model) {
+        $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
+        $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
+    }
 }
-
 ?>
 <div class="card card-primary card-outline">
     <div class="card-body">
@@ -242,17 +243,19 @@ foreach ($facilities_counts as $f_model) {
 </div>
 
 <script>
-var myvar = <?php echo json_encode($model->name); ?>;
-var facility_types=<?php echo json_encode($type_str); ?>;
+    var myvar = <?php echo json_encode($model->name); ?>;
+    var facility_types =<?php echo json_encode($type_str); ?>;
 
 <?php
+if(!empty($center_coords)){
 echo 'var center=[' . $center_coords[1] . ',' . $center_coords[0] . ']';
-?> 
-var map = L.map('map').setView(center, 10);
+}
+?>
+    var map = L.map('map').setView(center, 10);
 
-L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; MoH-MFL, <a href="http://osm.org/copyright">OpenStreetMap</a>; contributors'
-}).addTo(map);
+    }).addTo(map);
 <?php
 if (!empty($model->geom)) {
     echo 'var polygon =[';
@@ -264,9 +267,9 @@ if (!empty($model->geom)) {
 } else {
     echo 'var polygon =[];';
 }
-?> 
+?>
 
-var poly = L.polygon(polygon,{color: 'red'}).addTo(map);
-poly.bindPopup("<p><strong><span class='text-center'>"+myvar+" Ward operational facilities</span></strong></p><hr>"+facility_types);
+    var poly = L.polygon(polygon, {color: 'red'}).addTo(map);
+    poly.bindPopup("<p><strong><span class='text-center'>" + myvar + " Ward operational facilities</span></strong></p><hr>" + facility_types);
 </script>
 

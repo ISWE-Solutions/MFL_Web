@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\ActionColumn;
 use backend\models\User;
 use kartik\export\ExportMenu;
+
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\MFLFacilityRatingsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -15,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="card card-primary card-outline">
     <div class="card-body">
 
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
 
         <?php
         $gridColumns = [
@@ -32,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \backend\models\Facility::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by facility', 'class' => 'form-control',],
                 'value' => function ($model) {
-                    return backend\models\Facility::findOne($model->facility_id)->name;
+                    return !empty($model->facility_id) ? backend\models\Facility::findOne($model->facility_id)->name : "";
                 }
             ],
             [
@@ -45,8 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \backend\models\MFLFacilityRateTypes::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by type', 'class' => 'form-control',],
                 'format' => 'raw',
-                'value'=>function($model){
-                return backend\models\MFLFacilityRateTypes::findOne($model->rate_type_id)->name;
+                'value' => function ($model) {
+                    return !empty($model->rate_type_id) ? backend\models\MFLFacilityRateTypes::findOne($model->rate_type_id)->name : "";
                 }
             ],
             [
@@ -81,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'date_created',
                 'filter' => false,
-                'value' => function($model) {
+                'value' => function ($model) {
                     return date('d-M-Y', $model->date_created);
                 }
             ],
@@ -112,7 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ];
         ?>
 
-         <?php
+        <?php
         if (!empty($dataProvider) && $dataProvider->getCount() > 0) {
             $fullExportMenu = ExportMenu::widget([
                         'dataProvider' => $dataProvider,

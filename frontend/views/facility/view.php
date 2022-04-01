@@ -64,6 +64,19 @@ $facility_operating_hours = new ActiveDataProvider([
         ]);
 
 \yii\web\YiiAsset::register($this);
+
+$facility_rate_count = \backend\models\MFLFacilityRatings::find()
+                // ->cache(Yii::$app->params['cache_duration'])
+                ->where(['facility_id' => $model->id])->count();
+$facility_rates_sum = \backend\models\MFLFacilityRatings::find()
+        //->cache(Yii::$app->params['cache_duration'])
+        ->where(['facility_id' => $model->id])
+        ->sum('rate_value');
+$rating = !empty($facility_rate_count) && !empty($facility_rates_sum) ? $facility_rates_sum / $facility_rate_count : 0;
+$rating_model = new \backend\models\MFLFacilityRatings();
+$rate_type_model = \backend\models\MFLFacilityRateTypes::find()
+        ->cache(Yii::$app->params['cache_duration'])
+        ->all();
 ?>
 
 <div class="container-fluid">
@@ -115,7 +128,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                                         'filterWidgetOptions' => [
                                                             'pluginOptions' => ['allowClear' => true],
                                                         ],
-                                                        'filter' => \backend\models\MFLFacility::getNames(),
+                                                        'filter' => \backend\models\Facility::getNames(),
                                                         'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                                                         'format' => 'raw',
                                                     ],
@@ -172,7 +185,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                                         'format' => 'raw',
                                                         'attribute' => 'mobility_status',
                                                         'value' => function ($model) {
-                                                            $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                                                            $status_arr = [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"];
                                                             return $status_arr[$model->mobility_status];
                                                         },
                                                     ],
@@ -275,11 +288,11 @@ $facility_operating_hours = new ActiveDataProvider([
                                             <?php
                                             $coords = [];
                                             $center_coords = [];
-                                            if (empty($model->geom)) {
+                                            if (empty($model->longitude) && empty($model->latitude)) {
                                                 echo "<div class='alert alert-warning'>There are no location coordinates for facility:" . $model->name . "</div>";
                                             } else {
-                                                $coordinate = json_decode($model->geom, true)['coordinates'];
-                                                $coord = new LatLng(['lat' => $coordinate[1], 'lng' => $coordinate[0]]);
+                                                //$coordinate = json_decode($model->geom, true)['coordinates'];
+                                                $coord = new LatLng(['lat' => $model->latitude, 'lng' => $model->longitude]);
                                                 //$center = round(count($coord) / 2);
                                                 $center_coords = $coord;
                                             }
@@ -402,26 +415,13 @@ $facility_operating_hours = new ActiveDataProvider([
                                 </div>
 
                                 <div class="tab-pane fade" id="custom-tabs-facility-rating" role="tabpanel" aria-labelledby="custom-tabs-facility-rating">
-                                    <?php
-                                    $facility_rate_count = \backend\models\MFLFacilityRatings::find()
-                                                    ->cache(Yii::$app->params['cache_duration'])
-                                                    ->where(['facility_id' => $model->id])->count();
-                                    $facility_rates_sum = \backend\models\MFLFacilityRatings::find()
-                                            ->cache(Yii::$app->params['cache_duration'])
-                                            ->where(['facility_id' => $model->id])
-                                            ->sum('rate_value');
-                                    $rating = !empty($facility_rate_count) && !empty($facility_rates_sum) ? $facility_rates_sum / $facility_rate_count : 0;
-                                    $rating_model = new \backend\models\MFLFacilityRatings();
-                                    $rate_type_model = \backend\models\MFLFacilityRateTypes::find()
-                                            ->cache(Yii::$app->params['cache_duration'])
-                                            ->all();
-                                    ?>
+
                                     <table style="margin-top: 0px;">
                                         <tr><td class="text-sm">Average Facility rating: <?= $rating ?> </td><td>
                                                 <?php
                                                 echo StarRating::widget([
-                                                    'name' => 'facility_rating',
-                                                    'value' => $rating,
+                                                    'name' => 'facility_rating1',
+                                                    'value' => round($rating),
                                                     'pluginOptions' => [
                                                         'min' => 0,
                                                         'max' => 5,
@@ -559,7 +559,6 @@ $facility_operating_hours = new ActiveDataProvider([
                                                             ],
                                                         ]
                                                     ]);
-
 
                                                     echo $form->field($facility_rating_model, 'email')->textInput(['maxlength' => true, 'placeholder' =>
                                                         'Your email address', 'required' => false,]);

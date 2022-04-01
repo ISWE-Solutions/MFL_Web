@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use kartik\depdrop\DepDrop;
 use yii\helpers\Url;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model backend\models\FacilitySearch */
@@ -27,61 +28,99 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-                $form->field($model, 'service_category')
-                ->dropDownList(
-                        \backend\models\FacilityServicecategory::getList(), ['custom' => true, 'prompt' => 'Filter by service type', 'required' => false]
-        );
-        ?>
-    </div>
-    <div class="col-lg-3">
-        <?=
-                $form->field($model, 'service')
-                ->dropDownList(
-                        \backend\models\FacilityService::getList(), ['custom' => true, 'prompt' => 'Filter by service', 'required' => false]
-        );
-        ?>
-    </div>
-    <div class="col-lg-3">
-        <?=
-                $form->field($model, 'type')
-                ->dropDownList(
-                        \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
-                )->label("Facility type");
-        ?>
-    </div>
-    <div class="col-lg-3">
-        <?=
-                $form->field($model, 'ownership_type')
-                ->dropDownList(
-                        [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Filter by ownership type', 'required' => false]
-        );
-        ?>
-    </div>
-    <div class="col-lg-3">
-        <?=
-                $form->field($model, 'ownership')
-                ->dropDownList(
-                        \backend\models\FacilityOwnership::getList(), ['custom' => true, 'prompt' => 'Filter by facility owner', 'required' => false]
-        );
-        ?>
-    </div>
+         $form->field($model, 'service_category')->widget(Select2::classname(), [
+            'data' => \backend\models\FacilityServicecategory::getList(),
+            'options' => ['placeholder' => 'Filter by service type', 'id' => 'service_category_id'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ]);
 
-    <div class="col-lg-3">
-        <?=
-                $form->field($model, 'operational_status')
-                ->dropDownList(
-                        \backend\models\Operationstatus::getList(), ['custom' => true, 'prompt' => 'Filter by operation status', 'required' => false]
-        );
         ?>
     </div>
-
     <div class="col-lg-3">
         <?php
-        echo
-                $form->field($model, 'province_id')
-                ->dropDownList(
-                        \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Filter by province', 'required' => false]
-        );
+        $model->isNewRecord = !empty($_GET['FacilitySearch']['service_category']) ? false : true;
+        echo Html::hiddenInput('selected_id_s', $model->isNewRecord ? '' : $model->service, ['id' => 'selected_id_s']);
+
+        echo $form->field($model, 'service')->widget(DepDrop::classname(), [
+            'options' => ['id' => 'service_id', 'custom' => true,],
+            'type' => DepDrop::TYPE_SELECT2,
+            'pluginOptions' => [
+                'depends' => ['service_category_id'],
+                'initialize' => $model->isNewRecord ? false : true,
+                'placeholder' => 'Filter by service',
+                'url' => yii\helpers\Url::to(['/facility/services']),
+                'params' => ['selected_id_s'],
+                'loadingText' => 'Loading services....',
+            ]
+        ]);
+        ?>
+    </div>
+    <div class="col-lg-3">
+        <?=
+            $form->field($model, 'type')->widget(Select2::classname(), [
+            'data' => \backend\models\Facilitytype::getList(),
+            'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type_id'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ])->label("Facility type");
+        ?>
+    </div>
+    <div class="col-lg-3">
+         <?=
+            $form->field($model, 'ownership_type')->widget(Select2::classname(), [
+            'data' =>  [1 => "Public", 2 => "Private"],
+            'options' => ['placeholder' => 'Filter by ownership type', 'id' => 'ownership_type_id'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ]);
+        ?>
+    </div>
+    <div class="col-lg-3">
+        <?php
+        $model->isNewRecord = !empty($_GET['FacilitySearch']['ownership_type']) ? false : true;
+        echo Html::hiddenInput('selected_id_o', $model->isNewRecord ? '' : $model->ownership, ['id' => 'selected_id_o']);
+
+        echo $form->field($model, 'ownership')->widget(DepDrop::classname(), [
+            'options' => ['id' => 'ownership_id', 'custom' => true,],
+            'type' => DepDrop::TYPE_SELECT2,
+            'pluginOptions' => [
+                'depends' => ['ownership_type_id'],
+                'initialize' => $model->isNewRecord ? false : true,
+                'placeholder' => 'Filter by facility owner',
+                'url' => yii\helpers\Url::to(['/facility/ownerships']),
+                'params' => ['selected_id_o'],
+                'loadingText' => 'Loading ownership....',
+            ]
+        ]);
+        ?>
+       
+    </div>
+
+    <div class="col-lg-3">
+         <?=
+            $form->field($model, 'operational_status')->widget(Select2::classname(), [
+            'data' =>  \backend\models\Operationstatus::getList(),
+            'options' => ['placeholder' => 'Filter by operation status', 'id' => 'operational_status_id'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ]);
+        ?>
+    </div>
+
+    <div class="col-lg-3">
+         <?=
+            $form->field($model, 'province_id')->widget(Select2::classname(), [
+            'data' =>  \backend\models\Provinces::getProvinceList(),
+            'options' => ['placeholder' => 'Filter by province', 'id' => 'prov_id'],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ]);
         ?>
     </div>
     <div class="col-lg-3">
@@ -148,77 +187,77 @@ $form = ActiveForm::begin([
         ?>
 
     </div>
-    <?php //$form->field($model, 'smartcare_GUID')      ?>
+    <?php //$form->field($model, 'smartcare_GUID')        ?>
 
-    <?php //$form->field($model, 'eLMIS_ID')      ?>
+    <?php //$form->field($model, 'eLMIS_ID')        ?>
 
-    <?php // echo $form->field($model, 'iHRIS_ID')      ?>
+    <?php // echo $form->field($model, 'iHRIS_ID')        ?>
 
-    <?php // echo $form->field($model, 'name')      ?>
+    <?php // echo $form->field($model, 'name')        ?>
 
-    <?php // echo $form->field($model, 'number_of_beds')      ?>
+    <?php // echo $form->field($model, 'number_of_beds')        ?>
 
-    <?php // echo $form->field($model, 'number_of_cots')      ?>
+    <?php // echo $form->field($model, 'number_of_cots')        ?>
 
-    <?php // echo $form->field($model, 'number_of_nurses')      ?>
+    <?php // echo $form->field($model, 'number_of_nurses')        ?>
 
-    <?php // echo $form->field($model, 'number_of_doctors')      ?>
+    <?php // echo $form->field($model, 'number_of_doctors')        ?>
 
-    <?php // echo $form->field($model, 'address_line1')      ?>
+    <?php // echo $form->field($model, 'address_line1')        ?>
 
-    <?php // echo $form->field($model, 'address_line2')      ?>
+    <?php // echo $form->field($model, 'address_line2')        ?>
 
-    <?php // echo $form->field($model, 'postal_address')      ?>
+    <?php // echo $form->field($model, 'postal_address')        ?>
 
-    <?php // echo $form->field($model, 'web_address')      ?>
+    <?php // echo $form->field($model, 'web_address')        ?>
 
-    <?php // echo $form->field($model, 'email')      ?>
+    <?php // echo $form->field($model, 'email')        ?>
 
-    <?php // echo $form->field($model, 'phone')      ?>
+    <?php // echo $form->field($model, 'phone')        ?>
 
-    <?php // echo $form->field($model, 'mobile')      ?>
+    <?php // echo $form->field($model, 'mobile')        ?>
 
-    <?php // echo $form->field($model, 'fax')      ?>
+    <?php // echo $form->field($model, 'fax')        ?>
 
-    <?php // echo $form->field($model, 'catchment_population_head_count')      ?>
+    <?php // echo $form->field($model, 'catchment_population_head_count')        ?>
 
-    <?php // echo $form->field($model, 'catchment_population_cso')      ?>
+    <?php // echo $form->field($model, 'catchment_population_cso')        ?>
 
-    <?php // echo $form->field($model, 'star')      ?>
+    <?php // echo $form->field($model, 'star')        ?>
 
-    <?php // echo $form->field($model, 'rated')      ?>
+    <?php // echo $form->field($model, 'rated')        ?>
 
-    <?php // echo $form->field($model, 'rating')      ?>
+    <?php // echo $form->field($model, 'rating')        ?>
 
-    <?php // echo $form->field($model, 'longitude')      ?>
+    <?php // echo $form->field($model, 'longitude')        ?>
 
-    <?php // echo $form->field($model, 'latitude')      ?>
+    <?php // echo $form->field($model, 'latitude')        ?>
 
-    <?php // echo $form->field($model, 'comment')      ?>
+    <?php // echo $form->field($model, 'comment')        ?>
 
-    <?php // echo $form->field($model, 'geom')      ?>
+    <?php // echo $form->field($model, 'geom')        ?>
 
-    <?php // echo $form->field($model, 'timestamp')      ?>
+    <?php // echo $form->field($model, 'timestamp')        ?>
 
-    <?php // echo $form->field($model, 'updated')      ?>
+    <?php // echo $form->field($model, 'updated')        ?>
 
-    <?php // echo $form->field($model, 'slug')      ?>
+    <?php // echo $form->field($model, 'slug')        ?>
 
-    <?php // echo $form->field($model, 'administrative_unit_id')      ?>
+    <?php // echo $form->field($model, 'administrative_unit_id')        ?>
 
-    <?php // echo $form->field($model, 'constituency_id')      ?>
+    <?php // echo $form->field($model, 'constituency_id')        ?>
 
-    <?php // echo $form->field($model, 'district_id')      ?>
+    <?php // echo $form->field($model, 'district_id')        ?>
 
-    <?php // echo $form->field($model, 'facility_type_id')      ?>
+    <?php // echo $form->field($model, 'facility_type_id')        ?>
 
-    <?php // echo $form->field($model, 'location_type_id')      ?>
+    <?php // echo $form->field($model, 'location_type_id')        ?>
 
-    <?php // echo $form->field($model, 'operation_status_id')      ?>
+    <?php // echo $form->field($model, 'operation_status_id')        ?>
 
-    <?php // echo $form->field($model, 'ownership_id')      ?>
+    <?php // echo $form->field($model, 'ownership_id')        ?>
 
-    <?php // echo $form->field($model, 'ward_id')       ?>
+    <?php // echo $form->field($model, 'ward_id')         ?>
 
     <div class="form-group col-lg-12">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary btn-sm']) ?>

@@ -65,7 +65,6 @@ class FacilitiesController extends Controller {
                 $post = ['Facility' => $posted];
                 $old_status = $model->status;
 
-
                 if ($model->load($post)) {
                     if ($old_status != $model->status) {
                         $status = $model->status === 1 ? "Active from Inactive" : "Inactive from Active";
@@ -483,6 +482,10 @@ class FacilitiesController extends Controller {
                 $model->date_updated = new Expression('NOW()');
                 $model->updated_by = Yii::$app->user->identity->id;
 
+                if ($model->ownership_type == 2) {
+                    $model->created_by = Yii::$app->user->identity->id;
+                }
+
 
                 if ($old_provincial_status === 2) {
                     $model->province_approval_status = 0;
@@ -595,24 +598,37 @@ class FacilitiesController extends Controller {
                 return Json::encode(\yii\widgets\ActiveForm::validate($model));
             }
             if ($model->load(Yii::$app->request->post())) {
-                if ($model->save()) {
-                    $service = \backend\models\FacilityService::findOne($model->service_id)->name;
-                    $facility = \backend\models\MFLFacility::findOne($model->facility_id)->name;
+                $count = 0;
+                foreach ($model->service_id as $key => $value) {
+                    $_model = new \backend\models\MFLFacilityServices();
+                    $serviceDetails = \backend\models\FacilityService::findOne($value);
+                    if (!empty($serviceDetails)) {
+                        $_model->service_area_id = $serviceDetails->category_id;
+                        $_model->service_id = $serviceDetails->id;
+                        $_model->facility_id = $model->facility_id;
+                        $_model->save(false);
+                    }
+
+                    $count++;
+                }
+
+                if ($count>0) {
+                    $facility = \backend\models\Facility::findOne($model->facility_id)->name;
                     $audit = new AuditTrail();
                     $audit->user = Yii::$app->user->id;
-                    $audit->action = "Added service  " . $service . " to facility: " . $facility;
+                    $audit->action = "Added " . $count . " services to facility: " . $facility;
                     $audit->ip_address = Yii::$app->request->getUserIP();
                     $audit->user_agent = Yii::$app->request->getUserAgent();
                     $audit->save();
-                    Yii::$app->session->setFlash('success', 'Facility service was successfully added.');
+                    Yii::$app->session->setFlash('success', 'Facility services were successfully added.');
                 } else {
                     $message = '';
                     foreach ($model->getErrors() as $error) {
                         $message .= $error[0];
                     }
-                    Yii::$app->session->setFlash('error', 'Error occured while adding service to facility. Error:' . $message);
+                    Yii::$app->session->setFlash('error', 'Error occured while adding services to facility. Error:' . $message);
                 }
-                return $this->redirect(['view', 'id' => $model->facility_id]);
+                 return $this->redirect(['view', 'id' => $model->facility_id]);
             }
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
@@ -736,7 +752,7 @@ class FacilitiesController extends Controller {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->save()) {
                     $op_hour = \backend\models\Operatinghours::findOne($model->operatinghours_id)->name;
-                    $facility = \backend\models\MFLFacility::findOne($model->facility_id)->name;
+                    $facility = \backend\models\Facility::findOne($model->facility_id)->name;
                     $audit = new AuditTrail();
                     $audit->user = Yii::$app->user->id;
                     $audit->action = "Added operating hour '" . $op_hour . "' to facility: " . $facility;

@@ -34,7 +34,7 @@ class MFLFacilityLabLevel extends \yii\db\ActiveRecord
             [['facility_id', 'lablevel_id'], 'default', 'value' => null],
             [['facility_id', 'lablevel_id'], 'integer'],
             [['facility_id', 'lablevel_id'], 'unique', 'targetAttribute' => ['facility_id', 'lablevel_id']],
-            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => MFLFacility::className(), 'targetAttribute' => ['facility_id' => 'id']],
+            [['facility_id'], 'exist', 'skipOnError' => true, 'targetClass' => Facility::className(), 'targetAttribute' => ['facility_id' => 'id']],
             [['lablevel_id'], 'exist', 'skipOnError' => true, 'targetClass' => MFLLablevel::className(), 'targetAttribute' => ['lablevel_id' => 'id']],
         ];
     }
@@ -58,7 +58,7 @@ class MFLFacilityLabLevel extends \yii\db\ActiveRecord
      */
     public function getFacility()
     {
-        return $this->hasOne(MFLFacility::className(), ['id' => 'facility_id']);
+        return $this->hasOne(Facility::className(), ['id' => 'facility_id']);
     }
 
     /**
