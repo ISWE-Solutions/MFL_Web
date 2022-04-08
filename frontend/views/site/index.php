@@ -45,6 +45,7 @@ if (!empty($operation_status_model)) {
     $facility_model = backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
                     ->select(['type', 'COUNT(*) AS count'])
                     ->where(['operational_status' => $opstatus_id])
+                    ->andWhere(['status' => 1])
                     ->groupBy(['type'])
                     ->createCommand()->queryAll();
     foreach ($facility_model as $model) {
@@ -75,11 +76,12 @@ $labels1 = [];
 if (!empty($operation_status_model)) {
     $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
         return $connection->createCommand('select count(f.id) as count,p.name from public."facility" f INNER JOIN 
-public."geography_district" d ON f.district_id=d.id INNER JOIN
-public."geography_province" p ON d.province_id=p.id INNER JOIN
-public."MFL_operationstatus" ops ON f.operational_status=ops.id
-WHERE ops.id=' . $operation_status_model->id . '
-group by p.name Order by p.name')->queryAll();
+                                            public."geography_district" d ON f.district_id=d.id INNER JOIN
+                                            public."geography_province" p ON d.province_id=p.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . '
+                                            group by p.name Order by p.name')
+                ->queryAll();
     });
 
     foreach ($province_counts as $model) {

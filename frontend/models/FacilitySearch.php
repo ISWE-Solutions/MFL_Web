@@ -10,15 +10,17 @@ use backend\models\Facility;
  * FacilitySearch represents the model behind the search form of `backend\models\Facility`.
  */
 class FacilitySearch extends Facility {
-public $service_category;
+
+    public $service_category;
     public $service;
+
     /**
      * {@inheritdoc}
      */
     public function rules() {
         return [
-            [['id', 'district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by', 'province_approval_status', 'national_approval_status','province_approval_status','national_approval_status'], 'integer'],
-            [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code', 'name', 'catchment_population_head_count', 'catchment_population_cso', 'number_of_households', 'accesibility', 'latitude', 'longitude', 'geom', 'date_approved', 'date_created', 'date_updated', 'province_id', 'service_category','service',], 'safe'],
+            [['id', 'district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by', 'province_approval_status', 'national_approval_status', 'province_approval_status', 'national_approval_status'], 'integer'],
+            [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code', 'name', 'catchment_population_head_count', 'catchment_population_cso', 'number_of_households', 'accesibility', 'latitude', 'longitude', 'geom', 'date_approved', 'date_created', 'date_updated', 'province_id', 'service_category', 'service',], 'safe'],
         ];
     }
 
@@ -38,7 +40,7 @@ public $service_category;
      * @return ActiveDataProvider
      */
     public function search($params) {
-        $query = Facility::find();
+        $query = Facility::find()->where(['status' => 1]);
 
         // add conditions that should always apply here
 
