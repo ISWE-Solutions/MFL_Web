@@ -188,8 +188,13 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             }
                         }
                     } else {
-                        $str = "<span class='badge badge-pill badge-success'> "
-                                . "<i class='fa fa-check'></i> Active</span>";
+                        if ($model->status === 1) {
+                            $str = "<span class='badge badge-pill badge-success'> "
+                                    . "<i class='fa fa-check'></i> Active</span>";
+                        } else {
+                            $str = "<span class='badge badge-pill badge-danger'> "
+                                    . "<i class='fa fa-times'></i> Inactive";
+                        }
                     }
                     return $str;
                 },

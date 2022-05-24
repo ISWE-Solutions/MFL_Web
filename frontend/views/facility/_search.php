@@ -35,7 +35,6 @@ $form = ActiveForm::begin([
                 'allowClear' => true
             ],
         ]);
-
         ?>
     </div>
     <div class="col-lg-3">
