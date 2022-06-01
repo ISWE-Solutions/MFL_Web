@@ -159,7 +159,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 ],
                 'value' => function ($model) {
                     $str = "";
-                    if ($model->ownership_type == 1) {
+                  //  if ($model->ownership_type == 1) {
                         if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
                             if ($model->status === 1) {
                                 $str = "<span class='badge badge-pill badge-success'> "
@@ -187,15 +187,15 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                         . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
                             }
                         }
-                    } else {
-                        if ($model->status === 1) {
-                            $str = "<span class='badge badge-pill badge-success'> "
-                                    . "<i class='fa fa-check'></i> Active</span>";
-                        } else {
-                            $str = "<span class='badge badge-pill badge-danger'> "
-                                    . "<i class='fa fa-times'></i> Inactive";
-                        }
-                    }
+//                    } else {
+//                        if ($model->status === 1) {
+//                            $str = "<span class='badge badge-pill badge-success'> "
+//                                    . "<i class='fa fa-check'></i> Active</span>";
+//                        } else {
+//                            $str = "<span class='badge badge-pill badge-danger'> "
+//                                    . "<i class='fa fa-times'></i> Inactive";
+//                        }
+//                    }
                     return $str;
                 },
                 'format' => 'raw',

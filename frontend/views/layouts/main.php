@@ -74,10 +74,10 @@ AppAsset::register($this);
                                 ?>
                             </li>
 
-                            <li class="nav-item">
-                                <?= Html::a('<span class="fas fa-indent"></span> National Indicator Dataset', ['/indicators/index'], ["class" => "nav-link text-white text-sm"])
+<!--                            <li class="nav-item">
+                                <?php// Html::a('<span class="fas fa-indent"></span> National Indicator Dataset', ['/indicators/index'], ["class" => "nav-link text-white text-sm"])
                                 ?>
-                            </li>
+                            </li>-->
                             <li class="nav-item">
                                 <?= Html::a('<span class="fas fa-info"></span> About', ['/site/about'], ["class" => "nav-link text-white text-sm"])
                                 ?>
