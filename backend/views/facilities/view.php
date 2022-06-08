@@ -579,17 +579,17 @@ $facility_operating_hours = new ActiveDataProvider([
                                     <p>
                                         <?php
                                         if (User::userIsAllowedTo('Manage facilities') && !empty(\backend\models\FacilityService::getList())) {
-                                            if ($model->status == 1) {
-                                                $count1 = \backend\models\MFLFacilityServices::find()->where(['facility_id' => $model->id])->count();
-                                                $count2 = \backend\models\FacilityService::find()->count();
+                                            //  if ($model->status == 1) {
+                                            $count1 = \backend\models\MFLFacilityServices::find()->where(['facility_id' => $model->id])->count();
+                                            $count2 = \backend\models\FacilityService::find()->count();
 
-                                                if ($count1 == $count2) {
-                                                    echo "<div class='alert alert-warning'>Facility already has all system services!</div>";
-                                                } else {
-                                                    echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
+                                            if ($count1 == $count2) {
+                                                echo "<div class='alert alert-warning'>Facility already has all system services!</div>";
+                                            } else {
+                                                echo '<button class="btn btn-primary btn-sm" href="#" onclick="$(\'#addNewModal\').modal(); 
                                                   return false;"><i class="fa fa-plus"></i> Add service</button>';
-                                                }
                                             }
+                                            //  }
                                         }
                                         ?>
                                     </p>
@@ -739,7 +739,7 @@ $facility_operating_hours = new ActiveDataProvider([
             </div>
             <div class="modal-body">
                 <div class="row">
-                      <div class="col-lg-12">
+                    <div class="col-lg-12">
                         <h4>Instructions</h4>
                         <ol>
                             <li>Fields marked with <span style="color: red;">*</span> are required</li>
@@ -759,7 +759,6 @@ $facility_operating_hours = new ActiveDataProvider([
 //                                ->dropDownList(
 //                                        \backend\models\FacilityServicecategory::getList(), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select service area', 'required' => true]
 //                        );
-
 //                        echo $form1->field($service_model, 'service_id')->widget(DepDrop::classname(), [
 //                            'options' => ['id' => 'constituency_id', 'custom' => true,],
 //                            'type' => DepDrop::TYPE_SELECT2,
@@ -782,7 +781,7 @@ $facility_operating_hours = new ActiveDataProvider([
                             'pluginOptions' => [
                                 'allowClear' => true,
                                 'tags' => true,
-                               // 'tokenSeparators' => [','],
+                            // 'tokenSeparators' => [','],
                             ],
                         ])->label("Services")->hint("Select multiple services at the same time");
                         ?>
@@ -791,7 +790,7 @@ $facility_operating_hours = new ActiveDataProvider([
                         ?>
 
                     </div>
-                  
+
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
