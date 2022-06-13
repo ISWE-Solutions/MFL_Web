@@ -88,6 +88,24 @@ class FacilitiesController extends Controller {
                 return $out;
             }
 
+            //Lets filter based on logged in user type
+            if (Yii::$app->user->identity->user_type == "District") {
+                $dataProvider->query->andFilterWhere(['district_id' => Yii::$app->user->identity->district_id]);
+            }
+
+            if (Yii::$app->user->identity->user_type == "Province") {
+                $district_ids = [];
+                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->user->identity->province_id])->all();
+                if (!empty($districts)) {
+                    foreach ($districts as $id) {
+                        array_push($district_ids, $id['id']);
+                    }
+                }
+
+                $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
+            }
+
+            //When one filters by province
             if (!empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
                 $district_ids = [];
                 $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['FacilitySearch']['province_id']])->all();
@@ -455,6 +473,7 @@ class FacilitiesController extends Controller {
             $old_lng = $model->longitude;
             $old_geom = $model->geom;
             $old_provincial_status = $model->province_approval_status;
+            $old_created_by = $model->created_by;
 
             if ($model->load(Yii::$app->request->post())) {
 
@@ -481,6 +500,9 @@ class FacilitiesController extends Controller {
 
                 $model->date_updated = new Expression('NOW()');
                 $model->updated_by = Yii::$app->user->identity->id;
+                if (empty($old_created_by)) {
+                    $model->created_by = Yii::$app->user->identity->id;
+                }
 
                 if ($model->ownership_type == 2) {
                     $model->created_by = Yii::$app->user->identity->id;
@@ -612,7 +634,7 @@ class FacilitiesController extends Controller {
                     $count++;
                 }
 
-                if ($count>0) {
+                if ($count > 0) {
                     $facility = \backend\models\Facility::findOne($model->facility_id)->name;
                     $audit = new AuditTrail();
                     $audit->user = Yii::$app->user->id;
@@ -628,7 +650,7 @@ class FacilitiesController extends Controller {
                     }
                     Yii::$app->session->setFlash('error', 'Error occured while adding services to facility. Error:' . $message);
                 }
-                 return $this->redirect(['view', 'id' => $model->facility_id]);
+                return $this->redirect(['view', 'id' => $model->facility_id]);
             }
         } else {
             Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');

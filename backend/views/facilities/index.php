@@ -29,6 +29,7 @@ if ($user_type == "District") {
 
 if ($user_type == "Province") {
     $province_user_province_id = Yii::$app->user->identity->province_id;
+    $provinceId=$province_user_province_id;
 }
 
 
@@ -75,8 +76,8 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => true,
-                'filter' => \backend\models\Provinces::getProvinceList(),
+                'filter' => Yii::$app->user->identity->user_type === "District" || Yii::$app->user->identity->user_type === "Province" ? false : \backend\models\Provinces::getProvinceList(),
+                //'filter' => \backend\models\Provinces::getProvinceList(),
                 'filterInputOptions' => ['prompt' => 'Filter by Province', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
                     $province_id = backend\models\Districts::findOne($model->district_id)->province_id;
@@ -90,7 +91,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => \backend\models\Districts::getList($provinceId),
+                'filter' => Yii::$app->user->identity->user_type === "District" ? false : \backend\models\Districts::getList($provinceId),
                 'filterInputOptions' => ['prompt' => 'Filter by District', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
                     $name = backend\models\Districts::findOne($model->district_id)->name;
@@ -159,34 +160,34 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 ],
                 'value' => function ($model) {
                     $str = "";
-                  //  if ($model->ownership_type == 1) {
-                        if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
-                            if ($model->status === 1) {
-                                $str = "<span class='badge badge-pill badge-success'> "
-                                        . "<i class='fa fa-check'></i> Active</span>";
-                            }
-                            if ($model->status === 0) {
-                                $str = "<span class='badge badge-pill badge-danger'> "
-                                        . "<i class='fa fa-times'></i> Inactive";
-                            }
-                        } else {
-                            if ($model->province_approval_status === 0 && $model->national_approval_status === 0) {
-                                $str = "<span class='badge badge-pill badge-dark'> "
-                                        . "<i class='fas fa-hourglass-half'></i> Pending Provincial review";
-                            }
-                            if ($model->province_approval_status === 1 && $model->national_approval_status === 0) {
-                                $str = "<span class='badge badge-pill badge-info'> "
-                                        . "<i class='fas fa-hourglass-half'></i> Pending National approval";
-                            }
-                            if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
-                                $str = "<span class='badge badge-pill badge-danger'> "
-                                        . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
-                            }
-                            if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
-                                $str = "<span class='badge badge-pill badge-danger'> "
-                                        . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
-                            }
+                    //  if ($model->ownership_type == 1) {
+                    if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
+                        if ($model->status === 1) {
+                            $str = "<span class='badge badge-pill badge-success'> "
+                                    . "<i class='fa fa-check'></i> Active</span>";
                         }
+                        if ($model->status === 0) {
+                            $str = "<span class='badge badge-pill badge-danger'> "
+                                    . "<i class='fa fa-times'></i> Inactive";
+                        }
+                    } else {
+                        if ($model->province_approval_status === 0 && $model->national_approval_status === 0) {
+                            $str = "<span class='badge badge-pill badge-dark'> "
+                                    . "<i class='fas fa-hourglass-half'></i> Pending Provincial review";
+                        }
+                        if ($model->province_approval_status === 1 && $model->national_approval_status === 0) {
+                            $str = "<span class='badge badge-pill badge-info'> "
+                                    . "<i class='fas fa-hourglass-half'></i> Pending National approval";
+                        }
+                        if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
+                            $str = "<span class='badge badge-pill badge-danger'> "
+                                    . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
+                        }
+                        if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
+                            $str = "<span class='badge badge-pill badge-danger'> "
+                                    . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
+                        }
+                    }
 //                    } else {
 //                        if ($model->status === 1) {
 //                            $str = "<span class='badge badge-pill badge-success'> "
