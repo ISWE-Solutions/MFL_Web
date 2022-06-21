@@ -180,7 +180,8 @@ class WardsController extends Controller {
 
             if ($model->load(Yii::$app->request->post())) {
                 //var_dump(Yii::$app->request->post());
-                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']['coordinates'];
+                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'];
+                //[0]['geometry']['coordinates'];
 
                 // $coord_array = "";
                 //get latitude and longitude and create a geom array

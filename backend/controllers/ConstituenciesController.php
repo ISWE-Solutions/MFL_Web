@@ -161,8 +161,10 @@ class ConstituenciesController extends Controller {
             }
 
             if ($model->load(Yii::$app->request->post())) {
-                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']['coordinates'];
-
+                
+                    $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'];
+                          //  [0]['geometry']['coordinates'];
+                
                 if (!empty($coordinates)) {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",
