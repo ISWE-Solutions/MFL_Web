@@ -38,7 +38,7 @@ class Wards extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['name', 'geom', 'district_id'], 'required'],
+            [['name', 'district_id'], 'required'],
             [['population', 'pop_density', 'area_sq_km'], 'number'],
             //[['geom'], 'string'],
             [['province_id', 'geom'], 'safe'],

@@ -161,31 +161,32 @@ class ConstituenciesController extends Controller {
             }
 
             if ($model->load(Yii::$app->request->post())) {
-                
-                    $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'];
-                          //  [0]['geometry']['coordinates'];
-                
+
+                $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'];
+                //  [0]['geometry']['coordinates'];
+
                 if (!empty($coordinates)) {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",
                             array(':geom' => $coordinates_json));
-
-                    if ($model->save()) {
-                        $audit = new AuditTrail();
-                        $audit->user = Yii::$app->user->id;
-                        $audit->action = "Added Constituency " . $model->name;
-                        $audit->ip_address = Yii::$app->request->getUserIP();
-                        $audit->user_agent = Yii::$app->request->getUserAgent();
-                        $audit->save();
-                        Yii::$app->session->setFlash('success', 'Constituency ' . $model->name . ' was successfully added.');
-                        return $this->redirect(['view', 'id' => $model->id]);
-                    } else {
-                        Yii::$app->session->setFlash('error', 'Error occured while adding Constituency ' . $model->name);
-                    }
-                    //return $this->redirect(['index']);
-                } else {
-                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the constituency!');
                 }
+
+                if ($model->save()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Added Constituency " . $model->name;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', 'Constituency ' . $model->name . ' was successfully added.');
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } else {
+                    Yii::$app->session->setFlash('error', 'Error occured while adding Constituency ' . $model->name);
+                }
+                //return $this->redirect(['index']);
+//                } else {
+//                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the constituency!');
+//                }
             }
             return $this->render('create', ['model' => $model]);
         } else {
@@ -212,26 +213,27 @@ class ConstituenciesController extends Controller {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",
                             array(':geom' => $coordinates_json));
-
-                    if ($model->save()) {
-                        $audit = new AuditTrail();
-                        $audit->user = Yii::$app->user->id;
-                        $audit->action = "Updated Constituency " . $model->name;
-                        $audit->ip_address = Yii::$app->request->getUserIP();
-                        $audit->user_agent = Yii::$app->request->getUserAgent();
-                        $audit->save();
-                        Yii::$app->session->setFlash('success', 'Constituency ' . $model->name . ' was successfully updated.');
-                        return $this->redirect(['view', 'id' => $model->id]);
-                    } else {
-                        $message = "";
-                        foreach ($model->getErrors() as $error) {
-                            $message .= $error[0];
-                        }
-                        Yii::$app->session->setFlash('error', 'Error occured while updating constituency ' . $model->name . ".Error is:::$message");
-                    }
-                } else {
-                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the constituency!');
                 }
+
+                if ($model->save()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Updated Constituency " . $model->name;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', 'Constituency ' . $model->name . ' was successfully updated.');
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } else {
+                    $message = "";
+                    foreach ($model->getErrors() as $error) {
+                        $message .= $error[0];
+                    }
+                    Yii::$app->session->setFlash('error', 'Error occured while updating constituency ' . $model->name . ".Error is:::$message");
+                }
+//                } else {
+//                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the constituency!');
+//                }
             }
             return $this->render('update', [
                         'model' => $model

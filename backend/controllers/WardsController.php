@@ -182,33 +182,33 @@ class WardsController extends Controller {
                 //var_dump(Yii::$app->request->post());
                 $coordinates = json_decode(Yii::$app->request->post()['geom'], true)['features'];
                 //[0]['geometry']['coordinates'];
-
                 // $coord_array = "";
                 //get latitude and longitude and create a geom array
                 if (!empty($coordinates)) {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",
                             array(':geom' => $coordinates_json));
-
-                    if ($model->save()) {
-                        $audit = new AuditTrail();
-                        $audit->user = Yii::$app->user->id;
-                        $audit->action = "Added Ward " . $model->name;
-                        $audit->ip_address = Yii::$app->request->getUserIP();
-                        $audit->user_agent = Yii::$app->request->getUserAgent();
-                        $audit->save();
-                        Yii::$app->session->setFlash('success', 'Ward ' . $model->name . ' was successfully added.');
-                        return $this->redirect(['view', 'id' => $model->id]);
-                    } else {
-                        $message = "";
-                        foreach ($model->getErrors() as $error) {
-                            $message .= $error[0];
-                        }
-                        Yii::$app->session->setFlash('error', 'Error occured while adding Ward ' . $model->name . ".Error is:::$message");
-                    }
-                } else {
-                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the ward!');
                 }
+
+                if ($model->save()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Added Ward " . $model->name;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', 'Ward ' . $model->name . ' was successfully added.');
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } else {
+                    $message = "";
+                    foreach ($model->getErrors() as $error) {
+                        $message .= $error[0];
+                    }
+                    Yii::$app->session->setFlash('error', 'Error occured while adding Ward ' . $model->name . ".Error is:::$message");
+                }
+//                } else {
+//                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the ward!');
+//                }
             }
             return $this->render('create', ['model' => $model]);
         } else {
@@ -235,26 +235,27 @@ class WardsController extends Controller {
                     $coordinates_json = \GuzzleHttp\json_encode(json_decode(Yii::$app->request->post()['geom'], true)['features'][0]['geometry']);
                     $model->geom = new Expression("ST_Force2D(ST_Multi(ST_GeomFromGeoJSON(:geom)))",
                             array(':geom' => $coordinates_json));
-
-                    if ($model->save()) {
-                        $audit = new AuditTrail();
-                        $audit->user = Yii::$app->user->id;
-                        $audit->action = "Updated Ward " . $model->name;
-                        $audit->ip_address = Yii::$app->request->getUserIP();
-                        $audit->user_agent = Yii::$app->request->getUserAgent();
-                        $audit->save();
-                        Yii::$app->session->setFlash('success', 'Ward ' . $model->name . ' was successfully updated.');
-                        return $this->redirect(['view', 'id' => $model->id]);
-                    } else {
-                        $message = "";
-                        foreach ($model->getErrors() as $error) {
-                            $message .= $error[0];
-                        }
-                        Yii::$app->session->setFlash('error', 'Error occured while updating Ward ' . $model->name . ".Error is:::$message");
-                    }
-                } else {
-                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the ward!');
                 }
+
+                if ($model->save()) {
+                    $audit = new AuditTrail();
+                    $audit->user = Yii::$app->user->id;
+                    $audit->action = "Updated Ward " . $model->name;
+                    $audit->ip_address = Yii::$app->request->getUserIP();
+                    $audit->user_agent = Yii::$app->request->getUserAgent();
+                    $audit->save();
+                    Yii::$app->session->setFlash('success', 'Ward ' . $model->name . ' was successfully updated.');
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } else {
+                    $message = "";
+                    foreach ($model->getErrors() as $error) {
+                        $message .= $error[0];
+                    }
+                    Yii::$app->session->setFlash('error', 'Error occured while updating Ward ' . $model->name . ".Error is:::$message");
+                }
+//                } else {
+//                    Yii::$app->session->setFlash('error', 'You need to pick geometry coordinates for the ward!');
+//                }
             }
             return $this->render('update', [
                         'model' => $model

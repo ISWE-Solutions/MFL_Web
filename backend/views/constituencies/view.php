@@ -45,11 +45,11 @@ if (!empty($operation_status_model)) {
 
 //We build the window string
 $type_str = "";
-if(!empty($facilities_counts)){
-foreach ($facilities_counts as $f_model) {
-    $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
-    $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
-}
+if (!empty($facilities_counts)) {
+    foreach ($facilities_counts as $f_model) {
+        $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
+        $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
+    }
 }
 ?>
 <div class="card card-primary card-outline">
@@ -137,37 +137,37 @@ foreach ($facilities_counts as $f_model) {
                     $center = round(count($coord) / 2);
                     $center_coords = $coord[$center];
                 }
-                /*if (!empty($center_coords)) {
-                    $coord = new LatLng([
-                        'lat' => $center_coords[1],
-                        'lng' => $center_coords[0]
-                    ]);
-                } else {
-                    $coord = new LatLng([
-                        'lat' => Yii::$app->params['center_lat'],
-                        'lng' => Yii::$app->params['center_lng']
-                    ]);
-                }
-                $map = new Map([
-                    'center' => $coord,
-                    'zoom' => 8,
-                    'width' => '100%', 'height' => 500,
-                ]);
-                $polygon = new Polygon([
-                    'paths' => $coords,
-                    'strokeColor' => Yii::$app->params['polygon_strokeColor'],
-                    'strokeOpacity' => 0.8,
-                    'strokeWeight' => 2,
-                    'fillColor' => Yii::$app->params['polygon_strokeColor'],
-                    'fillOpacity' => 0.35,
-                ]);
+                /* if (!empty($center_coords)) {
+                  $coord = new LatLng([
+                  'lat' => $center_coords[1],
+                  'lng' => $center_coords[0]
+                  ]);
+                  } else {
+                  $coord = new LatLng([
+                  'lat' => Yii::$app->params['center_lat'],
+                  'lng' => Yii::$app->params['center_lng']
+                  ]);
+                  }
+                  $map = new Map([
+                  'center' => $coord,
+                  'zoom' => 8,
+                  'width' => '100%', 'height' => 500,
+                  ]);
+                  $polygon = new Polygon([
+                  'paths' => $coords,
+                  'strokeColor' => Yii::$app->params['polygon_strokeColor'],
+                  'strokeOpacity' => 0.8,
+                  'strokeWeight' => 2,
+                  'fillColor' => Yii::$app->params['polygon_strokeColor'],
+                  'fillOpacity' => 0.35,
+                  ]);
 
-                $polygon->attachInfoWindow(new InfoWindow([
-                            'content' => '<p>' . $model->name . ' Constituency</p>'
-                ]));
+                  $polygon->attachInfoWindow(new InfoWindow([
+                  'content' => '<p>' . $model->name . ' Constituency</p>'
+                  ]));
 
-                $map->addOverlay($polygon);
-                echo $map->display();*/
+                  $map->addOverlay($polygon);
+                  echo $map->display(); */
                 ?>
                 <div id="map" style="width: 100%; height: 500px"></div>
             </div>
@@ -175,17 +175,19 @@ foreach ($facilities_counts as $f_model) {
     </div>
 </div>
 <script>
-var myvar = <?php echo json_encode($model->name); ?>;
-var facility_types=<?php echo json_encode($type_str); ?>;
+    var myvar = <?php echo json_encode($model->name); ?>;
+    var facility_types =<?php echo json_encode($type_str); ?>;
 
 <?php
-echo 'var center=[' . $center_coords[1] . ',' . $center_coords[0] . ']';
-?> 
-var map = L.map('map').setView(center, 8);
+if (!empty($center_coords)) {
+    echo 'var center=[' . $center_coords[1] . ',' . $center_coords[0] . ']';
+}
+?>
+    var map = L.map('map').setView(center, 8);
 
-L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; MoH-MFL, <a href="http://osm.org/copyright">OpenStreetMap</a>; contributors'
-}).addTo(map);
+    }).addTo(map);
 <?php
 if (!empty($model->geom)) {
     echo 'var polygon =[';
@@ -197,8 +199,8 @@ if (!empty($model->geom)) {
 } else {
     echo 'var polygon =[];';
 }
-?> 
+?>
 
-var poly = L.polygon(polygon,{color: 'red'}).addTo(map);
-poly.bindPopup("<p><strong><span class='text-center'>"+myvar+" Constituency functional facilities</span></strong></p><hr>"+facility_types);
+    var poly = L.polygon(polygon, {color: 'red'}).addTo(map);
+    poly.bindPopup("<p><strong><span class='text-center'>" + myvar + " Constituency functional facilities</span></strong></p><hr>" + facility_types);
 </script>
