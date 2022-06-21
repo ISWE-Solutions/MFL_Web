@@ -215,12 +215,12 @@ $province_user_province_id = "";
                                 echo
                                         $form->field($model, 'constituency_id')
                                         ->dropDownList(
-                                                \backend\models\Constituency::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => false]
+                                                \backend\models\Constituency::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a constituency', 'required' => false]
                                 );
                                 echo
                                         $form->field($model, 'ward_id')
                                         ->dropDownList(
-                                                \backend\models\Wards::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => false]
+                                                \backend\models\Wards::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a ward', 'required' => false]
                                 );
                             }
 

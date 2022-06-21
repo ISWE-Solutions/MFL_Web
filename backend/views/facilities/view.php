@@ -533,7 +533,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                     // $coordinate = json_decode($model->geom, true)['coordinates'];
                                     $coord = new LatLng(['lat' => $model->latitude, 'lng' => $model->longitude]);
                                     //$center = round(count($coord) / 2);
-                                    $center_coords = $coord;
+                                    //$center_coords = $coord;
                                 }
                                 if (empty($coord)) {
                                     $coord = new LatLng([
