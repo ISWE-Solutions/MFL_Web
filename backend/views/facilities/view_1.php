@@ -47,7 +47,7 @@ $facility_operating_hours = new ActiveDataProvider([
     'query' => $query_foh,
         ]);
 ?>
-?>
+
 <div class="card card-primary card-outline">
     <div class="card-header border-transparent">
 

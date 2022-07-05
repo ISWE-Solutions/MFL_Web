@@ -89,30 +89,30 @@ if (Yii::$app->user->identity->user_type == "District") {
     }
 }
 //Show rejected for province users
-$facilityDataProviderRejectedProvince = "";
-if (Yii::$app->user->identity->user_type == "Province") {
-    $distric_model = backend\models\Districts::find()
-                    ->where(['province_id' => Yii::$app->user->identity->province_id])
-                    ->asArray()->all();
-    if (!empty($distric_model)) {
-        $district_arr = [];
-        foreach ($distric_model as $district) {
-            array_push($district_arr, $district['id']);
-        }
-
-        $query = \backend\models\Facility::find()
-                ->where(['status' => 0,])
-                ->andWhere(['province_approval_status' => 2])
-                ->andWhere(['IN', 'district_id', $district_arr])
-                ->andWhere(['national_approval_status' => 2]);
-        $facilityDataProviderRejectedProvince = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-        if ($facilityDataProviderRejectedProvince->count > 0) {
-            $count++;
-        }
-    }
-}
+//$facilityDataProviderRejectedProvince = "";
+//if (Yii::$app->user->identity->user_type == "Province") {
+//    $distric_model = backend\models\Districts::find()
+//                    ->where(['province_id' => Yii::$app->user->identity->province_id])
+//                    ->asArray()->all();
+//    if (!empty($distric_model)) {
+//        $district_arr = [];
+//        foreach ($distric_model as $district) {
+//            array_push($district_arr, $district['id']);
+//        }
+//
+//        $query = \backend\models\Facility::find()
+//                ->where(['status' => 0,])
+//                ->andWhere(['province_approval_status' => 2])
+//                ->andWhere(['IN', 'district_id', $district_arr])
+//                ->andWhere(['national_approval_status' => 2]);
+//        $facilityDataProviderRejectedProvince = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
+//        if ($facilityDataProviderRejectedProvince->count > 0) {
+//            $count++;
+//        }
+//    }
+//}
 ?>
 <!-- /.row -->
 <div class="container-fluid">
@@ -414,86 +414,86 @@ if (Yii::$app->user->identity->user_type == "Province") {
                     }
 
                     //Rejected province
-                    if (!empty($facilityDataProviderRejectedProvince) && $facilityDataProviderRejectedProvince->count > 0) {
-                        echo '<h5>Rejected facilities</h5>
-                        <p>Instructions</p>
-                        <ol>
-                            <li>Below facilities have been rejected.You need to provide more information</li>
-                            <li>Click the "Update" link under the Action column to go to the update page</li>
-                        </ol>
-                        <hr class="dotted short">';
-
-                        echo GridView::widget([
-                            'dataProvider' => $facilityDataProviderRejectedProvince,
-                            'hover' => true,
-                            'columns' => [
-                                ['class' => 'yii\grid\SerialColumn'],
-                                [
-                                    'attribute' => 'name',
-                                    'filter' => false,
-                                    'format' => 'raw',
-                                ],
-                                [
-                                    'attribute' => 'district_id',
-                                    'filter' => false,
-                                    'value' => function ($model) {
-                                        $name = backend\models\Districts::findOne($model->district_id)->name;
-                                        return $name;
-                                    },
-                                ],
-                                [
-                                    'attribute' => 'type',
-                                    'filter' => false,
-                                    'value' => function ($model) {
-                                        $name = backend\models\Facilitytype::findOne($model->type)->name;
-                                        return $name;
-                                    },
-                                ],
-                                [
-                                    'attribute' => 'ownership',
-                                    'filter' => false,
-                                    'value' => function ($model) {
-                                        $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
-                                        return $name;
-                                    },
-                                ],
-                                [
-                                    'format' => 'raw',
-                                    'attribute' => 'approver_comments',
-                                    'filter' => false,
-                                    'label' => "Approval comments",
-                                ],
-                                [
-                                    'attribute' => 'status',
-                                    'filter' => false,
-                                    'format' => 'raw',
-                                    'value' => function($model) {
-                                        $str = "";
-
-                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
-                                            $str = "<span class='badge badge-pill badge-danger'> "
-                                                    . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
-                                        }
-                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
-                                            $str = "<span class='badge badge-pill badge-danger'> "
-                                                    . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
-                                        }
-
-
-                                        return $str;
-                                    },
-                                    'format' => 'raw',
-                                ],
-                                [
-                                    'attribute' => 'Action',
-                                    'format' => 'raw',
-                                    'value' => function($model) {
-                                        return Html::a("Update", ["facilities/update", 'id' => $model->id]);
-                                    }
-                                ]
-                            ],
-                        ]);
-                    }
+//                    if (!empty($facilityDataProviderRejectedProvince) && $facilityDataProviderRejectedProvince->count > 0) {
+//                        echo '<h5>Rejected facilities</h5>
+//                        <p>Instructions</p>
+//                        <ol>
+//                            <li>Below facilities have been rejected.You need to provide more information</li>
+//                            <li>Click the "Update" link under the Action column to go to the update page</li>
+//                        </ol>
+//                        <hr class="dotted short">';
+//
+//                        echo GridView::widget([
+//                            'dataProvider' => $facilityDataProviderRejectedProvince,
+//                            'hover' => true,
+//                            'columns' => [
+//                                ['class' => 'yii\grid\SerialColumn'],
+//                                [
+//                                    'attribute' => 'name',
+//                                    'filter' => false,
+//                                    'format' => 'raw',
+//                                ],
+//                                [
+//                                    'attribute' => 'district_id',
+//                                    'filter' => false,
+//                                    'value' => function ($model) {
+//                                        $name = backend\models\Districts::findOne($model->district_id)->name;
+//                                        return $name;
+//                                    },
+//                                ],
+//                                [
+//                                    'attribute' => 'type',
+//                                    'filter' => false,
+//                                    'value' => function ($model) {
+//                                        $name = backend\models\Facilitytype::findOne($model->type)->name;
+//                                        return $name;
+//                                    },
+//                                ],
+//                                [
+//                                    'attribute' => 'ownership',
+//                                    'filter' => false,
+//                                    'value' => function ($model) {
+//                                        $name = backend\models\FacilityOwnership::findOne($model->ownership)->name;
+//                                        return $name;
+//                                    },
+//                                ],
+//                                [
+//                                    'format' => 'raw',
+//                                    'attribute' => 'approver_comments',
+//                                    'filter' => false,
+//                                    'label' => "Approval comments",
+//                                ],
+//                                [
+//                                    'attribute' => 'status',
+//                                    'filter' => false,
+//                                    'format' => 'raw',
+//                                    'value' => function($model) {
+//                                        $str = "";
+//
+//                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 2) {
+//                                            $str = "<span class='badge badge-pill badge-danger'> "
+//                                                    . "<i class='fas fa-times'></i> Rejected at national level,need more infor!<br> See approval comments";
+//                                        }
+//                                        if ($model->province_approval_status === 2 && $model->national_approval_status == 0) {
+//                                            $str = "<span class='badge badge-pill badge-danger'> "
+//                                                    . "<i class='fas fa-times'></i> Rejected at province level,need more infor!<br> See approval comments";
+//                                        }
+//
+//
+//                                        return $str;
+//                                    },
+//                                    'format' => 'raw',
+//                                ],
+//                                [
+//                                    'attribute' => 'Action',
+//                                    'format' => 'raw',
+//                                    'value' => function($model) {
+//                                        return Html::a("Update", ["facilities/update", 'id' => $model->id]);
+//                                    }
+//                                ]
+//                            ],
+//                        ]);
+//                    }
                 } else {
                     echo "You currently have no tasks";
                 }

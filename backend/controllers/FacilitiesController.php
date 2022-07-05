@@ -172,6 +172,7 @@ class FacilitiesController extends Controller {
             }
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->province_approval_status == 1) {
+                    $model->national_approval_status = 0;
                     $model->date_verified = new Expression('NOW()');
                     $model->date_updated = new Expression('NOW()');
                     $model->verified_by = Yii::$app->user->identity->id;
@@ -205,7 +206,7 @@ class FacilitiesController extends Controller {
                 } else {
 
                     //Send notification to creator 
-                    $model->national_approval_status = 0;
+                    $model->national_approval_status = 2;
                     $user = User::findOne($model->created_by);
 
                     if ($model->save(false)) {
@@ -325,9 +326,7 @@ class FacilitiesController extends Controller {
                             $msg .= "<p>Hello! " . $user->first_name . " " . $user->last_name . "<br>";
                             $msg .= "The MFL facility:" . $model->name . " you created needs more information. See approver comments for more details<br>";
                             $msg .= "Login below and go to facilities to view the facility details</p>";
-                            if (self::sendEmail($subject, $user->email, $msg)) {
-                                
-                            }
+                            self::sendEmail($subject, $user->email, $msg);
                         }
                     }
                     Yii::$app->session->setFlash('success', 'Facility creator was notified to provide more information');
