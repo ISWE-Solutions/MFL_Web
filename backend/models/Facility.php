@@ -71,18 +71,18 @@ class Facility extends \yii\db\ActiveRecord {
             ['name', 'unique', 'when' => function($model) {
                     return $model->isAttributeChanged('name');
                 }, 'message' => 'Facility name exist already!'],
-            [['verifier_comments'], 'required', 'when' => function($model) {
-                    return $this->province_approval_status == 2 ? true : false;
-                }, 'whenClient' => "function (attribute, value) {
-                   return $('input[type=\"select\"][name=\"Facility[province_approval_status]\"]:selected').val() == 2 ;
-              }", 'message' => 'Please provide reason for not approving facility!'
-            ],
-            [['approver_comments'], 'required', 'when' => function($model) {
-                    return $this->national_approval_status == 2 ? true : false;
-                }, 'whenClient' => "function (attribute, value) {
-                   return $('input[type=\"select\"][name=\"Facility[national_approval_status]\"]:selected').val() == 2;
-              }", 'message' => 'Please provide reason for not approving facility!'
-            ],
+//            [['verifier_comments'], 'required', 'when' => function($model) {
+//                    return $this->province_approval_status == 2 ? true : false;
+//                }, 'whenClient' => "function (attribute, value) {
+//                   return $('input[type=\"select\"][name=\"Facility[province_approval_status]\"]:selected').val() == 2 ;
+//              }", 'message' => 'Please provide reason for not approving facility!'
+//            ],
+//            [['approver_comments'], 'required', 'when' => function($model) {
+//                    return $this->national_approval_status == 2 ? true : false;
+//                }, 'whenClient' => "function (attribute, value) {
+//                   return $('input[type=\"select\"][name=\"Facility[national_approval_status]\"]:selected').val() == 2;
+//              }", 'message' => 'Please provide reason for not approving facility!'
+//            ],
             [['coordinates', 'physical_address', 'postal_address', 'phone',
             'fax', 'plot_no', 'street', 'town','mobile'], 'safe'],
             ['email', 'email', 'message' => "The email isn't correct!"],
