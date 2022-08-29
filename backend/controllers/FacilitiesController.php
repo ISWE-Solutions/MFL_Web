@@ -29,11 +29,13 @@ class FacilitiesController extends Controller {
             'access' => [
                 'class' => AccessControl::className(),
                 'only' => ['index', 'create', 'update', 'delete', 'view',
-                    'services', 'delete-service', 'approve-facility-province', 'approve-facility-national'],
+                    'services', 'delete-service', 'approve-facility-province',
+                    'approve-facility-national', 'unapprove'],
                 'rules' => [
                     [
                         'actions' => ['index', 'create', 'update', 'delete', 'view',
-                            'services', 'delete-service', 'approve-facility-province', 'approve-facility-national'],
+                            'services', 'delete-service', 'approve-facility-province',
+                            'approve-facility-national', 'unapprove'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -344,6 +346,52 @@ class FacilitiesController extends Controller {
             Yii::$app->session->setFlash('error', 'Error occured while approving facility. Error::' . $message);
         }
         return $this->redirect(['home/home']);
+    }
+
+    /**
+     * Action for sending back the facility back to district
+     * @param type $id
+     */
+    public function actionUnapprove($id) {
+        if (User::userIsAllowedTo('Manage facilities')) {
+            $model = $this->findModel($id);
+            $model->date_updated = new Expression('NOW()');
+            $model->updated_by = Yii::$app->user->identity->id;
+            $model->province_approval_status = 2;
+            $model->national_approval_status = 2;
+            $model->status = 0; //pending provincial approval
+            if ($model->save(false)) {
+                //We log action taken
+                $audit = new AuditTrail();
+                $audit->user = Yii::$app->user->id;
+                $audit->action = "Sent Facility: " . $model->name . " back to district for editing";
+                $audit->ip_address = Yii::$app->request->getUserIP();
+                $audit->user_agent = Yii::$app->request->getUserAgent();
+                $audit->save();
+                $user = User::findOne($model->created_by);
+
+                if ($user) {
+                    $subject = "Editing MFL Facility:" . $model->name;
+                    $msg = "";
+                    $msg .= "<p>Hello! " . $user->first_name . " " . $user->last_name . "<br>";
+                    $msg .= "MFL facility:" . $model->name . " has been enabled for editting.<br>";
+                    $msg .= "Login below and go to facilities to edit facility details</p>";
+                    self::sendEmail($subject, $user->email, $msg);
+                }
+
+                Yii::$app->session->setFlash('success', 'Facility was added successfully sendt back to district user. District user will have to login to edit the facility');
+            } else {
+                $message = "";
+                foreach ($model->getErrors() as $error) {
+                    $message .= $error[0];
+                }
+                Yii::$app->session->setFlash('error', 'Error occured while sending facility back to district. Error::' . $message);
+            }
+            return $this->redirect(['view', 'id' => $model->id]);
+        } else {
+            Yii::$app->session->setFlash('error', 'You are not authorised to perform that action.');
+            return $this->redirect(['home/home']);
+        }
     }
 
     /**

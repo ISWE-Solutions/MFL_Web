@@ -29,7 +29,7 @@ if ($user_type == "District") {
 
 if ($user_type == "Province") {
     $province_user_province_id = Yii::$app->user->identity->province_id;
-    $provinceId=$province_user_province_id;
+    $provinceId = $province_user_province_id;
 }
 
 
@@ -410,7 +410,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'format' => 'raw',
                 'attribute' => 'mobility_status',
                 'value' => function ($model) {
-                    $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                    $status_arr = [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"];
                     return $status_arr[$model->mobility_status];
                 },
             ],

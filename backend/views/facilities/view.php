@@ -108,7 +108,7 @@ $facility_operating_hours = new ActiveDataProvider([
 
                 if ($user_type == "National") {
                     echo Html::a(
-                            '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                            '<span class="fas fa-edit fa-2x"></span>', ['update', 'id' => $model->id], [
                         'title' => 'Update facility',
                         'data-toggle' => 'tooltip',
                         'data-placement' => 'top',
@@ -117,6 +117,23 @@ $facility_operating_hours = new ActiveDataProvider([
                         'class' => 'bt btn-lg'
                             ]
                     );
+
+                    if ($model->status === 1) {
+                        echo "&nbsp;&nbsp;&nbsp;&nbsp;";
+                        echo Html::a('<span class="fa fa-spinner fa-2x"></span>', ['unapprove', 'id' => $model->id], [
+                            'title' => 'Send back to district',
+                            'data-toggle' => 'tooltip',
+                            'data-placement' => 'top',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to send facility: ' . $model->name . ' back to district?<br>'
+                                . 'Facility will no longer be public and have to undergo approval process again!',
+                                'method' => 'post',
+                            ],
+                            'style' => "padding:5px;",
+                            'class' => 'bt btn-lg'
+                                ]
+                        );
+                    }
                 }
             }
             if (User::userIsAllowedTo('Remove facility') && $model->ownership_type == 1) {
@@ -182,7 +199,7 @@ $facility_operating_hours = new ActiveDataProvider([
     <div class="card-body">
 
         <?php
-        //This is a hack, just to use pjax for the delete confirm button
+         //This is a hack, just to use pjax for the delete confirm button
         $query = User::find()->where(['id' => '-2']);
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $query,

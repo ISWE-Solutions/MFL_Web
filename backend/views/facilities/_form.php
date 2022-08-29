@@ -170,7 +170,7 @@ $province_user_province_id = "";
                             ?>
                         </div>
                         <div class="col-lg-4">
-                            <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of beds']) ?>
+                            <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of households']) ?>
                         </div>
                         <div class="col-lg-8">
                             <?=
