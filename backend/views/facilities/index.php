@@ -159,9 +159,11 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     'data' => [1 => 'Active', 0 => 'Inactive'],
                 ],
                 'value' => function ($model) {
+                    
                     $str = "";
                     //  if ($model->ownership_type == 1) {
                     if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
+                      
                         if ($model->status === 1) {
                             $str = "<span class='badge badge-pill badge-success'> "
                                     . "<i class='fa fa-check'></i> Active</span>";
@@ -171,6 +173,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                     . "<i class='fa fa-times'></i> Inactive";
                         }
                     } else {
+                      
                         if ($model->province_approval_status === 0 && $model->national_approval_status === 0) {
                             $str = "<span class='badge badge-pill badge-dark'> "
                                     . "<i class='fas fa-hourglass-half'></i> Pending Provincial review";

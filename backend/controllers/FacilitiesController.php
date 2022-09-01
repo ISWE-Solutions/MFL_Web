@@ -520,6 +520,7 @@ class FacilitiesController extends Controller {
             $old_lng = $model->longitude;
             $old_geom = $model->geom;
             $old_provincial_status = $model->province_approval_status;
+            $old_national_approval_status = $model->national_approval_status;
             $old_created_by = $model->created_by;
 
             if ($model->load(Yii::$app->request->post())) {
@@ -558,7 +559,14 @@ class FacilitiesController extends Controller {
 
                 if ($old_provincial_status === 2) {
                     $model->province_approval_status = 0;
+                    $model->national_approval_status = 0;
                 }
+                
+                if ($old_national_approval_status === 2) {
+                    $model->province_approval_status = 0;
+                    $model->national_approval_status = 0;
+                }
+                
                 if ($model->save()) {
 
                     //We log action taken

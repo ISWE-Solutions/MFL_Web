@@ -280,7 +280,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a district',
                                         'url' => Url::to(['/constituencies/district']),
                                         'params' => ['selected_id'],
-                                        'loadingText' => 'Loading districts....',
+                                        //'loadingText' => 'Loading districts....',
                                     ]
                                 ]);
                                 echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
