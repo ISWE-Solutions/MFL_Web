@@ -86,9 +86,6 @@ class FacilityOwnershipController extends Controller {
                         }
                         $output = $message;
                     }
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
-                    Yii::error($Id . "===" . $b . "====" . $out);
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
                     
                     $output = '';
                     $out = Json::encode(['output' => $output, 'message' => $message]);
