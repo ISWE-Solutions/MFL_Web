@@ -63,7 +63,7 @@ class FacilityOwnershipController extends Controller {
                 $old_shared_id = $model->shared_id;
 
                 if ($model->load($post)) {
-                
+
                     $msg = "";
                     if ($old != $model->name) {
                         $msg = "Updated Facility ownership name from $old to " . $model->name;
@@ -77,8 +77,6 @@ class FacilityOwnershipController extends Controller {
                     $audit->ip_address = Yii::$app->request->getUserIP();
                     $audit->user_agent = Yii::$app->request->getUserAgent();
                     $audit->save();
-                    
-                   
 
                     $message = '';
                     if (!$model->save(false)) {
@@ -86,14 +84,14 @@ class FacilityOwnershipController extends Controller {
                             $message .= $error[0];
                         }
                         $output = $message;
-                        
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
-                    Yii::error($Id."===".$model->name);
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
                     }
                     $output = '';
                     $out = Json::encode(['output' => $output, 'message' => $message]);
                 }
+
+                Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
+                Yii::error($Id . "===" . $model->name."====".$out);
+                Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
                 return $out;
             }
             $dataProvider->pagination = ['pageSize' => 15];
