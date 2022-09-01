@@ -54,9 +54,9 @@ class FacilityOwnershipController extends Controller {
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
             if (Yii::$app->request->post('hasEditable')) {
                 $Id = Yii::$app->request->post('editableKey');
-                 Yii::info("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
-                Yii::info($Id);
-                Yii::info("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
+                 Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
+                Yii::error($Id);
+                Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
                 die();
                 $model = FacilityOwnership::findOne($Id);
                 
