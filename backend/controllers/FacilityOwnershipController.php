@@ -78,9 +78,7 @@ class FacilityOwnershipController extends Controller {
                     $audit->user_agent = Yii::$app->request->getUserAgent();
                     $audit->save();
                     
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
-                    Yii::error($Id);
-                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
+                   
 
                     $message = '';
                     if (!$model->save(false)) {
@@ -88,6 +86,10 @@ class FacilityOwnershipController extends Controller {
                             $message .= $error[0];
                         }
                         $output = $message;
+                        
+                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
+                    Yii::error($Id."===".$model->name);
+                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
                     }
                     $output = '';
                     $out = Json::encode(['output' => $output, 'message' => $message]);
