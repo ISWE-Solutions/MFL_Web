@@ -235,7 +235,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                        'loadingText' => 'Loading constituencies....',
+                                        //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -250,7 +250,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                        'loadingText' => 'Loading wards....',
+                                        //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
@@ -285,7 +285,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                        'loadingText' => 'Loading constituencies....',
+                                        //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -300,7 +300,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                        'loadingText' => 'Loading wards....',
+                                        //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
