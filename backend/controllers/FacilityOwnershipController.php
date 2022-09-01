@@ -55,6 +55,11 @@ class FacilityOwnershipController extends Controller {
             if (Yii::$app->request->post('hasEditable')) {
                 $Id = Yii::$app->request->post('editableKey');
                 $model = FacilityOwnership::findOne($Id);
+                
+                Yii::info("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
+                Yii::info($Id);
+                Yii::info("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
+                
                 $out = Json::encode(['output' => '', 'message' => '']);
                 $posted = current($_POST['FacilityOwnership']);
                 $post = ['FacilityOwnership' => $posted];
