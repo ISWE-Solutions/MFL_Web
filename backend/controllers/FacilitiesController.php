@@ -567,7 +567,7 @@ class FacilitiesController extends Controller {
                     $model->national_approval_status = 0;
                 }
                 
-                if ($model->save()) {
+                if ($model->save(false)) {
 
                     //We log action taken
                     $audit = new AuditTrail();

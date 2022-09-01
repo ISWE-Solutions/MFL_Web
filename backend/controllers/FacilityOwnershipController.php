@@ -54,14 +54,8 @@ class FacilityOwnershipController extends Controller {
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
             if (Yii::$app->request->post('hasEditable')) {
                 $Id = Yii::$app->request->post('editableKey');
-                 Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
-                Yii::error($Id);
-                Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
-                die();
                 $model = FacilityOwnership::findOne($Id);
-                
-               
-                
+
                 $out = Json::encode(['output' => '', 'message' => '']);
                 $posted = current($_POST['FacilityOwnership']);
                 $post = ['FacilityOwnership' => $posted];
@@ -69,6 +63,7 @@ class FacilityOwnershipController extends Controller {
                 $old_shared_id = $model->shared_id;
 
                 if ($model->load($post)) {
+                
                     $msg = "";
                     if ($old != $model->name) {
                         $msg = "Updated Facility ownership name from $old to " . $model->name;
@@ -82,9 +77,13 @@ class FacilityOwnershipController extends Controller {
                     $audit->ip_address = Yii::$app->request->getUserIP();
                     $audit->user_agent = Yii::$app->request->getUserAgent();
                     $audit->save();
+                    
+                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG STARTS-----------------------------");
+                    Yii::error($Id);
+                    Yii::error("-----------------------------LOGGGGGGIINNNNNGGGGGG ENDS-------------------------------");
 
                     $message = '';
-                    if (!$model->save()) {
+                    if (!$model->save(false)) {
                         foreach ($model->getErrors() as $error) {
                             $message .= $error[0];
                         }
