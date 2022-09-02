@@ -66,7 +66,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => \backend\models\Facility::getNames(),
+                'filter' => \backend\models\Facility::getNamesFilter($provinceId,$districtId),
                 'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                 'format' => 'raw',
             ],
