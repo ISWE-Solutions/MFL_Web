@@ -61,6 +61,7 @@ class FacilityController extends Controller {
 
     public function actionSearch() {
         $searchModel = new FacilitySearch();
+        
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['district_id']) ||
                 !empty(Yii::$app->request->queryParams['FacilitySearch']['constituency_id']) ||
                 !empty(Yii::$app->request->queryParams['FacilitySearch']['zone_id']) ||
@@ -83,6 +84,7 @@ class FacilityController extends Controller {
 
         //Filter by province
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
+            
             $district_ids = [];
             $districts = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
                             ->where(['province_id' => Yii::$app->request->queryParams['FacilitySearch']['province_id']])->all();
@@ -93,6 +95,7 @@ class FacilityController extends Controller {
             }
 
             $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
+            //var_dump($dataProvider);exit();
         }
         //Filter by district
         /* if (!empty(Yii::$app->request->queryParams['FacilitySearch']['district_id'])) {
@@ -160,20 +163,6 @@ class FacilityController extends Controller {
             $dataProvider->query->andFilterWhere(['IN', 'id', $facility_service_ids]);
         }
 
-//        //Filter by operating hours
-//        if (!empty(Yii::$app->request->queryParams['FacilitySearch']['operating_hours'])) {
-//            $facility_service_ids = [];
-//            $facility_op_hrs = \backend\models\MFLFacilityOperatingHours::find()
-//                    ->cache(Yii::$app->params['cache_duration'])
-//                    ->where(['operatinghours_id' => Yii::$app->request->queryParams['FacilitySearch']['operating_hours']])
-//                    ->all();
-//            if (!empty($facility_op_hrs)) {
-//                foreach ($facility_op_hrs as $id) {
-//                    array_push($facility_service_ids, $id['facility_id']);
-//                }
-//            }
-//            $dataProvider->query->andFilterWhere(['IN', 'id', $facility_service_ids]);
-//        }
 
         return $this->render('search', [
                     'searchModel' => $searchModel,
