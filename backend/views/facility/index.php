@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \backend\models\FacilityOwnership::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
-                    $name = backend\models\FacilityOwnership::findOne($model->ownership_id)->name;
+                       $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
                     return $name;
                 },
             ],
@@ -278,7 +278,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \backend\models\FacilityOwnership::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
-                    $name = backend\models\FacilityOwnership::findOne($model->ownership_id)->name;
+                    $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
                     return $name;
                 },
             ],

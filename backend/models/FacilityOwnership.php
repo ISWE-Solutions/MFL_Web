@@ -70,7 +70,7 @@ class FacilityOwnership extends \yii\db\ActiveRecord {
 
     public static function getList() {
         $list = self::find()->orderBy(['name' => SORT_ASC])->all();
-        return ArrayHelper::map($list, 'shared_id', 'name');
+        return ArrayHelper::map($list, 'id', 'name');
     }
 
     public static function getListPrivateOnly($id) {

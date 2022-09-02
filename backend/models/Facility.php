@@ -68,7 +68,7 @@ class Facility extends \yii\db\ActiveRecord {
             [['district_id', 'constituency_id', 'ward_id', 'zone_id', 'operational_status', 'type', 'mobility_status', 'location', 'ownership_type', 'ownership', 'status', 'approved_by', 'created_by', 'updated_by', 'province_approval_status', 'national_approval_status'], 'integer'],
             [['hims_code', 'smartcare_code', 'elmis_code', 'hpcz_code', 'disa_code', 'name', 'catchment_population_head_count', 'catchment_population_cso', 'number_of_households', 'accesibility', 'latitude', 'longitude'], 'string'],
             [['date_approved', 'date_created', 'date_updated', 'geom', 'verifier_comments', 'approver_comments'], 'safe'],
-            ['name', 'unique', 'when' => function($model) {
+            ['name', 'unique', 'when' => function ($model) {
                     return $model->isAttributeChanged('name');
                 }, 'message' => 'Facility name exist already!'],
 //            [['verifier_comments'], 'required', 'when' => function($model) {
@@ -84,7 +84,7 @@ class Facility extends \yii\db\ActiveRecord {
 //              }", 'message' => 'Please provide reason for not approving facility!'
 //            ],
             [['coordinates', 'physical_address', 'postal_address', 'phone',
-            'fax', 'plot_no', 'street', 'town','mobile'], 'safe'],
+            'fax', 'plot_no', 'street', 'town', 'mobile'], 'safe'],
             ['email', 'email', 'message' => "The email isn't correct!"],
             //[['mobile'], PhoneInputValidator::className()],
             [['operational_status'], 'exist', 'skipOnError' => true, 'targetClass' => Operationstatus::className(), 'targetAttribute' => ['operational_status' => 'id']],
@@ -179,6 +179,29 @@ class Facility extends \yii\db\ActiveRecord {
      */
     public function getOwnership0() {
         return $this->hasOne(Ownership::className(), ['id' => 'ownership']);
+    }
+
+    public static function getNamesFilter($provinceId = "", $districtId = "") {
+        if (!empty($provinceId)) {
+            $district_ids = [];
+            $districts = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])->where(['province_id' => $provinceId])->all();
+            if (!empty($districts)) {
+                foreach ($districts as $id) {
+                    array_push($district_ids, $id['id']);
+                }
+            }
+
+            $names = self::find()->where(['IN', 'district_id', $district_ids])->orderBy(['name' => SORT_ASC])->all();
+            return ArrayHelper::map($names, 'name', 'name');
+        }
+
+        if (!empty($districtId)) {
+            $names = self::find()->where(['district_id' => $districtId])->orderBy(['name' => SORT_ASC])->all();
+            return ArrayHelper::map($names, 'name', 'name');
+        }
+
+        $names = self::find()->orderBy(['name' => SORT_ASC])->all();
+        return ArrayHelper::map($names, 'name', 'name');
     }
 
     public static function getNames() {

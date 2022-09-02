@@ -272,7 +272,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             'filter' => \backend\models\FacilityOwnership::getList(),
                                             'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                                             'value' => function ($model) {
-                                                $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
+                                                $name = backend\models\FacilityOwnership::findOne($model->ownership);
                                                 return !empty($name) ? $name->name : "";
                                             },
                                         ],

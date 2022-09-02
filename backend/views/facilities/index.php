@@ -120,7 +120,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filter' => \backend\models\FacilityOwnership::getList(),
                 'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
-                    $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
+                    $name = backend\models\FacilityOwnership::findOne($model->ownership);
                     return !empty($name) ? $name->name : "";
                 },
             ],
@@ -131,7 +131,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     'pluginOptions' => ['allowClear' => true],
                 ],
                 'filter' => [1 => "Public", 2 => "Private"],
-                'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
+                'filterInputOptions' => ['prompt' => 'Filter by ownership type', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
                     $status_arr = [1 => "Public", 2 => "Private"];
                     return $status_arr[$model->ownership_type];

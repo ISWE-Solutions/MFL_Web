@@ -37,7 +37,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'filterWidgetOptions' => [
                                 'pluginOptions' => ['allowClear' => true],
                             ],
-                            'filter' => \backend\models\Facility::getNames(),
+                            'filter' => \backend\models\Facility::getNamesFilter($provinceId,$districtId),
                             'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                             'format' => 'raw',
                         ],
@@ -106,7 +106,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'filter' => \backend\models\FacilityOwnership::getList(),
                             'filterInputOptions' => ['prompt' => 'Filter by ownership', 'class' => 'form-control', 'id' => null],
                             'value' => function ($model) {
-                                $name = backend\models\FacilityOwnership::findOne(["shared_id" => $model->ownership]);
+                                $name = backend\models\FacilityOwnership::findOne($model->ownership);
                                 return !empty($name) ? $name->name : "";
                             },
                         ],
@@ -116,14 +116,14 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'buttons' => [
                                 'view' => function ($url, $model) {
                                     return Html::a(
-                                                    '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
-                                                'title' => 'View facility',
-                                                'data-toggle' => 'tooltip',
-                                                'data-placement' => 'top',
-                                                'data-pjax' => '0',
-                                                'style' => "padding:5px;",
-                                                'class' => 'bt btn-lg'
-                                                    ]
+                                            '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
+                                        'title' => 'View facility',
+                                        'data-toggle' => 'tooltip',
+                                        'data-placement' => 'top',
+                                        'data-pjax' => '0',
+                                        'style' => "padding:5px;",
+                                        'class' => 'bt btn-lg'
+                                            ]
                                     );
                                 },
                             ]
@@ -213,7 +213,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'format' => 'raw',
                             'attribute' => 'mobility_status',
                             'value' => function ($model) {
-                                $status_arr = [1 => "Fixed", 2 => "Mobile", 3 => "telemedicine"];
+                                $status_arr = [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"];
                                 return $status_arr[$model->mobility_status];
                             },
                         ],

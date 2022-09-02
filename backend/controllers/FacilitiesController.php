@@ -516,6 +516,7 @@ class FacilitiesController extends Controller {
                 $model->load(Yii::$app->request->post());
                 return Json::encode(\yii\widgets\ActiveForm::validate($model));
             }
+            
             $old_lat = $model->latitude;
             $old_lng = $model->longitude;
             $old_geom = $model->geom;
