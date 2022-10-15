@@ -7,7 +7,7 @@ $this->title = 'About';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container-fluid">
-    <div class="row"  style="margin-right:-100px;margin-left:-100px;">
+    <div class="row" >
         <div class="col-lg-12">
             <div class="card card-primary card-outline">
                 <div class="card-body">
