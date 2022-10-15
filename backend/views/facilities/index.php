@@ -66,7 +66,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterWidgetOptions' => [
                     'pluginOptions' => ['allowClear' => true],
                 ],
-                'filter' => \backend\models\Facility::getNamesFilter($provinceId,$districtId),
+                'filter' => \backend\models\Facility::getNamesFilter($provinceId, $districtId),
                 'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                 'format' => 'raw',
             ],
@@ -159,11 +159,11 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     'data' => [1 => 'Active', 0 => 'Inactive'],
                 ],
                 'value' => function ($model) {
-                    
+
                     $str = "";
                     //  if ($model->ownership_type == 1) {
                     if ($model->province_approval_status === 1 && $model->national_approval_status === 1) {
-                      
+
                         if ($model->status === 1) {
                             $str = "<span class='badge badge-pill badge-success'> "
                                     . "<i class='fa fa-check'></i> Active</span>";
@@ -173,7 +173,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                     . "<i class='fa fa-times'></i> Inactive";
                         }
                     } else {
-                      
+
                         if ($model->province_approval_status === 0 && $model->national_approval_status === 0) {
                             $str = "<span class='badge badge-pill badge-dark'> "
                                     . "<i class='fas fa-hourglass-half'></i> Pending Provincial review";
@@ -224,7 +224,6 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     'update' => function ($url, $model) use ($district_user_district_id, $user_type, $province_user_province_id) {
                         if (User::userIsAllowedTo('Manage facilities')) {
                             if ($user_type == "District" && in_array($model->province_approval_status, [0, 2])) {
-
                                 if (!empty($district_user_district_id) && $district_user_district_id == $model->district_id) {
                                     return Html::a(
                                                     '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
@@ -255,6 +254,18 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                 }
                             }
 
+                            if ($user_type == "Province" && $model->status === 1) {
+                                return Html::a(
+                                                '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
+                                            'title' => 'Update facility',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                                ]
+                                );
+                            }
                             if ($user_type == "National") {
                                 return Html::a(
                                                 '<span class="fas fa-edit"></span>', ['update', 'id' => $model->id], [
