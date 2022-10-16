@@ -134,7 +134,8 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                 'filterInputOptions' => ['prompt' => 'Filter by ownership type', 'class' => 'form-control', 'id' => null],
                 'value' => function ($model) {
                     $status_arr = [1 => "Public", 2 => "Private"];
-                    return $status_arr[$model->ownership_type];
+                    return $model->ownership_type;
+                    //return $status_arr[$model->ownership_type];
                 },
             ],
             [

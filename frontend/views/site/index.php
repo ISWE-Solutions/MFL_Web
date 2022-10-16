@@ -73,7 +73,7 @@ $column_series1 = [];
 $data2 = [];
 $data3 = [];
 $labels1 = [];
-$totalOperatingFacilities=0;
+$totalOperatingFacilities = 0;
 
 if (!empty($operation_status_model)) {
     $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
@@ -88,7 +88,7 @@ if (!empty($operation_status_model)) {
 
     foreach ($province_counts as $model) {
         //Add to total operating facilities
-        $totalOperatingFacilities+=(int) $model['count'];
+        $totalOperatingFacilities += (int) $model['count'];
         //Push pie data to array
         array_push($data2, ['name' => $model['name'], 'y' => (int) $model['count'],]);
         //Push column labels to array
@@ -103,31 +103,25 @@ if (!empty($operation_status_model)) {
     array_push($column_series1, ['name' => "Total", 'data' => $data3]);
 }
 
-$public_count = backend\models\Facility::find()
-        ->cache(Yii::$app->params['cache_duration'])
-        ->where(['ownership_type' => 1])
-        ->count();
+//Public
 $public_count_active = backend\models\Facility::find()
         ->cache(Yii::$app->params['cache_duration'])
         ->where(['ownership_type' => 1])
+        ->andWhere(['operational_status' => $operation_status_model->id])
         ->andWhere(['status' => 1])
         ->count();
 
 // Private
-$_private_count = backend\models\Facility::find()
-        ->cache(Yii::$app->params['cache_duration'])
-        ->where(['IN', 'ownership_type', [2]])
-        ->count();
-// Private
 $_private_count_active = backend\models\Facility::find()
         ->cache(Yii::$app->params['cache_duration'])
         ->where(['IN', 'ownership_type', [2]])
+        ->andWhere(['operational_status' => $operation_status_model->id])
         ->andWhere(['status' => 1])
         ->count();
 ?>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-3 col-sm-6 col-12">
+        <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-info">
                 <span class="info-box-icon"><i class="fas fa-check"></i></span>
 
@@ -138,7 +132,7 @@ $_private_count_active = backend\models\Facility::find()
                         <div class="progress-bar" style="width:100%"></div>
                     </div>
                     <span class="progress-description text-sm">
-                        Active Public Facilities
+                        Public Operating Facilities
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -146,7 +140,7 @@ $_private_count_active = backend\models\Facility::find()
             <!-- /.info-box -->
         </div>
         <!-- /.col -->
-        <div class="col-md-3 col-sm-6 col-12">
+        <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-gradient-indigo">
                 <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
 
@@ -157,7 +151,7 @@ $_private_count_active = backend\models\Facility::find()
                         <div class="progress-bar" style="width: 100%"></div>
                     </div>
                     <span class="progress-description text-sm">
-                      Active Private Facilities
+                        Private Operating Facilities
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -165,27 +159,7 @@ $_private_count_active = backend\models\Facility::find()
             <!-- /.info-box -->
         </div>
         <!-- /.col -->
-        <!-- /.col -->
-        <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box bg-success">
-                <span class="info-box-icon"><i class="fas fa-hospital-symbol"></i></span>
-
-                <div class="info-box-content">
-                    <span class="info-box-number"><?= $public_count_active + $_private_count_active ?></span>
-
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 100%"></div>
-                    </div>
-                    <span class="progress-description text-sm">
-                        Total Active Facilities
-                    </span>
-                </div>
-                <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-        </div>
-        <!-- /.col -->
-        <div class="col-md-3 col-sm-6 col-12">
+        <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-warning">
                 <span class="info-box-icon"><i class="fas fa-hospital"></i></span>
 
