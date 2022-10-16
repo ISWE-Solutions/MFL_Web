@@ -429,7 +429,7 @@ class FacilitiesController extends Controller {
                 $model->status = 0; //pending provincial approval
                 //all facilities created through MFL are public=1
                 //All those from HPCZ are private=2
-                $model->ownership_type = 1;
+                //$model->ownership_type = 1;
 
                 if ($model->save()) {
                     //We log action taken

@@ -70,10 +70,11 @@ $province_user_province_id = "";
                             );
                             ?>
                             <?php
-//                                  echo  $form->field($model, 'ownership_type')
-//                                    ->dropDownList(
-//                                            [1=>"Public",2=>"Private"], ['custom' => true, 'prompt' => 'Select ownership type',]
-//                            );
+                            $model->ownership_type=1;
+                            echo $form->field($model, 'ownership_type')
+                                    ->dropDownList(
+                                            [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Select ownership type',]
+                            );
                             ?>
                             <?=
                                     $form->field($model, 'ownership')
@@ -136,6 +137,7 @@ $province_user_province_id = "";
                             $form->field($model, 'fax', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
                                 'Enter facility fax'])
                             ?>
+                            <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of households']) ?>
 
                         </div>
                         <div class="col-lg-4">
@@ -168,15 +170,11 @@ $province_user_province_id = "";
                             $form->field($model, 'catchment_population_cso')->textInput(['placeholder' =>
                                 'Enter population cso'])
                             ?>
-                        </div>
-                        <div class="col-lg-4">
-                            <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of households']) ?>
-                        </div>
-                        <div class="col-lg-8">
                             <?=
                             $form->field($model, 'physical_address')->textarea(['rows' => 3, "placeholder" => "Enter physical address"])->label("Physical address");
                             ?>
                         </div>
+                    
                     </div>
                 </div>
             </div>
@@ -244,7 +242,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                        //'loadingText' => 'Loading constituencies....',
+                                    //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -259,7 +257,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                        //'loadingText' => 'Loading wards....',
+                                    //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
@@ -280,7 +278,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a district',
                                         'url' => Url::to(['/constituencies/district']),
                                         'params' => ['selected_id'],
-                                        //'loadingText' => 'Loading districts....',
+                                    //'loadingText' => 'Loading districts....',
                                     ]
                                 ]);
                                 echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
@@ -294,7 +292,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                        //'loadingText' => 'Loading constituencies....',
+                                    //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -309,7 +307,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                        //'loadingText' => 'Loading wards....',
+                                    //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
