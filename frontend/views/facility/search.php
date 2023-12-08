@@ -13,7 +13,7 @@ $this->title = 'Advanced search';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container-fluid">
-    <div class="row"  style="margin-right:-100px;margin-left:-100px;">
+    <div class="row" style="margin-right:-100px;margin-left:-100px;">
 
         <div class="col-lg-12 text-sm">
             <div class="card card-primary card-outline">
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="card card-primary card-outline">
                 <div class="card-body">
                     <p>
-                    <hr class="dotted short">
+                        <hr class="dotted short">
                     </p>
 
                     <?php
@@ -88,27 +88,39 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return $status_arr[$model->ownership_type];
                             },
                         ],
-                        ['class' => ActionColumn::className(),
+                        [
+                            'class' => ActionColumn::className(),
                             'options' => ['style' => 'width:40px;'],
                             'template' => '{view}',
                             'buttons' => [
                                 'view' => function ($url, $model) {
                                     return Html::a(
-                                                    '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
-                                                'title' => 'View facility',
-                                                'data-toggle' => 'tooltip',
-                                                'data-placement' => 'top',
-                                                'data-pjax' => '0',
-                                                'style' => "padding:5px;",
-                                                'class' => 'bt btn-lg'
-                                                    ]
+                                        '<span class="fa fa-eye"></span>',
+                                        ['view', 'id' => $model->id],
+                                        [
+                                            'title' => 'View facility',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                        ]
                                     );
                                 },
                             ]
                         ],
                     ];
                     $gridColumns2 = [
-                        //'id',
+                        [
+                            'enableSorting' => true,
+                            'attribute' => 'id',
+                            'label' => 'MFL Code',
+                        ],
+                        [
+                            'enableSorting' => true,
+                            'attribute' => 'dhis2_uid',
+                            'label' => 'DHIS2 UID',
+                        ],
                         [
                             'enableSorting' => true,
                             'attribute' => 'name',
@@ -198,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'accesibility',
                         [
                             'attribute' => 'DHIS2_UID',
-                        // 'visible' => false
+                            // 'visible' => false
                         ],
                         [
                             'attribute' => 'HMIS_code',
@@ -214,59 +226,59 @@ $this->params['breadcrumbs'][] = $this->title;
                         'number_of_households',
                         'latitude',
                         'longitude',
-//                        [
-//                            'attribute' => 'status',
-//                            'value' => function($model) {
-//                                $str = "";
-//                                if ($model->status === 1) {
-//                                    $str = "<span class='badge badge-pill badge-success'> "
-//                                            . "<i class='fa fa-check'></i> Active</span>";
-//                                }
-//                                if ($model->status === 0) {
-//                                    $str = "<span class='badge badge-pill badge-danger'> "
-//                                            . "<i class='fa fa-times'></i> Inactive";
-//                                }
-//                                if ($model->status === 2) {
-//                                    $str = "<span class='badge badge-pill badge-dark'> "
-//                                            . "<i class='fas fa-hourglass-half'></i> Pending approval";
-//                                }
-//                                return $str;
-//                            },
-//                            'format' => 'raw',
-//                        ],
+                        //                        [
+                        //                            'attribute' => 'status',
+                        //                            'value' => function($model) {
+                        //                                $str = "";
+                        //                                if ($model->status === 1) {
+                        //                                    $str = "<span class='badge badge-pill badge-success'> "
+                        //                                            . "<i class='fa fa-check'></i> Active</span>";
+                        //                                }
+                        //                                if ($model->status === 0) {
+                        //                                    $str = "<span class='badge badge-pill badge-danger'> "
+                        //                                            . "<i class='fa fa-times'></i> Inactive";
+                        //                                }
+                        //                                if ($model->status === 2) {
+                        //                                    $str = "<span class='badge badge-pill badge-dark'> "
+                        //                                            . "<i class='fas fa-hourglass-half'></i> Pending approval";
+                        //                                }
+                        //                                return $str;
+                        //                            },
+                        //                            'format' => 'raw',
+                        //                        ],
                     ];
 
 
                     if ($dataProvider->getCount() > 0) {
                         $fullExportMenu = ExportMenu::widget([
-                                    'dataProvider' => $dataProvider,
-                                    'columns' => $gridColumns2,
-                                    'columnSelectorOptions' => [
-                                        'label' => 'Cols...',
-                                    ],
-                                    'batchSize' => 200,
-                                    // 'hiddenColumns' => [0, 9],
-                                    //'disabledColumns' => [1, 2],
-                                    //'target' => ExportMenu::TARGET_BLANK,
-                                    'exportConfig' => [
-                                        ExportMenu::FORMAT_TEXT => false,
-                                        ExportMenu::FORMAT_HTML => false,
-                                        ExportMenu::FORMAT_EXCEL => false,
-                                        ExportMenu::FORMAT_PDF => false,
-                                        ExportMenu::FORMAT_CSV => false,
-                                    ],
-                                    'pjaxContainerId' => 'kv-pjax-container',
-                                    'exportContainer' => [
-                                        'class' => 'btn-group mr-2'
-                                    ],
-                                    'dropdownOptions' => [
-                                        'label' => 'Export to Excel',
-                                        'class' => 'btn btn-outline-secondary',
-                                        'itemsBefore' => [
-                                            '<div class="dropdown-header">Export All Data</div>',
-                                        ],
-                                    ],
-                                    'filename' => 'mfl_facilities_export' . date("YmdHis")
+                            'dataProvider' => $dataProvider,
+                            'columns' => $gridColumns2,
+                            'columnSelectorOptions' => [
+                                'label' => 'Cols...',
+                            ],
+                            'batchSize' => 200,
+                            // 'hiddenColumns' => [0, 9],
+                            //'disabledColumns' => [1, 2],
+                            //'target' => ExportMenu::TARGET_BLANK,
+                            'exportConfig' => [
+                                ExportMenu::FORMAT_TEXT => false,
+                                ExportMenu::FORMAT_HTML => false,
+                                ExportMenu::FORMAT_EXCEL => false,
+                                ExportMenu::FORMAT_PDF => false,
+                                ExportMenu::FORMAT_CSV => false,
+                            ],
+                            'pjaxContainerId' => 'kv-pjax-container',
+                            'exportContainer' => [
+                                'class' => 'btn-group mr-2'
+                            ],
+                            'dropdownOptions' => [
+                                'label' => 'Export to Excel',
+                                'class' => 'btn btn-outline-secondary',
+                                'itemsBefore' => [
+                                    '<div class="dropdown-header">Export All Data</div>',
+                                ],
+                            ],
+                            'filename' => 'mfl_facilities_export' . date("YmdHis")
                         ]);
                         //  echo "<p class='text-sm'>Found " . $dataProvider->getCount() . " search record(s)</p>";
                         echo GridView::widget([
@@ -280,7 +292,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
                             'panel' => [
                                 'type' => GridView::TYPE_DEFAULT,
-                            // 'heading' => '<h3 class="panel-title"><i class="fas fa-book"></i> Library</h3>',
+                                // 'heading' => '<h3 class="panel-title"><i class="fas fa-book"></i> Library</h3>',
                             ],
                             // set a label for default menu
                             'export' => false,
@@ -305,4 +317,3 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 </div>
-
