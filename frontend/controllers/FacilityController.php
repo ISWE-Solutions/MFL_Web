@@ -10,7 +10,8 @@ use frontend\models\FacilitySearch;
 /**
  * Facility controller
  */
-class FacilityController extends Controller {
+class FacilityController extends Controller
+{
 
     /**
      * Displays a single MFLFacility model.
@@ -18,12 +19,13 @@ class FacilityController extends Controller {
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id) {
+    public function actionView($id)
+    {
         $model = Facility::find()
-                        ->select(['*', 'ST_AsGeoJSON(geom) as geom'])
-                        ->where(["id" => $id])->one();
+            ->select(['*', 'ST_AsGeoJSON(geom) as geom'])
+            ->where(["id" => $id])->one();
         return $this->render('view', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -31,7 +33,8 @@ class FacilityController extends Controller {
      * Lists all MFLFacility models.
      * @return mixed
      */
-    public function actionIndex($type = "", $ownership = "") {
+    public function actionIndex($type = "", $ownership = "")
+    {
         $searchModel = new FacilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->query->andFilterWhere(['status' => 1]);
@@ -47,6 +50,7 @@ class FacilityController extends Controller {
 
             $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
         }
+
         if (!empty($type)) {
             $dataProvider->query->andFilterWhere(['type' => $type]);
         }
@@ -54,27 +58,30 @@ class FacilityController extends Controller {
             $dataProvider->query->andFilterWhere(['ownership' => $ownership]);
         }
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
-    public function actionSearch() {
+    public function actionSearch()
+    {
         $searchModel = new FacilitySearch();
-        
-        if (!empty(Yii::$app->request->queryParams['FacilitySearch']['district_id']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['constituency_id']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['zone_id']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['ward_id']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['ownership']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['name']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['province_id']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['type']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['operational_status']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['ownership_type']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['service_category']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['service']) ||
-                !empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
+
+        if (
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['district_id']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['constituency_id']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['zone_id']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['ward_id']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['ownership']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['name']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['province_id']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['type']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['operational_status']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['ownership_type']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['service_category']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['service']) ||
+            !empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])
+        ) {
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         } else {
             // a hack to create an illusion that a person has not searched yet
@@ -84,10 +91,10 @@ class FacilityController extends Controller {
 
         //Filter by province
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['province_id'])) {
-            
+
             $district_ids = [];
             $districts = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
-                            ->where(['province_id' => Yii::$app->request->queryParams['FacilitySearch']['province_id']])->all();
+                ->where(['province_id' => Yii::$app->request->queryParams['FacilitySearch']['province_id']])->all();
             if (!empty($districts)) {
                 foreach ($districts as $id) {
                     array_push($district_ids, $id['id']);
@@ -128,8 +135,8 @@ class FacilityController extends Controller {
             $service_ids = [];
             $facility_service_ids = [];
             $services = \backend\models\FacilityService::find()->cache(Yii::$app->params['cache_duration'])
-                    ->where(['category_id' => Yii::$app->request->queryParams['FacilitySearch']['service_category']])
-                    ->all();
+                ->where(['category_id' => Yii::$app->request->queryParams['FacilitySearch']['service_category']])
+                ->all();
             if (!empty($services)) {
                 foreach ($services as $id) {
                     array_push($service_ids, $id['id']);
@@ -137,9 +144,9 @@ class FacilityController extends Controller {
             }
             if (!empty($service_ids)) {
                 $facility_services = \backend\models\MFLFacilityServices::find()
-                        ->cache(Yii::$app->params['cache_duration'])
-                        ->where(['IN', 'service_id', $service_ids])
-                        ->all();
+                    ->cache(Yii::$app->params['cache_duration'])
+                    ->where(['IN', 'service_id', $service_ids])
+                    ->all();
                 if (!empty($facility_services)) {
                     foreach ($facility_services as $id) {
                         array_push($facility_service_ids, $id['facility_id']);
@@ -152,9 +159,9 @@ class FacilityController extends Controller {
         if (!empty(Yii::$app->request->queryParams['FacilitySearch']['service'])) {
             $facility_service_ids = [];
             $facility_services = \backend\models\MFLFacilityServices::find()
-                    ->cache(Yii::$app->params['cache_duration'])
-                    ->where(['service_id' => Yii::$app->request->queryParams['FacilitySearch']['service']])
-                    ->all();
+                ->cache(Yii::$app->params['cache_duration'])
+                ->where(['service_id' => Yii::$app->request->queryParams['FacilitySearch']['service']])
+                ->all();
             if (!empty($facility_services)) {
                 foreach ($facility_services as $id) {
                     array_push($facility_service_ids, $id['facility_id']);
@@ -165,8 +172,8 @@ class FacilityController extends Controller {
 
 
         return $this->render('search', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -174,7 +181,8 @@ class FacilityController extends Controller {
      * 
      * @return type
      */
-    public function actionServices() {
+    public function actionServices()
+    {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
@@ -185,10 +193,10 @@ class FacilityController extends Controller {
                 $dist_id = $parents[0];
 
                 $out = \backend\models\FacilityService::find()
-                        ->select(['id', 'name'])
-                        ->where(['category_id' => $dist_id])
-                        ->asArray()
-                        ->all();
+                    ->select(['id', 'name'])
+                    ->where(['category_id' => $dist_id])
+                    ->asArray()
+                    ->all();
 
                 return ['output' => $out, 'selected' => $selected_id];
             }
@@ -200,7 +208,8 @@ class FacilityController extends Controller {
      * 
      * @return type
      */
-    public function actionOwnerships() {
+    public function actionOwnerships()
+    {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
@@ -210,16 +219,16 @@ class FacilityController extends Controller {
                 $dist_id = $parents[0];
                 if ($dist_id == 2) {
                     $out = \backend\models\FacilityOwnership::find()
-                            ->select(['shared_id as id', 'name'])
-                            ->where(['shared_id' => 9])
-                            ->asArray()
-                            ->all();
+                        ->select(['shared_id as id', 'name'])
+                        ->where(['shared_id' => 9])
+                        ->asArray()
+                        ->all();
                 } else {
                     $out = \backend\models\FacilityOwnership::find()
-                            ->select(['shared_id as id', 'name'])
-                            ->where(["NOT IN", 'shared_id', [9]])
-                            ->asArray()
-                            ->all();
+                        ->select(['shared_id as id', 'name'])
+                        ->where(["NOT IN", 'shared_id', [9]])
+                        ->asArray()
+                        ->all();
                 }
 
                 return ['output' => $out, 'selected' => $selected_id];
@@ -232,7 +241,8 @@ class FacilityController extends Controller {
      * 
      * @return type
      */
-    public function actionRating() {
+    public function actionRating()
+    {
         $model = new \backend\models\MFLFacilityRatings();
         if ($model->load(Yii::$app->request->post())) {
 
@@ -259,5 +269,4 @@ class FacilityController extends Controller {
             return $this->renderAjax('success', []);
         }
     }
-
 }

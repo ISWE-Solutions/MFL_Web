@@ -103,7 +103,6 @@ class FacilitiesController extends Controller {
                         array_push($district_ids, $id['id']);
                     }
                 }
-
                 $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
             }
 
@@ -379,7 +378,7 @@ class FacilitiesController extends Controller {
                     self::sendEmail($subject, $user->email, $msg);
                 }
 
-                Yii::$app->session->setFlash('success', 'Facility was added successfully sendt back to district user. District user will have to login to edit the facility');
+                Yii::$app->session->setFlash('success', 'Facility was successfully sent back to district user. District user will have to login to edit the facility');
             } else {
                 $message = "";
                 foreach ($model->getErrors() as $error) {

@@ -236,7 +236,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //                        ],
                     ];
 
-echo $dataProvider->getCount() ;
+
                     if ($dataProvider->getCount() > 0) {
                         $fullExportMenu = ExportMenu::widget([
                                     'dataProvider' => $dataProvider,

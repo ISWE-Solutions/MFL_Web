@@ -304,7 +304,16 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
             ],
         ];
         $gridColumns2 = [
-            'id',
+            [
+                'enableSorting' => true,
+                'attribute' => 'id',
+                'label' => 'MFL Code',
+            ],
+            [
+                'enableSorting' => true,
+                'attribute' => 'dhis2_uid',
+                'label' => 'DHIS2 UID',
+            ],
             [
                 'enableSorting' => true,
                 'attribute' => 'name',

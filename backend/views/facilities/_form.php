@@ -143,8 +143,12 @@ $province_user_province_id = "";
                         <div class="col-lg-4">
                             <?= $form->field($model, 'postal_address')->textInput(['placeholder' => 'Enter facility postal address']) ?>
                             <?=
+                            $form->field($model, 'dhis2_uid')->textInput(['maxlength' => true, 'placeholder' =>
+                            'Enter DHIS2 UID'])->label("DHIS2 UID")
+                            ?>
+                            <?=
                             $form->field($model, 'hims_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter hims Code'])
+                                'Enter hmis Code'])
                             ?>
 
                             <?=

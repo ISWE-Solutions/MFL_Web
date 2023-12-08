@@ -15,20 +15,20 @@ use kartik\select2\Select2;
 
 <?php
 $form = ActiveForm::begin([
-            'action' => ['search'],
-            'method' => 'get',
-        ]);
+    'action' => ['search'],
+    'method' => 'get',
+]);
 ?>
 <div class="row">
     <div class="col-lg-3">
         <?php
         echo $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' =>
-            'Filter by facility name', 'required' => false,]);
+        'Filter by facility name', 'required' => false,]);
         ?>
     </div>
     <div class="col-lg-3">
         <?=
-         $form->field($model, 'service_category')->widget(Select2::classname(), [
+        $form->field($model, 'service_category')->widget(Select2::classname(), [
             'data' => \backend\models\FacilityServicecategory::getList(),
             'options' => ['placeholder' => 'Filter by service type', 'id' => 'service_category_id'],
             'pluginOptions' => [
@@ -58,7 +58,7 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?=
-            $form->field($model, 'type')->widget(Select2::classname(), [
+        $form->field($model, 'type')->widget(Select2::classname(), [
             'data' => \backend\models\Facilitytype::getList(),
             'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type_id'],
             'pluginOptions' => [
@@ -68,8 +68,8 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-lg-3">
-         <?=
-            $form->field($model, 'ownership_type')->widget(Select2::classname(), [
+        <?=
+        $form->field($model, 'ownership_type')->widget(Select2::classname(), [
             'data' =>  [1 => "Public", 2 => "Private"],
             'options' => ['placeholder' => 'Filter by ownership type', 'id' => 'ownership_type_id'],
             'pluginOptions' => [
@@ -96,12 +96,12 @@ $form = ActiveForm::begin([
             ]
         ]);
         ?>
-       
+
     </div>
 
     <div class="col-lg-3">
-         <?=
-            $form->field($model, 'operational_status')->widget(Select2::classname(), [
+        <?=
+        $form->field($model, 'operational_status')->widget(Select2::classname(), [
             'data' =>  \backend\models\Operationstatus::getList(),
             'options' => ['placeholder' => 'Filter by operation status', 'id' => 'operational_status_id'],
             'pluginOptions' => [
@@ -112,8 +112,8 @@ $form = ActiveForm::begin([
     </div>
 
     <div class="col-lg-3">
-         <?=
-            $form->field($model, 'province_id')->widget(Select2::classname(), [
+        <?=
+        $form->field($model, 'province_id')->widget(Select2::classname(), [
             'data' =>  \backend\models\Provinces::getProvinceList(),
             'options' => ['placeholder' => 'Filter by province', 'id' => 'prov_id'],
             'pluginOptions' => [
@@ -142,7 +142,7 @@ $form = ActiveForm::begin([
                 'loadingText' => 'Loading districts....',
             ]
         ]);
-//  }
+        //  }
         ?>
     </div>
     <div class="col-lg-3">
@@ -184,7 +184,6 @@ $form = ActiveForm::begin([
             ]
         ]);
         ?>
-
     </div>
 
 
@@ -194,4 +193,3 @@ $form = ActiveForm::begin([
     </div>
 </div>
 <?php ActiveForm::end(); ?>
-

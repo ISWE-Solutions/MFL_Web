@@ -307,6 +307,7 @@ $facility_operating_hours = new ActiveDataProvider([
                                             },
                                         ],
                                         'accesibility',
+                                        'dhis2_uid',
                                         'hims_code',
                                         'smartcare_code',
                                         'elmis_code',

@@ -4,6 +4,7 @@ use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\grid\ActionColumn;
 use kartik\export\ExportMenu;
+use Yii;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\MFLFacilitySearch */
@@ -20,16 +21,18 @@ if (!empty($_GET['FacilitySearch']['province_id'])) {
 if (!empty($_GET['FacilitySearch']['district_id'])) {
     $districtId = $_GET['FacilitySearch']['district_id'];
 }
+
+
 ?>
 <div class="container-fluid">
-    <div class="row"  style="margin-right:-100px;margin-left:-100px;">
+    <div class="row" style="margin-right:-100px;margin-left:-100px;">
         <div class="col-lg-12">
             <div class="card card-primary card-outline">
                 <div class="card-body">
 
                     <?php
                     $gridColumns = [
-                        //'id',
+
                         [
                             'enableSorting' => true,
                             'attribute' => 'name',
@@ -37,7 +40,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                             'filterWidgetOptions' => [
                                 'pluginOptions' => ['allowClear' => true],
                             ],
-                            'filter' => \backend\models\Facility::getNamesFilter($provinceId,$districtId),
+                            'filter' => \backend\models\Facility::getNamesFilter($provinceId, $districtId),
                             'filterInputOptions' => ['prompt' => 'Filter by name', 'class' => 'form-control',],
                             'format' => 'raw',
                         ],
@@ -110,20 +113,23 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                                 return !empty($name) ? $name->name : "";
                             },
                         ],
-                        ['class' => ActionColumn::className(),
+                        [
+                            'class' => ActionColumn::className(),
                             'options' => ['style' => 'width:40px;'],
                             'template' => '{view}',
                             'buttons' => [
                                 'view' => function ($url, $model) {
                                     return Html::a(
-                                            '<span class="fa fa-eye"></span>', ['view', 'id' => $model->id], [
-                                        'title' => 'View facility',
-                                        'data-toggle' => 'tooltip',
-                                        'data-placement' => 'top',
-                                        'data-pjax' => '0',
-                                        'style' => "padding:5px;",
-                                        'class' => 'bt btn-lg'
-                                            ]
+                                        '<span class="fa fa-eye"></span>',
+                                        ['view', 'id' => $model->id],
+                                        [
+                                            'title' => 'View facility',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'data-pjax' => '0',
+                                            'style' => "padding:5px;",
+                                            'class' => 'bt btn-lg'
+                                        ]
                                     );
                                 },
                             ]
@@ -131,6 +137,16 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                     ];
                     $gridColumns2 = [
                         //'id',
+                        [
+                            'enableSorting' => true,
+                            'attribute' => 'id',
+                            'label' => 'MFL Code',
+                        ],
+                        [
+                            'enableSorting' => true,
+                            'attribute' => 'dhis2_uid',
+                            'label' => 'DHIS2 UID',
+                        ],
                         [
                             'enableSorting' => true,
                             'attribute' => 'name',
@@ -223,59 +239,59 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                         'number_of_households',
                         'latitude',
                         'longitude',
-//                        [
-//                            'attribute' => 'status',
-//                            'value' => function($model) {
-//                                $str = "";
-//                                if ($model->status === 1) {
-//                                    $str = "<span class='badge badge-pill badge-success'> "
-//                                            . "<i class='fa fa-check'></i> Active</span>";
-//                                }
-//                                if ($model->status === 0) {
-//                                    $str = "<span class='badge badge-pill badge-danger'> "
-//                                            . "<i class='fa fa-times'></i> Inactive";
-//                                }
-//                                if ($model->status === 2) {
-//                                    $str = "<span class='badge badge-pill badge-dark'> "
-//                                            . "<i class='fas fa-hourglass-half'></i> Pending approval";
-//                                }
-//                                return $str;
-//                            },
-//                            'format' => 'raw',
-//                        ],
+                        //                        [
+                        //                            'attribute' => 'status',
+                        //                            'value' => function($model) {
+                        //                                $str = "";
+                        //                                if ($model->status === 1) {
+                        //                                    $str = "<span class='badge badge-pill badge-success'> "
+                        //                                            . "<i class='fa fa-check'></i> Active</span>";
+                        //                                }
+                        //                                if ($model->status === 0) {
+                        //                                    $str = "<span class='badge badge-pill badge-danger'> "
+                        //                                            . "<i class='fa fa-times'></i> Inactive";
+                        //                                }
+                        //                                if ($model->status === 2) {
+                        //                                    $str = "<span class='badge badge-pill badge-dark'> "
+                        //                                            . "<i class='fas fa-hourglass-half'></i> Pending approval";
+                        //                                }
+                        //                                return $str;
+                        //                            },
+                        //                            'format' => 'raw',
+                        //                        ],
                     ];
 
                     $fullExportMenu = "";
                     if (!empty($dataProvider) && $dataProvider->getCount() > 0) {
                         $fullExportMenu = ExportMenu::widget([
-                                    'dataProvider' => $dataProvider,
-                                    'columns' => $gridColumns2,
-                                    'columnSelectorOptions' => [
-                                        'label' => 'Cols...',
-                                    ],
-                                    'batchSize' => 200,
-                                    // 'hiddenColumns' => [0, 9],
-                                    //'disabledColumns' => [1, 2],
-                                    //'target' => ExportMenu::TARGET_BLANK,
-                                    'exportConfig' => [
-                                        ExportMenu::FORMAT_TEXT => false,
-                                        ExportMenu::FORMAT_HTML => false,
-                                        ExportMenu::FORMAT_EXCEL => false,
-                                        ExportMenu::FORMAT_PDF => false,
-                                        ExportMenu::FORMAT_CSV => false,
-                                    ],
-                                    'pjaxContainerId' => 'kv-pjax-container',
-                                    'exportContainer' => [
-                                        'class' => 'btn-group mr-2'
-                                    ],
-                                    'dropdownOptions' => [
-                                        'label' => 'Export to Excel',
-                                        'class' => 'btn btn-outline-secondary',
-                                        'itemsBefore' => [
-                                            '<div class="dropdown-header">Export All Data</div>',
-                                        ],
-                                    ],
-                                    'filename' => 'mfl_facilities_export' . date("YmdHis")
+                            'dataProvider' => $dataProvider,
+                            'columns' => $gridColumns2,
+                            'columnSelectorOptions' => [
+                                'label' => 'Cols...',
+                            ],
+                            'batchSize' => 200,
+                            // 'hiddenColumns' => [0, 9],
+                            //'disabledColumns' => [1, 2],
+                            //'target' => ExportMenu::TARGET_BLANK,
+                            'exportConfig' => [
+                                ExportMenu::FORMAT_TEXT => false,
+                                ExportMenu::FORMAT_HTML => false,
+                                ExportMenu::FORMAT_EXCEL => false,
+                                ExportMenu::FORMAT_PDF => false,
+                                ExportMenu::FORMAT_CSV => false,
+                            ],
+                            'pjaxContainerId' => 'kv-pjax-container',
+                            'exportContainer' => [
+                                'class' => 'btn-group mr-2'
+                            ],
+                            'dropdownOptions' => [
+                                'label' => 'Export to Excel',
+                                'class' => 'btn btn-outline-secondary',
+                                'itemsBefore' => [
+                                    '<div class="dropdown-header">Export All Data</div>',
+                                ],
+                            ],
+                            'filename' => 'mfl_facilities_export' . date("YmdHis")
                         ]);
                     }
                     //  echo "<p class='text-sm'>Found " . $dataProvider->getCount() . " search record(s)</p>";
@@ -290,7 +306,7 @@ if (!empty($_GET['FacilitySearch']['district_id'])) {
                         'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
                         'panel' => [
                             'type' => GridView::TYPE_PRIMARY,
-                        // 'heading' => '<h3 class="panel-title"><i class="fas fa-book"></i> Library</h3>',
+                            // 'heading' => '<h3 class="panel-title"><i class="fas fa-book"></i> Library</h3>',
                         ],
                         // set a label for default menu
                         'export' => false,

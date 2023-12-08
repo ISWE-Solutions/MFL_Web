@@ -1,67 +1,30 @@
 <?php
 
+use yii\helpers\Url;
 use yii\helpers\Html;
-use dosamigos\google\maps\LatLng;
-use dosamigos\google\maps\overlays\InfoWindow;
-use dosamigos\google\maps\overlays\Marker;
-use dosamigos\google\maps\Map;
-use dosamigos\google\maps\overlays\Polygon;
 use kartik\depdrop\DepDrop;
 use kartik\form\ActiveForm;
-use yii\helpers\Url;
+use dosamigos\google\maps\Map;
+use dosamigos\google\maps\LatLng;
+use dosamigos\google\maps\overlays\Marker;
+use dosamigos\google\maps\overlays\Polygon;
+use dosamigos\google\maps\overlays\InfoWindow;
 
 $this->title = 'Home';
 $this->params['breadcrumbs'][] = $this->title;
-/* @var $this yii\web\View */
-$this->title = 'Home';
+
 $connection = Yii::$app->getDb();
 //Get all provinces data
 $provinces_model = \backend\models\Provinces::find()
-        ->cache(Yii::$app->params['cache_duration'])
-        ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
-        ->all();
+    ->cache(Yii::$app->params['cache_duration'])
+    ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
+    ->all();
 //get facility types
 $facility_types_model = \backend\models\Facilitytype::find()->cache(Yii::$app->params['cache_duration'])->all();
 $facility_ownership_model = \backend\models\FacilityOwnership::find()->cache(Yii::$app->params['cache_duration'])->all();
 
-/**
- * 
- * Data for Pie/Bar chart by Facility type
- * 
- */
-$pie_series = [];
-$column_series = [];
-$data = [];
-$data1 = [];
-$labels = [];
-$opstatus_id = "";
 $facility_model = "";
-//We assume facility operation status name "Operational" 
-//will never be renamed/deleted otherwise the system breaks
-$operation_status_model = \backend\models\Operationstatus::findOne(['shared_id' => 1]);
-if (!empty($operation_status_model)) {
-    $opstatus_id = $operation_status_model->id;
-//We get facilities by operating status and type
-    $facility_model = backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
-                    ->select(['type', 'COUNT(*) AS count'])
-                    ->where(['operational_status' => $opstatus_id])
-                    ->andWhere(['status' => 1])
-                    ->groupBy(['type'])
-                    ->createCommand()->queryAll();
-    foreach ($facility_model as $model) {
-        //Push pie data to array
-        array_push($data, ['name' => backend\models\Facilitytype::findOne($model['type'])->name, 'y' => (int) $model['count'],]);
-        //Push column labels to array
-        if (!in_array(backend\models\Facilitytype::findOne($model['type'])->name, $labels)) {
-            array_push($labels, backend\models\Facilitytype::findOne($model['type'])->name);
-        }
-        //We push column data to array
-        array_push($data1, (int) $model['count']);
-    }
-    //We push pie plot details to the series
-    array_push($pie_series, ['name' => 'Total', 'colorByPoint' => true, 'data' => $data]);
-    array_push($column_series, ['name' => "Total", 'data' => $data1]);
-}
+
 
 /**
  * 
@@ -73,7 +36,6 @@ $column_series1 = [];
 $data2 = [];
 $data3 = [];
 $labels1 = [];
-$totalOperatingFacilities = 0;
 
 if (!empty($operation_status_model)) {
     $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
@@ -83,12 +45,12 @@ if (!empty($operation_status_model)) {
                                             public."MFL_operationstatus" ops ON f.operational_status=ops.id
                                             WHERE f.status=1 AND ops.id=' . $operation_status_model->id . '
                                             group by p.name Order by p.name')
-                ->queryAll();
+            ->queryAll();
     });
 
     foreach ($province_counts as $model) {
         //Add to total operating facilities
-        $totalOperatingFacilities += (int) $model['count'];
+        //$totalOperatingFacilities += (int) $model['count'];
         //Push pie data to array
         array_push($data2, ['name' => $model['name'], 'y' => (int) $model['count'],]);
         //Push column labels to array
@@ -103,23 +65,27 @@ if (!empty($operation_status_model)) {
     array_push($column_series1, ['name' => "Total", 'data' => $data3]);
 }
 
-//Public
-$public_count_active = backend\models\Facility::find()
-        ->cache(Yii::$app->params['cache_duration'])
-        ->where(['ownership_type' => 1])
-        ->andWhere(['operational_status' => $operation_status_model->id])
-        ->andWhere(['status' => 1])
-        ->count();
-
-// Private
-$_private_count_active = backend\models\Facility::find()
-        ->cache(Yii::$app->params['cache_duration'])
-        ->where(['IN', 'ownership_type', [2]])
-        ->andWhere(['operational_status' => $operation_status_model->id])
-        ->andWhere(['status' => 1])
-        ->count();
 ?>
 <div class="container-fluid">
+    <div class="row">
+        <!-- <p>Use the form below to perform a filter</p> -->
+
+        <div class="col-lg-12 text-sm">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <p class="card-title text-sm">Use the form below to perform a filter</p>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <div class="card-body">
+                    <?php echo $this->render('_form', ['model' => $facilityFilterModel]); ?>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-info">
@@ -198,96 +164,94 @@ $_private_count_active = backend\models\Facility::find()
                 <div class="card-body">
                     <div class="tab-content p-0">
                         <!-- Morris chart - Sales -->
-                        <div class="chart tab-pane active" id="revenue-chart"
-                             style="height: auto;">
-                                 <?=
-                                 \dosamigos\highcharts\HighCharts::widget([
-                                     'clientOptions' => [
-                                         'chart' => [
-                                             'plotBackgroundColor' => null,
-                                             'plotBorderWidth' => null,
-                                             'plotShadow' => false,
-                                             'type' => 'pie',
-                                         ],
-                                         'title' => [
-                                             'text' => 'Operating Facilities by type'
-                                         ],
-                                         'tooltip' => [
-                                             'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
-                                         ],
-                                         [
-                                             'accessibility' => [
-                                                 'point' => [
-                                                     'valueSuffix' => '%'
-                                                 ]
-                                             ],
-                                         ],
-                                         'plotOptions' => [
-                                             'pie' => [
-                                                 'allowPointSelect' => true,
-                                                 'cursor' => 'pointer',
-                                                 'size' => '70%',
-                                                 'height' => '100%',
-                                                 'dataLabels' => [
-                                                     'enabled' => true,
-                                                     'style' => [
-                                                         'fontSize' => 5
-                                                     ],
-                                                     'format' => '{point.name}',
-                                                 //'format' => '{point.name}: {point.percentage:.1f} %',
-                                                 ],
-                                                 'showInLegend' => false
-                                             ]
-                                         ],
-                                         'series' =>
-                                         $pie_series
-                                     ]
-                                 ]);
-                                 ?>
+                        <div class="chart tab-pane active" id="revenue-chart" style="height: auto;">
+                            <?=
+                            \dosamigos\highcharts\HighCharts::widget([
+                                'clientOptions' => [
+                                    'chart' => [
+                                        'plotBackgroundColor' => null,
+                                        'plotBorderWidth' => null,
+                                        'plotShadow' => false,
+                                        'type' => 'pie',
+                                    ],
+                                    'title' => [
+                                        'text' => 'Operating Facilities by type'
+                                    ],
+                                    'tooltip' => [
+                                        'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
+                                    ],
+                                    [
+                                        'accessibility' => [
+                                            'point' => [
+                                                'valueSuffix' => '%'
+                                            ]
+                                        ],
+                                    ],
+                                    'plotOptions' => [
+                                        'pie' => [
+                                            'allowPointSelect' => true,
+                                            'cursor' => 'pointer',
+                                            'size' => '70%',
+                                            'height' => '100%',
+                                            'dataLabels' => [
+                                                'enabled' => true,
+                                                'style' => [
+                                                    'fontSize' => 5
+                                                ],
+                                                'format' => '{point.name}',
+                                                //'format' => '{point.name}: {point.percentage:.1f} %',
+                                            ],
+                                            'showInLegend' => false
+                                        ]
+                                    ],
+                                    'series' =>
+                                    $pie_series
+                                ]
+                            ]);
+                            ?>
                         </div>
-                        <div class="chart tab-pane" id="sales-chart" 
-                             style="position: relative; height: auto;">
-                                 <?=
-                                 \dosamigos\highcharts\HighCharts::widget([
-                                     'clientOptions' => [
-                                         'chart' => [
-                                             'plotBackgroundColor' => null,
-                                             'plotBorderWidth' => null,
-                                             'plotShadow' => false,
-                                             'type' => 'column'
-                                         ],
-                                         'legend' => [
-                                             'enabled' => false
-                                         ],
-                                         'plotOptions' => [
-                                             'column' => [
-                                                 'allowPointSelect' => true,
-                                                 'colorByPoint' => true,
-                                                 'cursor' => 'pointer',
-                                                 'dataLabels' => [
-                                                     'enabled' => true,
-                                                     'style' => [
-                                                         'fontSize' => 5
-                                                     ],
-                                                 ],
-                                             ]
-                                         ],
-                                         'title' => [
-                                             'text' => 'Operating Facilities by type'
-                                         ],
-                                         'xAxis' => [
-                                             'categories' => $labels
-                                         ],
-                                         'yAxis' => [
-                                             'title' => [
-                                                 'text' => 'Count'
-                                             ]
-                                         ],
-                                         'series' => $column_series
-                                     ]
-                                 ]);
-                                 ?>                       
-                        </div>  
+                        <div class="chart tab-pane" id="sales-chart" style="position: relative; height: auto;">
+                            <?=
+                            \dosamigos\highcharts\HighCharts::widget([
+                                'clientOptions' => [
+                                    'chart' => [
+                                        'plotBackgroundColor' => null,
+                                        'plotBorderWidth' => null,
+                                        'plotShadow' => false,
+                                        'type' => 'column'
+                                    ],
+                                    'legend' => [
+                                        'enabled' => false
+                                    ],
+                                    'plotOptions' => [
+                                        'column' => [
+                                            'allowPointSelect' => true,
+                                            'colorByPoint' => true,
+                                            'cursor' => 'pointer',
+                                            'dataLabels' => [
+                                                'enabled' => true,
+                                                'style' => [
+                                                    'fontSize' => 5
+                                                ],
+                                            ],
+                                        ]
+                                    ],
+                                    'title' => [
+                                        'text' => 'Operating Facilities by type'
+                                    ],
+                                    'xAxis' => [
+                                        'categories' => $labels
+                                    ],
+                                    'yAxis' => [
+                                        'title' => [
+                                            'text' => 'Count'
+                                        ]
+                                    ],
+                                    'series' => $column_series
+                                ]
+                            ]);
+                            ?>
+                        </div>
                     </div>
                 </div><!-- /.card-body -->
             </div>
@@ -310,96 +274,94 @@ $_private_count_active = backend\models\Facility::find()
                 <div class="card-body">
                     <div class="tab-content p-0">
                         <!-- Morris chart - Sales -->
-                        <div class="chart tab-pane " id="pie-chart"
-                             style="height: auto;">
-                                 <?=
-                                 \dosamigos\highcharts\HighCharts::widget([
-                                     'clientOptions' => [
-                                         'chart' => [
-                                             'plotBackgroundColor' => null,
-                                             'plotBorderWidth' => null,
-                                             'plotShadow' => false,
-                                             'type' => 'pie',
-                                         ],
-                                         'title' => [
-                                             'text' => 'Operating Facilities by Province'
-                                         ],
-                                         'tooltip' => [
-                                             'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
-                                         ],
-                                         [
-                                             'accessibility' => [
-                                                 'point' => [
-                                                     'valueSuffix' => '%'
-                                                 ]
-                                             ],
-                                         ],
-                                         'plotOptions' => [
-                                             'pie' => [
-                                                 'allowPointSelect' => true,
-                                                 'cursor' => 'pointer',
-                                                 'size' => '70%',
-                                                 'height' => '100%',
-                                                 'dataLabels' => [
-                                                     'enabled' => true,
-                                                     'style' => [
-                                                         'fontSize' => 5
-                                                     ],
-                                                     'format' => '{point.name}',
-                                                 //'format' => '{point.name}: {point.percentage:.1f} %',
-                                                 ],
-                                                 'showInLegend' => false
-                                             ]
-                                         ],
-                                         'series' =>
-                                         $pie_series1
-                                     ]
-                                 ]);
-                                 ?>
+                        <div class="chart tab-pane " id="pie-chart" style="height: auto;">
+                            <?=
+                            \dosamigos\highcharts\HighCharts::widget([
+                                'clientOptions' => [
+                                    'chart' => [
+                                        'plotBackgroundColor' => null,
+                                        'plotBorderWidth' => null,
+                                        'plotShadow' => false,
+                                        'type' => 'pie',
+                                    ],
+                                    'title' => [
+                                        'text' => 'Operating Facilities by Province'
+                                    ],
+                                    'tooltip' => [
+                                        'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
+                                    ],
+                                    [
+                                        'accessibility' => [
+                                            'point' => [
+                                                'valueSuffix' => '%'
+                                            ]
+                                        ],
+                                    ],
+                                    'plotOptions' => [
+                                        'pie' => [
+                                            'allowPointSelect' => true,
+                                            'cursor' => 'pointer',
+                                            'size' => '70%',
+                                            'height' => '100%',
+                                            'dataLabels' => [
+                                                'enabled' => true,
+                                                'style' => [
+                                                    'fontSize' => 5
+                                                ],
+                                                'format' => '{point.name}',
+                                                //'format' => '{point.name}: {point.percentage:.1f} %',
+                                            ],
+                                            'showInLegend' => false
+                                        ]
+                                    ],
+                                    'series' =>
+                                    $pie_series1
+                                ]
+                            ]);
+                            ?>
                         </div>
-                        <div class="chart tab-pane active" id="bar-chart" 
-                             style="position: relative; height: auto;">
-                                 <?=
-                                 \dosamigos\highcharts\HighCharts::widget([
-                                     'clientOptions' => [
-                                         'chart' => [
-                                             'plotBackgroundColor' => null,
-                                             'plotBorderWidth' => null,
-                                             'plotShadow' => false,
-                                             'type' => 'column'
-                                         ],
-                                         'legend' => [
-                                             'enabled' => false
-                                         ],
-                                         'plotOptions' => [
-                                             'column' => [
-                                                 'allowPointSelect' => true,
-                                                 'colorByPoint' => true,
-                                                 'cursor' => 'pointer',
-                                                 'dataLabels' => [
-                                                     'enabled' => true,
-                                                     'style' => [
-                                                         'fontSize' => 5
-                                                     ],
-                                                 ],
-                                             ]
-                                         ],
-                                         'title' => [
-                                             'text' => 'Operating Facilities by Province'
-                                         ],
-                                         'xAxis' => [
-                                             'categories' => $labels1
-                                         ],
-                                         'yAxis' => [
-                                             'title' => [
-                                                 'text' => 'Count'
-                                             ]
-                                         ],
-                                         'series' => $column_series1
-                                     ]
-                                 ]);
-                                 ?>                       
-                        </div>  
+                        <div class="chart tab-pane active" id="bar-chart" style="position: relative; height: auto;">
+                            <?=
+                            \dosamigos\highcharts\HighCharts::widget([
+                                'clientOptions' => [
+                                    'chart' => [
+                                        'plotBackgroundColor' => null,
+                                        'plotBorderWidth' => null,
+                                        'plotShadow' => false,
+                                        'type' => 'column'
+                                    ],
+                                    'legend' => [
+                                        'enabled' => false
+                                    ],
+                                    'plotOptions' => [
+                                        'column' => [
+                                            'allowPointSelect' => true,
+                                            'colorByPoint' => true,
+                                            'cursor' => 'pointer',
+                                            'dataLabels' => [
+                                                'enabled' => true,
+                                                'style' => [
+                                                    'fontSize' => 5
+                                                ],
+                                            ],
+                                        ]
+                                    ],
+                                    'title' => [
+                                        'text' => 'Operating Facilities by Province'
+                                    ],
+                                    'xAxis' => [
+                                        'categories' => $labels1
+                                    ],
+                                    'yAxis' => [
+                                        'title' => [
+                                            'text' => 'Count'
+                                        ]
+                                    ],
+                                    'series' => $column_series1
+                                ]
+                            ]);
+                            ?>
+                        </div>
                     </div>
                 </div><!-- /.card-body -->
             </div>
@@ -429,11 +391,13 @@ $_private_count_active = backend\models\Facility::find()
 
                             //We set the map settings based on the province/distric search
                             //1. By province
-                            if (isset($_GET['Facility']['province_id']) &&
-                                    !empty($_GET['Facility']['province_id'])) {
+                            if (
+                                isset($_GET['Facility']['province_id']) &&
+                                !empty($_GET['Facility']['province_id'])
+                            ) {
                                 $prov_model = \backend\models\Provinces::find()->cache(Yii::$app->params['cache_duration'])
-                                                ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
-                                                ->where(["id" => $_GET['Facility']['province_id']])->one();
+                                    ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
+                                    ->where(["id" => $_GET['Facility']['province_id']])->one();
 
                                 if (!empty($prov_model)) {
                                     $coords = \backend\models\Provinces::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
@@ -459,11 +423,13 @@ $_private_count_active = backend\models\Facility::find()
                                 }
                             }
                             //2. By district
-                            if (isset($_GET['Facility']['district_id']) &&
-                                    !empty($_GET['Facility']['district_id'])) {
+                            if (
+                                isset($_GET['Facility']['district_id']) &&
+                                !empty($_GET['Facility']['district_id'])
+                            ) {
                                 $prov_model = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
-                                                ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
-                                                ->where(["id" => $_GET['Facility']['district_id']])->one();
+                                    ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
+                                    ->where(["id" => $_GET['Facility']['district_id']])->one();
 
                                 if (!empty($prov_model)) {
                                     $coords = \backend\models\Districts::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
@@ -492,11 +458,13 @@ $_private_count_active = backend\models\Facility::find()
 
                             //Show the filter parameters
                             if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
-                                if (!empty($_GET['Facility']['province_id']) ||
-                                        !empty($_GET['Facility']['ownership']) ||
-                                        !empty($_GET['Facility']['type']) ||
-                                        !empty($_GET['Facility']['name']) ||
-                                        !empty($_GET['Facility']['district_id'])) {
+                                if (
+                                    !empty($_GET['Facility']['province_id']) ||
+                                    !empty($_GET['Facility']['ownership']) ||
+                                    !empty($_GET['Facility']['type']) ||
+                                    !empty($_GET['Facility']['name']) ||
+                                    !empty($_GET['Facility']['district_id'])
+                                ) {
                                     $_province = !empty($_GET['Facility']['province_id']) ? \backend\models\Provinces::findOne($_GET['Facility']['province_id'])->name : "";
                                     $_district = !empty($_GET['Facility']['district_id']) ? \backend\models\Districts::findOne($_GET['Facility']['district_id'])->name : "";
                                     $_facility_type = !empty($_GET['Facility']['type']) ? \backend\models\Facilitytype::findOne($_GET['Facility']['type'])->name : "";
@@ -507,7 +475,7 @@ $_private_count_active = backend\models\Facility::find()
                                     $own_str = !empty($_ownership) ? "Ownship:" . $_ownership : "";
                                     $name_str = !empty($_GET['Facility']['name']) ? "Facility name:" . $_GET['Facility']['name'] . "|" : "";
                                     $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i>"
-                                            . $fac_str . "</i><i>" . $own_str . "</I>";
+                                        . $fac_str . "</i><i>" . $own_str . "</I>";
                                     echo "<p class='text-sm'>$filter_str</p>";
                                 }
                             }
@@ -516,24 +484,34 @@ $_private_count_active = backend\models\Facility::find()
                             }
 
                             //We make sure that the filter form maintains the filter values
-                            if (isset($_GET['Facility']['province_id']) &&
-                                    !empty($_GET['Facility']['province_id'])) {
+                            if (
+                                isset($_GET['Facility']['province_id']) &&
+                                !empty($_GET['Facility']['province_id'])
+                            ) {
                                 $Facility_model->province_id = $_GET['Facility']['province_id'];
                             }
-                            if (isset($_GET['Facility']['district_id']) &&
-                                    !empty($_GET['Facility']['district_id'])) {
+                            if (
+                                isset($_GET['Facility']['district_id']) &&
+                                !empty($_GET['Facility']['district_id'])
+                            ) {
                                 $Facility_model->district_id = $_GET['Facility']['district_id'];
                             }
-                            if (isset($_GET['Facility']['ownership']) &&
-                                    !empty($_GET['Facility']['ownership'])) {
+                            if (
+                                isset($_GET['Facility']['ownership']) &&
+                                !empty($_GET['Facility']['ownership'])
+                            ) {
                                 $Facility_model->ownership = $_GET['Facility']['ownership'];
                             }
-                            if (isset($_GET['Facility']['type']) &&
-                                    !empty($_GET['Facility']['type'])) {
+                            if (
+                                isset($_GET['Facility']['type']) &&
+                                !empty($_GET['Facility']['type'])
+                            ) {
                                 $Facility_model->type = $_GET['Facility']['type'];
                             }
-                            if (isset($_GET['Facility']['name']) &&
-                                    !empty($_GET['Facility']['name'])) {
+                            if (
+                                isset($_GET['Facility']['name']) &&
+                                !empty($_GET['Facility']['name'])
+                            ) {
                                 $Facility_model->name = $_GET['Facility']['name'];
                             }
                             /* if (isset($_GET['Facility']['district_id']) &&
@@ -560,8 +538,8 @@ $_private_count_active = backend\models\Facility::find()
                                         ]);
                                         //We get all districts in the province
                                         $districts_model = backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
-                                                ->where(['province_id' => $model->id])
-                                                ->all();
+                                            ->where(['province_id' => $model->id])
+                                            ->all();
                                         //We create an array to be used to get the facilities in the province
                                         $district_ids = [];
                                         if (!empty($districts_model)) {
@@ -572,12 +550,12 @@ $_private_count_active = backend\models\Facility::find()
 
                                         //We now get the facilities in the province
                                         $facilities_counts = backend\models\Facility::find()
-                                                        ->cache(Yii::$app->params['cache_duration'])
-                                                        ->select(["COUNT(*) as count", "type"])
-                                                        ->where(['operational_status' => $opstatus_id])
-                                                        ->andWhere(['IN', 'district_id', $district_ids])
-                                                        ->groupBy(['type'])
-                                                        ->createCommand()->queryAll();
+                                            ->cache(Yii::$app->params['cache_duration'])
+                                            ->select(["COUNT(*) as count", "type"])
+                                            ->where(['operational_status' => $opstatus_id])
+                                            ->andWhere(['IN', 'district_id', $district_ids])
+                                            ->groupBy(['type'])
+                                            ->createCommand()->queryAll();
 
                                         //We build the window string
                                         $type_str = "";
@@ -586,8 +564,8 @@ $_private_count_active = backend\models\Facility::find()
                                             $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
                                         }
                                         $polygon->attachInfoWindow(new InfoWindow([
-                                                    'content' => '<p><strong><span class="text-center">' . $model->name . ' Province Facility types</span></strong><hr>'
-                                                    . $type_str . '</p>'
+                                            'content' => '<p><strong><span class="text-center">' . $model->name . ' Province Facility types</span></strong><hr>'
+                                                . $type_str . '</p>'
                                         ]));
 
                                         $map->addOverlay($polygon);
@@ -619,9 +597,10 @@ $_private_count_active = backend\models\Facility::find()
                                                 $type_str .= "<b>Operation status: </b><span style='color:green;'>" . $operation_status . "</span><br>";
                                                 $type_str .= Html::a('View more details', ['/facility/view', 'id' => $_model->id], ["class" => "text-sm"]);
                                                 $marker->attachInfoWindow(
-                                                        new InfoWindow([
-                                                            'content' => '<p><strong><span class="text-center">' . $_model->name . '</span></strong><hr>'
-                                                            . $type_str . '</p>'])
+                                                    new InfoWindow([
+                                                        'content' => '<p><strong><span class="text-center">' . $_model->name . '</span></strong><hr>'
+                                                            . $type_str . '</p>'
+                                                    ])
                                                 );
 
                                                 $map->addOverlay($marker);
@@ -652,8 +631,8 @@ $_private_count_active = backend\models\Facility::find()
 
                                         //We get all districts in the province
                                         $districts_model = backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
-                                                ->where(['province_id' => $model->id])
-                                                ->all();
+                                            ->where(['province_id' => $model->id])
+                                            ->all();
                                         //We create an array to be used to get the facilities in the province
                                         $district_ids = [];
                                         if (!empty($districts_model)) {
@@ -664,12 +643,12 @@ $_private_count_active = backend\models\Facility::find()
 
                                         //We now get the facilities in the province
                                         $facilities_counts = backend\models\Facility::find()
-                                                        ->cache(Yii::$app->params['cache_duration'])
-                                                        ->select(["COUNT(*) as count", "type"])
-                                                        ->where(['operational_status' => $opstatus_id])
-                                                        ->andWhere(['IN', 'district_id', $district_ids])
-                                                        ->groupBy(['type'])
-                                                        ->createCommand()->queryAll();
+                                            ->cache(Yii::$app->params['cache_duration'])
+                                            ->select(["COUNT(*) as count", "type"])
+                                            ->where(['operational_status' => $opstatus_id])
+                                            ->andWhere(['IN', 'district_id', $district_ids])
+                                            ->groupBy(['type'])
+                                            ->createCommand()->queryAll();
 
                                         //We build the window string
                                         $type_str = "";
@@ -678,8 +657,8 @@ $_private_count_active = backend\models\Facility::find()
                                             $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
                                         }
                                         $polygon->attachInfoWindow(new InfoWindow([
-                                                    'content' => '<p><strong><span class="text-center">' . $model->name . ' Province Facility types</span></strong><hr>'
-                                                    . $type_str . '</p>'
+                                            'content' => '<p><strong><span class="text-center">' . $model->name . ' Province Facility types</span></strong><hr>'
+                                                . $type_str . '</p>'
                                         ]));
 
                                         $map->addOverlay($polygon);
@@ -694,30 +673,31 @@ $_private_count_active = backend\models\Facility::find()
                             <h4>Map Instructions</h4>
                             <ol>
                                 <li>Click province to view facility counts by type</li>
-                                <li>A filter below will show actual 
+                                <li>A filter below will show actual
                                     facility locations on the map</li>
                             </ol>
                             <div class="row">
 
                                 <?php
                                 $form = ActiveForm::begin([
-                                            'action' => ['index'],
-                                            'method' => 'GET',
+                                    'action' => ['index'],
+                                    'method' => 'GET',
                                 ]);
                                 ?>
                                 <div class="col-lg-12">
                                     <?php
                                     echo $form->field($Facility_model, 'name')->textInput(['maxlength' => true, 'placeholder' =>
-                                        'Filter by facility name', 'required' => false,]);
+                                    'Filter by facility name', 'required' => false,]);
                                     ?>
                                 </div>
                                 <div class="col-lg-12">
                                     <?php
                                     echo
-                                            $form->field($Facility_model, 'province_id')
-                                            ->dropDownList(
-                                                    \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Filter by province', 'required' => false]
-                                    );
+                                    $form->field($Facility_model, 'province_id')
+                                        ->dropDownList(
+                                            \backend\models\Provinces::getProvinceList(),
+                                            ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Filter by province', 'required' => false]
+                                        );
                                     ?>
                                 </div>
                                 <div class="col-lg-12">
@@ -745,23 +725,26 @@ $_private_count_active = backend\models\Facility::find()
                                 </div>
                                 <div class="col-lg-12">
                                     <?=
-                                            $form->field($Facility_model, 'type')
-                                            ->dropDownList(
-                                                    \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
-                                    );
+                                    $form->field($Facility_model, 'type')
+                                        ->dropDownList(
+                                            \backend\models\Facilitytype::getList(),
+                                            ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
+                                        );
                                     ?>
                                 </div>
                                 <div class="col-lg-12">
                                     <?=
-                                            $form->field($Facility_model, 'ownership')
-                                            ->dropDownList(
-                                                    \backend\models\FacilityOwnership::getList(), ['custom' => true, 'prompt' => 'Filter by ownership', 'required' => false]
-                                    );
+                                    $form->field($Facility_model, 'ownership')
+                                        ->dropDownList(
+                                            \backend\models\FacilityOwnership::getList(),
+                                            ['custom' => true, 'prompt' => 'Filter by ownership', 'required' => false]
+                                        );
                                     ?>
                                 </div>
                                 <div class="col-lg-12">
                                     <?= Html::submitButton('Filter map', ['class' => 'btn btn-primary btn-sm', 'name' => "filter", "value" => "true"]) ?>
-                                    <?php //echo Html::resetButton('Reset', ['class' => 'btn btn-default btn-sm']) ?>
+                                    <?php //echo Html::resetButton('Reset', ['class' => 'btn btn-default btn-sm']) 
+                                    ?>
                                 </div>
                                 <?php ActiveForm::end(); ?>
 
@@ -806,4 +789,3 @@ $_private_count_active = backend\models\Facility::find()
         </div>
     </div>
 </div>
-

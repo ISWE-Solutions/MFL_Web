@@ -53,46 +53,52 @@ $province_user_province_id = "";
                             <?php $form = ActiveForm::begin(); ?>
                             <?=
                             $form->field($model, 'name', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility name'])
+                            'Enter facility name'])
                             ?>
 
 
                             <?=
-                                    $form->field($model, 'type')
-                                    ->dropDownList(
-                                            \backend\models\Facilitytype::getList(), ['custom' => true, 'prompt' => 'Select facility type', 'required' => true]
-                            );
+                            $form->field($model, 'type')
+                                ->dropDownList(
+                                    \backend\models\Facilitytype::getList(),
+                                    ['custom' => true, 'prompt' => 'Select facility type', 'required' => true]
+                                );
                             ?>
                             <?=
-                                    $form->field($model, 'operational_status')
-                                    ->dropDownList(
-                                            \backend\models\Operationstatus::getList(), ['custom' => true, 'prompt' => 'Select operation status', 'required' => true]
-                            );
+                            $form->field($model, 'operational_status')
+                                ->dropDownList(
+                                    \backend\models\Operationstatus::getList(),
+                                    ['custom' => true, 'prompt' => 'Select operation status', 'required' => true]
+                                );
                             ?>
                             <?php
                             //$model->ownership_type = 1;
                             echo $form->field($model, 'ownership_type')
-                                    ->dropDownList(
-                                            [1 => "Public", 2 => "Private"], ['custom' => true, 'prompt' => 'Select ownership type',]
-                            );
+                                ->dropDownList(
+                                    [1 => "Public", 2 => "Private"],
+                                    ['custom' => true, 'prompt' => 'Select ownership type',]
+                                );
                             ?>
                             <?=
-                                    $form->field($model, 'ownership')
-                                    ->dropDownList(
-                                            \backend\models\FacilityOwnership::getList(), ['custom' => true, 'prompt' => 'Select ownership', 'required' => true]
-                            );
+                            $form->field($model, 'ownership')
+                                ->dropDownList(
+                                    \backend\models\FacilityOwnership::getList(),
+                                    ['custom' => true, 'prompt' => 'Select ownership', 'required' => true]
+                                );
                             ?>
                             <?=
-                                    $form->field($model, 'mobility_status')
-                                    ->dropDownList(
-                                            [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"], ['custom' => true, 'prompt' => 'Select mobility status',]
-                            );
+                            $form->field($model, 'mobility_status')
+                                ->dropDownList(
+                                    [1 => "Mobile", 2 => "Fixed", 3 => "telemedicine"],
+                                    ['custom' => true, 'prompt' => 'Select mobility status',]
+                                );
                             ?>
                             <?=
-                                    $form->field($model, 'accesibility')
-                                    ->dropDownList(
-                                            ["Open" => "Open", "Restricted" => "Restricted"], ['custom' => true, 'prompt' => 'Select accessibility',]
-                            );
+                            $form->field($model, 'accesibility')
+                                ->dropDownList(
+                                    ["Open" => "Open", "Restricted" => "Restricted"],
+                                    ['custom' => true, 'prompt' => 'Select accessibility',]
+                                );
                             ?>
                             <?= $form->field($model, 'postal_address')->textInput(['placeholder' => 'Enter facility postal address']) ?>
 
@@ -100,32 +106,32 @@ $province_user_province_id = "";
                         <div class="col-lg-4">
                             <?=
                             $form->field($model, 'email', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility email'])
+                            'Enter facility email'])
                             ?>
 
                             <?=
                             $form->field($model, 'mobile', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility Mobile no'])
+                            'Enter facility Mobile no'])
                             ?>
                             <?=
                             $form->field($model, 'phone', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility telephone no'])
+                            'Enter facility telephone no'])
                             ?>
                             <?=
                             $form->field($model, 'town', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility town'])
+                            'Enter facility town'])
                             ?>
                             <?=
                             $form->field($model, 'plot_no', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility plot no'])
+                            'Enter facility plot no'])
                             ?>
                             <?=
                             $form->field($model, 'street', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility street'])
+                            'Enter facility street'])
                             ?>
                             <?=
                             $form->field($model, 'fax', ['enableAjaxValidation' => true])->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter facility fax'])
+                            'Enter facility fax'])
                             ?>
                             <?= $form->field($model, 'number_of_households')->textInput(['placeholder' => 'Enter facility number of households']) ?>
 
@@ -133,35 +139,39 @@ $province_user_province_id = "";
                         <div class="col-lg-4">
                             <?=
                             $form->field($model, 'disa_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter disa code'])
+                            'Enter disa code'])
+                            ?>
+                            <?=
+                            $form->field($model, 'dhis2_uid')->textInput(['maxlength' => true, 'placeholder' =>
+                            'Enter DHIS2 UID'])->label("DHIS2 UID")
                             ?>
                             <?=
                             $form->field($model, 'hims_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter hims Code'])
+                            'Enter hims Code'])
                             ?>
 
                             <?=
                             $form->field($model, 'smartcare_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter Smartcare code'])
+                            'Enter Smartcare code'])
                             ?>
 
                             <?=
                             $form->field($model, 'elmis_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter elmis code'])
+                            'Enter elmis code'])
                             ?>
 
                             <?=
                             $form->field($model, 'hpcz_code')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter hpcz code'])
+                            'Enter hpcz code'])
                             ?>
                             <?=
                             $form->field($model, 'catchment_population_head_count')->textInput(['placeholder' =>
-                                'Enter population head count'])
+                            'Enter population head count'])
                             ?>
 
                             <?=
                             $form->field($model, 'catchment_population_cso')->textInput(['placeholder' =>
-                                'Enter population cso'])
+                            'Enter population cso'])
                             ?>
                             <?=
                             $form->field($model, 'physical_address')->textarea(['rows' => 3, "placeholder" => "Enter physical address"])->label("Physical address");
@@ -201,15 +211,17 @@ $province_user_province_id = "";
                                 echo $form->field($model, 'province_id')->hiddenInput(['value' => $distric_model->province_id])->label(false);
                                 echo $form->field($model, 'district_id')->hiddenInput(['value' => $district_user_district_id])->label(false);
                                 echo
-                                        $form->field($model, 'constituency_id')
-                                        ->dropDownList(
-                                                \backend\models\Constituency::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a constituency', 'required' => false]
-                                );
+                                $form->field($model, 'constituency_id')
+                                    ->dropDownList(
+                                        \backend\models\Constituency::getListByDistrictID($district_user_district_id),
+                                        ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a constituency', 'required' => false]
+                                    );
                                 echo
-                                        $form->field($model, 'ward_id')
-                                        ->dropDownList(
-                                                \backend\models\Wards::getListByDistrictID($district_user_district_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a ward', 'required' => false]
-                                );
+                                $form->field($model, 'ward_id')
+                                    ->dropDownList(
+                                        \backend\models\Wards::getListByDistrictID($district_user_district_id),
+                                        ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a ward', 'required' => false]
+                                    );
                             }
 
                             if ($user_type == "Province") {
@@ -217,10 +229,11 @@ $province_user_province_id = "";
                                 echo $form->field($model, 'province_id')->hiddenInput(['value' => $province_user_province_id, 'id' => 'prov_id',])->label(false);
 
                                 echo
-                                        $form->field($model, 'district_id')
-                                        ->dropDownList(
-                                                \backend\models\Districts::getListByProvinceID($province_user_province_id), ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => true]
-                                );
+                                $form->field($model, 'district_id')
+                                    ->dropDownList(
+                                        \backend\models\Districts::getListByProvinceID($province_user_province_id),
+                                        ['id' => 'dist_id', 'custom' => true, 'prompt' => 'Please select a district', 'required' => true]
+                                    );
                                 echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
 
                                 echo $form->field($model, 'constituency_id')->widget(DepDrop::classname(), [
@@ -232,7 +245,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                    //'loadingText' => 'Loading constituencies....',
+                                        //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -247,17 +260,18 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                    //'loadingText' => 'Loading wards....',
+                                        //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
 
                             if ($user_type == "National") {
                                 echo
-                                        $form->field($model, 'province_id')
-                                        ->dropDownList(
-                                                \backend\models\Provinces::getProvinceList(), ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Please select a province', 'required' => true]
-                                );
+                                $form->field($model, 'province_id')
+                                    ->dropDownList(
+                                        \backend\models\Provinces::getProvinceList(),
+                                        ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Please select a province', 'required' => true]
+                                    );
                                 echo Html::hiddenInput('selected_id', $model->isNewRecord ? '' : $model->district_id, ['id' => 'selected_id']);
                                 echo $form->field($model, 'district_id')->widget(DepDrop::classname(), [
                                     'options' => ['id' => 'dist_id', 'custom' => true, 'required' => TRUE],
@@ -268,7 +282,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a district',
                                         'url' => Url::to(['/constituencies/district']),
                                         'params' => ['selected_id'],
-                                    // 'loadingText' => 'Loading districts....',
+                                        // 'loadingText' => 'Loading districts....',
                                     ]
                                 ]);
                                 echo Html::hiddenInput('selected_id2', $model->isNewRecord ? '' : $model->constituency_id, ['id' => 'selected_id2']);
@@ -282,7 +296,7 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a constituency',
                                         'url' => Url::to(['/constituencies/constituency']),
                                         'params' => ['selected_id2'],
-                                    //'loadingText' => 'Loading constituencies....',
+                                        //'loadingText' => 'Loading constituencies....',
                                     ]
                                 ]);
 
@@ -297,28 +311,30 @@ $province_user_province_id = "";
                                         'placeholder' => 'Please select a ward',
                                         'url' => Url::to(['/constituencies/ward']),
                                         'params' => ['selected_id3'],
-                                    //'loadingText' => 'Loading wards....',
+                                        //'loadingText' => 'Loading wards....',
                                     ]
                                 ]);
                             }
                             echo
-                                    $form->field($model, 'location')
-                                    ->dropDownList(
-                                            \backend\models\LocationType::getList(), ['custom' => true, 'prompt' => 'Please select location type', 'required' => false]
-                            );
+                            $form->field($model, 'location')
+                                ->dropDownList(
+                                    \backend\models\LocationType::getList(),
+                                    ['custom' => true, 'prompt' => 'Please select location type', 'required' => false]
+                                );
                             echo
-                                    $form->field($model, 'zone_id')
-                                    ->dropDownList(
-                                            \backend\models\Zones::getList(), ['custom' => true, 'prompt' => 'Please select zone', 'required' => false]
-                            );
+                            $form->field($model, 'zone_id')
+                                ->dropDownList(
+                                    \backend\models\Zones::getList(),
+                                    ['custom' => true, 'prompt' => 'Please select zone', 'required' => false]
+                                );
                             ?>
                             <?=
                             $form->field($model, 'latitude')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter Latitude'])
+                            'Enter Latitude'])
                             ?>
                             <?=
                             $form->field($model, 'longitude')->textInput(['maxlength' => true, 'placeholder' =>
-                                'Enter Longitude'])
+                            'Enter Longitude'])
                             ?>
                         </div>
                         <div class="col-lg-8">
@@ -330,7 +346,7 @@ $province_user_province_id = "";
                                     'style' => 'width: 100%; height: 400px', // map canvas width and height
                                 ],
                                 'enableSearchBox' => true, // Optional , default is true
-                                'searchBoxOptions' => [// searchBox html attributes
+                                'searchBoxOptions' => [ // searchBox html attributes
                                     'style' => 'width: 300px;', // Optional , default width and height defined in css coordinates-picker.css
                                 ],
                                 'searchBoxPosition' => new JsExpression('google.maps.ControlPosition.TOP_LEFT'), // optional , default is TOP_LEFT
