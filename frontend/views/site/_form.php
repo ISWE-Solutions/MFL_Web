@@ -70,7 +70,7 @@ $form = ActiveForm::begin([
         ])->widget(Select2::classname(), [
             'data' => \backend\models\Provinces::getProvinceList(),
             'theme' => Select2::THEME_MATERIAL,
-            'options' => ['placeholder' => 'Filter by province', 'id' => 'province_id'],
+            'options' => ['placeholder' => 'Filter by province', 'id' => 'province_id','required'=>true],
             'pluginOptions' => [
                 'allowClear' => true,
                 
@@ -171,48 +171,48 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-lg-4">
-        <?=
-        $form->field($model, 'name', [
-            'labelOptions' => [
-                'class' => 'text-dark',
-                'style' => "font-size:13px;font-weight:normal;",
-            ],
-        ])->textInput(['maxlength' => true, 'placeholder' =>
-        'Filter by facility name', 'required' => false,]);
+        <?php
+        // echo $form->field($model, 'name', [
+        //     'labelOptions' => [
+        //         'class' => 'text-dark',
+        //         'style' => "font-size:13px;font-weight:normal;",
+        //     ],
+        // ])->textInput(['maxlength' => true, 'placeholder' =>
+        // 'Filter by facility name', 'required' => false,]);
         ?>
     </div>
     <div class="col-lg-4">
-        <?=
-        $form->field($model, 'type', [
-            'labelOptions' => [
-                'class' => 'text-dark',
-                'style' => "font-size:13px;font-weight:normal;",
-            ],
-        ])->widget(Select2::classname(), [
-            'data' => \backend\models\Facilitytype::getList(),
-            'theme' => Select2::THEME_MATERIAL,
-            'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type'],
-            'pluginOptions' => [
-                'allowClear' => true,
-            ],
-        ]);
+        <?php
+    //    echo $form->field($model, 'type', [
+    //         'labelOptions' => [
+    //             'class' => 'text-dark',
+    //             'style' => "font-size:13px;font-weight:normal;",
+    //         ],
+    //     ])->widget(Select2::classname(), [
+    //         'data' => \backend\models\Facilitytype::getList(),
+    //         'theme' => Select2::THEME_MATERIAL,
+    //         'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type'],
+    //         'pluginOptions' => [
+    //             'allowClear' => true,
+    //         ],
+    //     ]);
         ?>
     </div>
     <div class="col-lg-4">
-        <?=
-        $form->field($model, 'ownership', [
-            'labelOptions' => [
-                'class' => 'text-dark',
-                'style' => "font-size:13px;font-weight:normal;",
-            ],
-        ])->widget(Select2::classname(), [
-            'data' => \backend\models\FacilityOwnership::getList(),
-            'theme' => Select2::THEME_MATERIAL,
-            'options' => ['placeholder' => 'Filter by ownership', 'id' => 'ownership'],
-            'pluginOptions' => [
-                'allowClear' => true,
-            ],
-        ]);
+        <?php
+    //    echo $form->field($model, 'ownership', [
+    //         'labelOptions' => [
+    //             'class' => 'text-dark',
+    //             'style' => "font-size:13px;font-weight:normal;",
+    //         ],
+    //     ])->widget(Select2::classname(), [
+    //         'data' => \backend\models\FacilityOwnership::getList(),
+    //         'theme' => Select2::THEME_MATERIAL,
+    //         'options' => ['placeholder' => 'Filter by ownership', 'id' => 'ownership'],
+    //         'pluginOptions' => [
+    //             'allowClear' => true,
+    //         ],
+    //     ]);
         ?>
     </div>
 
