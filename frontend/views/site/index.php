@@ -2,10 +2,19 @@
 
 use yii\helpers\Url;
 use yii\helpers\Html;
+use backend\models\Wards;
 use kartik\depdrop\DepDrop;
 use kartik\form\ActiveForm;
+use backend\models\Facility;
+use backend\models\Districts;
+use backend\models\Provinces;
 use dosamigos\google\maps\Map;
+use backend\models\Constituency;
+use backend\models\Facilitytype;
+use backend\models\LocationType;
 use dosamigos\google\maps\LatLng;
+use backend\models\Operationstatus;
+use backend\models\FacilityOwnership;
 use dosamigos\google\maps\overlays\Marker;
 use dosamigos\google\maps\overlays\Polygon;
 use dosamigos\google\maps\overlays\InfoWindow;
@@ -15,77 +24,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $connection = Yii::$app->getDb();
 //Get all provinces data
-$provinces_model = \backend\models\Provinces::find()
+$provinces_model = Provinces::find()
     ->cache(Yii::$app->params['cache_duration'])
     ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
     ->all();
 //get facility types
-$facility_types_model = \backend\models\Facilitytype::find()->cache(Yii::$app->params['cache_duration'])->all();
-$facility_ownership_model = \backend\models\FacilityOwnership::find()->cache(Yii::$app->params['cache_duration'])->all();
-
+$facility_types_model = Facilitytype::find()->cache(Yii::$app->params['cache_duration'])->all();
+$facility_ownership_model =FacilityOwnership::find()->cache(Yii::$app->params['cache_duration'])->all();
 $facility_model = "";
-
-
-/**
- * 
- * Data for Pie/Bar chart by Province
- * 
- */
-$pie_series1 = [];
-$column_series1 = [];
-$data2 = [];
-$data3 = [];
-$labels1 = [];
-
-if (!empty($operation_status_model)) {
-    $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
-        return $connection->createCommand('select count(f.id) as count,p.name from public."facility" f INNER JOIN 
-                                            public."geography_district" d ON f.district_id=d.id INNER JOIN
-                                            public."geography_province" p ON d.province_id=p.id INNER JOIN
-                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
-                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . '
-                                            group by p.name Order by p.name')
-            ->queryAll();
-    });
-
-    foreach ($province_counts as $model) {
-        //Add to total operating facilities
-        //$totalOperatingFacilities += (int) $model['count'];
-        //Push pie data to array
-        array_push($data2, ['name' => $model['name'], 'y' => (int) $model['count'],]);
-        //Push column labels to array
-        if (!in_array($model['name'], $labels1)) {
-            array_push($labels1, $model['name']);
-        }
-        //We push column data to array
-        array_push($data3, (int) $model['count']);
-    }
-    //We push pie plot details to the series
-    array_push($pie_series1, ['name' => 'Total', 'colorByPoint' => true, 'data' => $data2]);
-    array_push($column_series1, ['name' => "Total", 'data' => $data3]);
-}
-
+$area="Province";
 ?>
 <div class="container-fluid">
-    <div class="row">
-        <!-- <p>Use the form below to perform a filter</p> -->
-
-        <div class="col-lg-12 text-sm">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <p class="card-title text-sm">Use the form below to perform a filter</p>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    <!-- /.card-tools -->
-                </div>
-                <div class="card-body">
-                    <?php echo $this->render('_form', ['model' => $facilityFilterModel]); ?>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-info">
@@ -144,6 +93,68 @@ if (!empty($operation_status_model)) {
             <!-- /.info-box -->
         </div>
     </div>
+    <div class="row">
+        <!-- <p>Use the form below to perform a filter</p> -->
+        <div class="col-lg-12 text-sm">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <p class="card-title text-sm">
+                        Use the form below to perform a filter. Filters by <strong>name, type and ownership</strong> are only applicable to the <strong>Map</strong>.
+                        Filter by <strong>ward/Constituency</strong> is not applicable to the <strong>second graph</strong>
+                    </p>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <div class="card-body">
+                    <?php
+                    $filter_str = "<strong>Filters: </strong> ";
+                    //Show the filter parameters
+                    if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
+                        if (
+                            !empty($_GET['Facility']['province_id']) ||
+                            !empty($_GET['Facility']['constituency_id']) ||
+                            !empty($_GET['Facility']['ward_id']) ||
+                            !empty($_GET['Facility']['ownership']) ||
+                            !empty($_GET['Facility']['type']) ||
+                            !empty($_GET['Facility']['name']) ||
+                            !empty($_GET['Facility']['district_id'])
+                        ) {
+                          
+                            $_province = !empty($_GET['Facility']['province_id']) ? Provinces::findOne($_GET['Facility']['province_id'])->name : "";
+                            $_district = !empty($_GET['Facility']['district_id']) ? Districts::findOne($_GET['Facility']['district_id'])->name : "";
+                            $constituency = !empty($_GET['Facility']['constituency_id']) ? Constituency::findOne($_GET['Facility']['constituency_id'])->name : "";
+                            $ward = !empty($_GET['Facility']['ward_id']) ? Wards::findOne($_GET['Facility']['ward_id'])->name : "";
+                            $_facility_type = !empty($_GET['Facility']['type']) ? Facilitytype::findOne($_GET['Facility']['type'])->name : "";
+                            $_ownership = !empty($_GET['Facility']['ownership']) ? FacilityOwnership::findOne($_GET['Facility']['ownership'])->name : "";
+                            $prov_str = !empty($_province) ?  $_province . " province | " : "";
+                            $dist_str = !empty($_district) ? $_district . " district | " : "";
+                            $cons_str = !empty($constituency) ? $constituency . " constituency | " : "";
+                            $ward_str = !empty($ward) ? $ward . " ward | " : "";
+                            $fac_str = !empty($_facility_type) ? " Facility type: " . $_facility_type . " | " : "";
+                            $own_str = !empty($_ownership) ? "Ownship: " . $_ownership : "";
+                            $name_str = !empty($_GET['Facility']['name']) ? " Facility name: " . $_GET['Facility']['name'] . " | " : "";
+                            $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i> $cons_str </i><i>$ward_str</i><i>"
+                                . $fac_str . "</i><i>" . $own_str . "</I>";
+                            echo "<p class='text-sm'>$filter_str</p>";
+
+                            $area = !empty($_district) && !empty($_GET['Facility']['district_id']) ? $_district . " district Constituencies" : $area;
+                            $area = empty($_GET['Facility']['district_id']) && !empty($_GET['Facility']['province_id']) ? $_province . " province districts" : $area;
+                            
+                        }
+                    }
+                    if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
+                        echo "<p class='text-sm'>No filter results were found!</p>";
+                    }
+                    echo $this->render('_form', ['model' => $Facility_model]);
+                   ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <div class="row">
@@ -175,7 +186,7 @@ if (!empty($operation_status_model)) {
                                         'type' => 'pie',
                                     ],
                                     'title' => [
-                                        'text' => 'Operating Facilities by type'
+                                        'text' => 'Operating Facilities by type: '.$area
                                     ],
                                     'tooltip' => [
                                         'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
@@ -237,7 +248,7 @@ if (!empty($operation_status_model)) {
                                         ]
                                     ],
                                     'title' => [
-                                        'text' => 'Operating Facilities by type'
+                                        'text' => 'Operating Facilities by type: '. $area
                                     ],
                                     'xAxis' => [
                                         'categories' => $labels
@@ -285,7 +296,7 @@ if (!empty($operation_status_model)) {
                                         'type' => 'pie',
                                     ],
                                     'title' => [
-                                        'text' => 'Operating Facilities by Province'
+                                        'text' => 'Operating Facilities '.$area
                                     ],
                                     'tooltip' => [
                                         'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
@@ -347,7 +358,7 @@ if (!empty($operation_status_model)) {
                                         ]
                                     ],
                                     'title' => [
-                                        'text' => 'Operating Facilities by Province'
+                                        'text' => 'Operating Facilities '.$area
                                     ],
                                     'xAxis' => [
                                         'categories' => $labels1
@@ -370,10 +381,10 @@ if (!empty($operation_status_model)) {
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-8">
+                        <div class="col-lg-12">
                             <p></p>
                             <?php
-                            $filter_str = "Search results for: ";
+
                             $counter = 0;
                             $colors = ["#ed5151", "#149ece", "#a7c636", "#9e559c", "#fc921f", "purple", "#006D2C", ' #2a4858', '#fafa6e', 'lime'];
 
@@ -395,12 +406,12 @@ if (!empty($operation_status_model)) {
                                 isset($_GET['Facility']['province_id']) &&
                                 !empty($_GET['Facility']['province_id'])
                             ) {
-                                $prov_model = \backend\models\Provinces::find()->cache(Yii::$app->params['cache_duration'])
+                                $prov_model = Provinces::find()->cache(Yii::$app->params['cache_duration'])
                                     ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
                                     ->where(["id" => $_GET['Facility']['province_id']])->one();
 
-                                if (!empty($prov_model)) {
-                                    $coords = \backend\models\Provinces::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
+                                if (!empty($prov_model) && !empty($prov_model->geom)) {
+                                    $coords = Provinces::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
                                     $coord = json_decode($prov_model->geom, true)['coordinates'][0][0];
                                     $center = round(count($coord) / 2);
                                     $center_coords = $coord[$center];
@@ -422,17 +433,18 @@ if (!empty($operation_status_model)) {
                                     ]);
                                 }
                             }
+
                             //2. By district
                             if (
                                 isset($_GET['Facility']['district_id']) &&
                                 !empty($_GET['Facility']['district_id'])
                             ) {
-                                $prov_model = \backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
+                                $prov_model = Districts::find()->cache(Yii::$app->params['cache_duration'])
                                     ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
                                     ->where(["id" => $_GET['Facility']['district_id']])->one();
 
-                                if (!empty($prov_model)) {
-                                    $coords = \backend\models\Districts::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
+                                if (!empty($prov_model) && !empty($prov_model->geom)) {
+                                    $coords = Districts::getCoordinates(json_decode($prov_model->geom, true)['coordinates']);
                                     $coord = json_decode($prov_model->geom, true)['coordinates'][0][0];
                                     $center = round(count($coord) / 2);
                                     $center_coords = $coord[$center];
@@ -455,69 +467,74 @@ if (!empty($operation_status_model)) {
                                 }
                             }
 
+                            //3. By constituency
+                            if (
+                                isset($_GET['Facility']['constituency_id']) &&
+                                !empty($_GET['Facility']['constituency_id'])
+                            ) {
+                                $_model = Constituency::find()
+                                    ->cache(Yii::$app->params['cache_duration'])
+                                    ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
+                                    ->where(["id" => $_GET['Facility']['constituency_id']])->one();
 
-                            //Show the filter parameters
-                            if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
-                                if (
-                                    !empty($_GET['Facility']['province_id']) ||
-                                    !empty($_GET['Facility']['ownership']) ||
-                                    !empty($_GET['Facility']['type']) ||
-                                    !empty($_GET['Facility']['name']) ||
-                                    !empty($_GET['Facility']['district_id'])
-                                ) {
-                                    $_province = !empty($_GET['Facility']['province_id']) ? \backend\models\Provinces::findOne($_GET['Facility']['province_id'])->name : "";
-                                    $_district = !empty($_GET['Facility']['district_id']) ? \backend\models\Districts::findOne($_GET['Facility']['district_id'])->name : "";
-                                    $_facility_type = !empty($_GET['Facility']['type']) ? \backend\models\Facilitytype::findOne($_GET['Facility']['type'])->name : "";
-                                    $_ownership = !empty($_GET['Facility']['ownership']) ? \backend\models\FacilityOwnership::findOne($_GET['Facility']['ownership'])->name : "";
-                                    $prov_str = !empty($_province) ? "Province:" . $_province . " | " : "";
-                                    $dist_str = !empty($_district) ? "District:" . $_district . " | " : "";
-                                    $fac_str = !empty($_facility_type) ? "Facility type:" . $_facility_type . " | " : "";
-                                    $own_str = !empty($_ownership) ? "Ownship:" . $_ownership : "";
-                                    $name_str = !empty($_GET['Facility']['name']) ? "Facility name:" . $_GET['Facility']['name'] . "|" : "";
-                                    $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i>"
-                                        . $fac_str . "</i><i>" . $own_str . "</I>";
-                                    echo "<p class='text-sm'>$filter_str</p>";
+                                if (!empty($_model) && !empty($_model->geom)) {
+                                    $coords = Constituency::getCoordinates(json_decode($_model->geom, true)['coordinates']);
+                                    $coord = json_decode($_model->geom, true)['coordinates'][0][0];
+                                    $center = round(count($coord) / 2);
+                                    $center_coords = $coord[$center];
+                                    if (!empty($center_coords)) {
+                                        $coord = new LatLng([
+                                            'lat' => $center_coords[1],
+                                            'lng' => $center_coords[0]
+                                        ]);
+                                    } else {
+                                        $coord = new LatLng([
+                                            'lat' => Yii::$app->params['center_lat'],
+                                            'lng' => Yii::$app->params['center_lng']
+                                        ]);
+                                    }
+                                    $map = new Map([
+                                        'center' => $coord,
+                                        'zoom' => 10,
+                                        'width' => '100%', 'height' => 500,
+                                    ]);
                                 }
                             }
-                            if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
-                                echo "<p class='text-sm'>No search results were found!</p>";
+
+                            //4. By ward
+                            if (
+                                isset($_GET['Facility']['ward_id']) &&
+                                !empty($_GET['Facility']['ward_id'])
+                            ) {
+                                $_model = Wards::find()
+                                    ->cache(Yii::$app->params['cache_duration'])
+                                    ->select(['id', 'name', 'population', 'pop_density', 'area_sq_km', 'ST_AsGeoJSON(geom) as geom'])
+                                    ->where(["id" => $_GET['Facility']['ward_id']])->one();
+
+                                if (!empty($_model) && !empty($_model->geom)) {
+                                    $coords = Wards::getCoordinates(json_decode($_model->geom, true)['coordinates']);
+                                    $coord = json_decode($_model->geom, true)['coordinates'][0][0];
+                                    $center = round(count($coord) / 2);
+                                    $center_coords = $coord[$center];
+                                    if (!empty($center_coords)) {
+                                        $coord = new LatLng([
+                                            'lat' => $center_coords[1],
+                                            'lng' => $center_coords[0]
+                                        ]);
+                                    } else {
+                                        $coord = new LatLng([
+                                            'lat' => Yii::$app->params['center_lat'],
+                                            'lng' => Yii::$app->params['center_lng']
+                                        ]);
+                                    }
+                                    $map = new Map([
+                                        'center' => $coord,
+                                        'zoom' => 10,
+                                        'width' => '100%', 'height' => 500,
+                                    ]);
+                                }
                             }
 
-                            //We make sure that the filter form maintains the filter values
-                            if (
-                                isset($_GET['Facility']['province_id']) &&
-                                !empty($_GET['Facility']['province_id'])
-                            ) {
-                                $Facility_model->province_id = $_GET['Facility']['province_id'];
-                            }
-                            if (
-                                isset($_GET['Facility']['district_id']) &&
-                                !empty($_GET['Facility']['district_id'])
-                            ) {
-                                $Facility_model->district_id = $_GET['Facility']['district_id'];
-                            }
-                            if (
-                                isset($_GET['Facility']['ownership']) &&
-                                !empty($_GET['Facility']['ownership'])
-                            ) {
-                                $Facility_model->ownership = $_GET['Facility']['ownership'];
-                            }
-                            if (
-                                isset($_GET['Facility']['type']) &&
-                                !empty($_GET['Facility']['type'])
-                            ) {
-                                $Facility_model->type = $_GET['Facility']['type'];
-                            }
-                            if (
-                                isset($_GET['Facility']['name']) &&
-                                !empty($_GET['Facility']['name'])
-                            ) {
-                                $Facility_model->name = $_GET['Facility']['name'];
-                            }
-                            /* if (isset($_GET['Facility']['district_id']) &&
-                              !empty($_GET['Facility']['district_id'])) {
-                              $Facility_model->district_id = $_GET['Facility']['district_id'];
-                              } */
                             if ($dataProvider !== "" && $dataProvider->getTotalCount() > 0) {
                                 $dataProvider_models = $dataProvider->getModels();
                                 foreach ($provinces_model as $model) {
@@ -526,7 +543,7 @@ if (!empty($operation_status_model)) {
                                         $stroke_color = $colors[$counter];
                                         $counter++;
 
-                                        $coords = \backend\models\Provinces::getCoordinates(json_decode($model->geom, true)['coordinates']);
+                                        $coords =Provinces::getCoordinates(json_decode($model->geom, true)['coordinates']);
 
                                         $polygon = new Polygon([
                                             'paths' => $coords,
@@ -537,7 +554,7 @@ if (!empty($operation_status_model)) {
                                             'fillOpacity' => 0.35,
                                         ]);
                                         //We get all districts in the province
-                                        $districts_model = backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
+                                        $districts_model = Districts::find()->cache(Yii::$app->params['cache_duration'])
                                             ->where(['province_id' => $model->id])
                                             ->all();
                                         //We create an array to be used to get the facilities in the province
@@ -549,7 +566,7 @@ if (!empty($operation_status_model)) {
                                         }
 
                                         //We now get the facilities in the province
-                                        $facilities_counts = backend\models\Facility::find()
+                                        $facilities_counts = Facility::find()
                                             ->cache(Yii::$app->params['cache_duration'])
                                             ->select(["COUNT(*) as count", "type"])
                                             ->where(['operational_status' => $opstatus_id])
@@ -580,15 +597,15 @@ if (!empty($operation_status_model)) {
                                                     'icon' => \yii\helpers\Url::to('@web/img/map_icon.png')
                                                 ]);
 
-                                                $constituency = !empty($_model->constituency_id) ? backend\models\Constituency::findOne($_model->constituency_id)->name : "";
-                                                $ward = !empty($_model->ward_id) ? backend\models\Wards::findOne($_model->ward_id)->name : "";
-                                                $loc_type = !empty($_model->location) ? backend\models\LocationType::findOne($_model->location)->name : "";
-                                                $type = !empty($_model->type) ? backend\models\Facilitytype::findOne($_model->type)->name : "";
-                                                $ownership = !empty($_model->ownership) ? backend\models\FacilityOwnership::findOne($_model->ownership)->name : "";
-                                                $operation_status = !empty($_model->operational_status) ? backend\models\Operationstatus::findOne($_model->operational_status)->name : "";
+                                                $constituency = !empty($_model->constituency_id) ? Constituency::findOne($_model->constituency_id)->name : "";
+                                                $ward = !empty($_model->ward_id) ? Wards::findOne($_model->ward_id)->name : "";
+                                                $loc_type = !empty($_model->location) ? LocationType::findOne($_model->location)->name : "";
+                                                $type = !empty($_model->type) ? Facilitytype::findOne($_model->type)->name : "";
+                                                $ownership = !empty($_model->ownership) ? FacilityOwnership::findOne($_model->ownership)->name : "";
+                                                $operation_status = !empty($_model->operational_status) ? Operationstatus::findOne($_model->operational_status)->name : "";
                                                 $type_str = "";
-                                                $type_str .= "<b>Province: </b>" . \backend\models\Provinces::findOne(backend\models\Districts::findOne($_model->district_id)->province_id)->name . "<br>";
-                                                $type_str .= "<b>District: </b>" . backend\models\Districts::findOne($_model->district_id)->name . "<br>";
+                                                $type_str .= "<b>Province: </b>" . Provinces::findOne(Districts::findOne($_model->district_id)->province_id)->name . "<br>";
+                                                $type_str .= "<b>District: </b>" . Districts::findOne($_model->district_id)->name . "<br>";
                                                 $type_str .= "<b>Constituency: </b>" . $constituency . "<br>";
                                                 $type_str .= "<b>Ward: </b>" . $ward . "<br>";
                                                 $type_str .= "<b>Location type: </b>" . $loc_type . "<br>";
@@ -618,7 +635,7 @@ if (!empty($operation_status_model)) {
                                         $stroke_color = $colors[$counter];
                                         $counter++;
 
-                                        $coords = \backend\models\Provinces::getCoordinates(json_decode($model->geom, true)['coordinates']);
+                                        $coords = Provinces::getCoordinates(json_decode($model->geom, true)['coordinates']);
 
                                         $polygon = new Polygon([
                                             'paths' => $coords,
@@ -630,7 +647,7 @@ if (!empty($operation_status_model)) {
                                         ]);
 
                                         //We get all districts in the province
-                                        $districts_model = backend\models\Districts::find()->cache(Yii::$app->params['cache_duration'])
+                                        $districts_model = Districts::find()->cache(Yii::$app->params['cache_duration'])
                                             ->where(['province_id' => $model->id])
                                             ->all();
                                         //We create an array to be used to get the facilities in the province
@@ -642,7 +659,7 @@ if (!empty($operation_status_model)) {
                                         }
 
                                         //We now get the facilities in the province
-                                        $facilities_counts = backend\models\Facility::find()
+                                        $facilities_counts = Facility::find()
                                             ->cache(Yii::$app->params['cache_duration'])
                                             ->select(["COUNT(*) as count", "type"])
                                             ->where(['operational_status' => $opstatus_id])
@@ -653,7 +670,7 @@ if (!empty($operation_status_model)) {
                                         //We build the window string
                                         $type_str = "";
                                         foreach ($facilities_counts as $f_model) {
-                                            $facility_type = !empty($f_model['type']) ? backend\models\Facilitytype::findOne($f_model['type'])->name : "";
+                                            $facility_type = !empty($f_model['type']) ? Facilitytype::findOne($f_model['type'])->name : "";
                                             $type_str .= $facility_type . ":<b>" . $f_model['count'] . "</b><br>";
                                         }
                                         $polygon->attachInfoWindow(new InfoWindow([
@@ -669,87 +686,7 @@ if (!empty($operation_status_model)) {
                             }
                             ?>
                         </div>
-                        <div class="col-lg-4 text-sm">
-                            <h4>Map Instructions</h4>
-                            <ol>
-                                <li>Click province to view facility counts by type</li>
-                                <li>A filter below will show actual
-                                    facility locations on the map</li>
-                            </ol>
-                            <div class="row">
 
-                                <?php
-                                $form = ActiveForm::begin([
-                                    'action' => ['index'],
-                                    'method' => 'GET',
-                                ]);
-                                ?>
-                                <div class="col-lg-12">
-                                    <?php
-                                    echo $form->field($Facility_model, 'name')->textInput(['maxlength' => true, 'placeholder' =>
-                                    'Filter by facility name', 'required' => false,]);
-                                    ?>
-                                </div>
-                                <div class="col-lg-12">
-                                    <?php
-                                    echo
-                                    $form->field($Facility_model, 'province_id')
-                                        ->dropDownList(
-                                            \backend\models\Provinces::getProvinceList(),
-                                            ['id' => 'prov_id', 'custom' => true, 'prompt' => 'Filter by province', 'required' => false]
-                                        );
-                                    ?>
-                                </div>
-                                <div class="col-lg-12">
-                                    <?php
-                                    $Facility_model->isNewRecord = !empty($_GET['Facility']['province_id']) ? false : true;
-                                    echo Html::hiddenInput('selected_id', $Facility_model->isNewRecord ? '' : $Facility_model->district_id, ['id' => 'selected_id']);
-
-                                    echo $form->field($Facility_model, 'district_id')->widget(DepDrop::classname(), [
-                                        'options' => ['id' => 'dist_id', 'custom' => true, 'required' => false,],
-                                        //'data' => [backend\models\Districts::getListByProvinceID($Facility_model->province_id)],
-                                        //'value'=>$Facility_model->district_id,
-                                        'type' => DepDrop::TYPE_SELECT2,
-                                        'pluginOptions' => [
-                                            'depends' => ['prov_id'],
-                                            'initialize' => $Facility_model->isNewRecord ? false : true,
-                                            'placeholder' => 'Filter by district',
-                                            'prompt' => 'Filter by district',
-                                            'url' => Url::to(['/site/district']),
-                                            'allowClear' => true,
-                                            'params' => ['selected_id'],
-                                            'loadingText' => 'Loading districts....',
-                                        ]
-                                    ]);
-                                    ?>
-                                </div>
-                                <div class="col-lg-12">
-                                    <?=
-                                    $form->field($Facility_model, 'type')
-                                        ->dropDownList(
-                                            \backend\models\Facilitytype::getList(),
-                                            ['custom' => true, 'prompt' => 'Filter by facility type', 'required' => false]
-                                        );
-                                    ?>
-                                </div>
-                                <div class="col-lg-12">
-                                    <?=
-                                    $form->field($Facility_model, 'ownership')
-                                        ->dropDownList(
-                                            \backend\models\FacilityOwnership::getList(),
-                                            ['custom' => true, 'prompt' => 'Filter by ownership', 'required' => false]
-                                        );
-                                    ?>
-                                </div>
-                                <div class="col-lg-12">
-                                    <?= Html::submitButton('Filter map', ['class' => 'btn btn-primary btn-sm', 'name' => "filter", "value" => "true"]) ?>
-                                    <?php //echo Html::resetButton('Reset', ['class' => 'btn btn-default btn-sm']) 
-                                    ?>
-                                </div>
-                                <?php ActiveForm::end(); ?>
-
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

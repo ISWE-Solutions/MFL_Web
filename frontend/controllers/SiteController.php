@@ -2,20 +2,21 @@
 
 namespace frontend\controllers;
 
-use frontend\models\ResendVerificationEmailForm;
-use frontend\models\VerifyEmailForm;
 use Yii;
-use yii\base\InvalidArgumentException;
-use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
 use common\models\LoginForm;
-use frontend\models\PasswordResetRequestForm;
-use frontend\models\ResetPasswordForm;
+use yii\filters\AccessControl;
 use frontend\models\SignupForm;
+use backend\models\Constituency;
 use frontend\models\ContactForm;
 use yii\data\ActiveDataProvider;
+use frontend\models\VerifyEmailForm;
+use yii\web\BadRequestHttpException;
+use frontend\models\ResetPasswordForm;
+use yii\base\InvalidArgumentException;
+use frontend\models\PasswordResetRequestForm;
+use frontend\models\ResendVerificationEmailForm;
 
 /**
  * Site controller
@@ -79,51 +80,9 @@ class SiteController extends Controller
     {
         $totalOperatingFacilities = 0;
         $Facility_model = new \frontend\models\Facility();
-        $facilityFilterModel = new \frontend\models\FacilityFilter();
         $searchModel = new \frontend\models\FacilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        if (
-            !empty(Yii::$app->request->queryParams['Facility']['province_id']) ||
-            !empty(Yii::$app->request->queryParams['Facility']['district_id']) ||
-            !empty(Yii::$app->request->queryParams['Facility']['ownership']) ||
-            !empty(Yii::$app->request->queryParams['Facility']['name']) ||
-            !empty(Yii::$app->request->queryParams['Facility']['type'])
-        ) {
-
-            if (!empty(Yii::$app->request->queryParams['Facility']['district_id'])) {
-                $dataProvider->query->andFilterWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']]);
-            }
-            if (!empty(Yii::$app->request->queryParams['Facility']['ownership'])) {
-                $dataProvider->query->andFilterWhere(['ownership' => Yii::$app->request->queryParams['Facility']['ownership']]);
-            }
-            if (!empty(Yii::$app->request->queryParams['Facility']['type'])) {
-                $dataProvider->query->andFilterWhere(['type' => Yii::$app->request->queryParams['Facility']['type']]);
-            }
-            if (!empty(Yii::$app->request->queryParams['Facility']['name'])) {
-                $dataProvider->query->andFilterWhere(['LIKE', 'name', Yii::$app->request->queryParams['Facility']['name']]);
-            }
-
-            if (!empty(Yii::$app->request->queryParams['Facility']['province_id'])) {
-                $district_ids = [];
-                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['Facility']['province_id']])->all();
-                if (!empty($districts)) {
-                    foreach ($districts as $id) {
-                        array_push($district_ids, $id['id']);
-                    }
-                }
-
-                $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
-            }
-        } else {
-            if (
-                !empty(Yii::$app->request->queryParams['Facility']) &&
-                Yii::$app->request->queryParams['filter'] == "true"
-            ) {
-                Yii::$app->session->setFlash('error', 'Please pick a filter to filter on the map!');
-            }
-            $dataProvider = "";
-        }
+        $connection = Yii::$app->getDb();
 
         //For graph filtering
         $pie_series = [];
@@ -131,6 +90,13 @@ class SiteController extends Controller
         $data = [];
         $data1 = [];
         $labels = [];
+        $pie_series1 = [];
+        $column_series1 = [];
+        $data2 = [];
+        $data3 = [];
+        $labels1 = [];
+        $province_counts = "";
+
         $opstatus_id = "";
         $facility_model = "";
         $operation_status_model = \backend\models\Operationstatus::findOne(['shared_id' => 1]);
@@ -145,6 +111,18 @@ class SiteController extends Controller
                 ->andWhere(['status' => 1])
                 ->groupBy(['type'])
                 ->createCommand()->queryAll();
+        }
+
+        if (!empty($operation_status_model)) {
+            $province_counts = $connection->cache(function ($connection) use ($operation_status_model) {
+                return $connection->createCommand('select count(f.id) as count,p.name from public."facility" f INNER JOIN 
+                                            public."geography_district" d ON f.district_id=d.id INNER JOIN
+                                            public."geography_province" p ON d.province_id=p.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . '
+                                            group by p.name Order by p.name')
+                ->queryAll();
+            });
         }
 
 
@@ -164,20 +142,73 @@ class SiteController extends Controller
             ->andWhere(['status' => 1])
             ->count();
 
+
         if (
-            !empty(Yii::$app->request->queryParams['FacilityFilter']['province']) ||
-            !empty(Yii::$app->request->queryParams['FacilityFilter']['district']) ||
-            !empty(Yii::$app->request->queryParams['FacilityFilter']['ward']) ||
-            !empty(Yii::$app->request->queryParams['FacilityFilter']['constituency'])
+            !empty(Yii::$app->request->queryParams['Facility']['province_id']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['district_id']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['ownership']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['name']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['type']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['ward_id']) ||
+            !empty(Yii::$app->request->queryParams['Facility']['constituency_id'])
         ) {
-            //If ward is set we filter only by ward
-            if (!empty(Yii::$app->request->queryParams['FacilityFilter']['ward'])) {
+
+         //If ward is set we filter only by ward
+        if (!empty(Yii::$app->request->queryParams['Facility']['ward_id'])) {
+           
+            //Public
+            $public_count_active = \backend\models\Facility::find()
+                ->cache(Yii::$app->params['cache_duration'])
+                ->where(['ownership_type' => 1])
+                ->andWhere(['operational_status' => $operation_status_model->id])
+                ->andWhere(['ward_id' => Yii::$app->request->queryParams['Facility']['ward_id']])
+                ->andWhere(['status' => 1])
+                ->count();
+
+            // Private
+            $_private_count_active = \backend\models\Facility::find()
+                ->cache(Yii::$app->params['cache_duration'])
+                ->where(['IN', 'ownership_type', [2]])
+                ->andWhere(['operational_status' => $operation_status_model->id])
+                ->andWhere(['ward_id' => Yii::$app->request->queryParams['Facility']['ward_id']])
+                ->andWhere(['status' => 1])
+                ->count();
+
+            $facility_model = \backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
+                ->select(['type', 'COUNT(*) AS count'])
+                ->where(['operational_status' => $operation_status_model->id])
+                ->andWhere(['status' => 1])
+                ->andWhere(['ward_id' => Yii::$app->request->queryParams['Facility']['ward_id']])
+                ->groupBy(['type'])
+                ->createCommand()->queryAll();
+                $dataProvider->query->andFilterWhere(['ward_id' => Yii::$app->request->queryParams['Facility']['ward_id']]);
+                $districtId = Yii::$app->request->queryParams['Facility']['district_id'];
+                if (!empty($operation_status_model)) {
+                    $province_counts = $connection->cache(function ($connection) use ($operation_status_model, $districtId) {
+
+                        return $connection->createCommand('select count(f.id) as count,c.name from public."facility" f INNER JOIN 
+                                            public."geography_constituency" c ON f.constituency_id=c.id INNER JOIN
+                                            public."geography_district" d ON c.district_id=d.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . ' 
+                                             AND f.district_id =' . $districtId . ' group by c.name Order by c.name')
+                        ->queryAll();
+                    });
+                }
+            }
+
+            if (
+                !empty(Yii::$app->request->queryParams['Facility']['constituency_id']) &&
+                empty(Yii::$app->request->queryParams['Facility']['ward_id'])
+            ) {
+                $constituency= Yii::$app->request->queryParams['Facility']['constituency_id'];
+             
                 //Public
                 $public_count_active = \backend\models\Facility::find()
                     ->cache(Yii::$app->params['cache_duration'])
                     ->where(['ownership_type' => 1])
                     ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['ward_id' => Yii::$app->request->queryParams['FacilityFilter']['ward']])
+                    ->andWhere(['constituency_id' => $constituency])
                     ->andWhere(['status' => 1])
                     ->count();
 
@@ -186,30 +217,46 @@ class SiteController extends Controller
                     ->cache(Yii::$app->params['cache_duration'])
                     ->where(['IN', 'ownership_type', [2]])
                     ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['ward_id' => Yii::$app->request->queryParams['FacilityFilter']['ward']])
+                    ->andWhere(['constituency_id' => $constituency])
                     ->andWhere(['status' => 1])
                     ->count();
 
-                $facility_model = \backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
+                $facility_model = \backend\models\Facility::find()
+                    ->cache(Yii::$app->params['cache_duration'])
                     ->select(['type', 'COUNT(*) AS count'])
                     ->where(['operational_status' => $operation_status_model->id])
                     ->andWhere(['status' => 1])
-                    ->andWhere(['ward_id' => Yii::$app->request->queryParams['FacilityFilter']['ward']])
+                    ->andWhere(['constituency_id' => $constituency])
                     ->groupBy(['type'])
                     ->createCommand()->queryAll();
-            }
+                $dataProvider->query->andFilterWhere(['constituency_id' => $constituency]);
+                $districtId = Constituency::findOne($constituency)->district_id;
 
-            //If constituency is set, we expect ward to be empty
+                if (!empty($operation_status_model)) {
+                    $province_counts = $connection->cache(function ($connection) use ($operation_status_model, $districtId) {
+                        return $connection->createCommand('select count(f.id) as count,c.name from public."facility" f INNER JOIN 
+                                            public."geography_constituency" c ON f.constituency_id=c.id INNER JOIN
+                                            public."geography_district" d ON c.district_id=d.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . ' 
+                                             AND f.district_id =' . $districtId . ' group by c.name Order by c.name')
+                        ->queryAll();
+                    });
+                }
+
+               
+            }
             if (
-                !empty(Yii::$app->request->queryParams['FacilityFilter']['constituency']) &&
-                empty(Yii::$app->request->queryParams['FacilityFilter']['ward'])
+                !empty(Yii::$app->request->queryParams['Facility']['district_id']) &&
+                (empty(Yii::$app->request->queryParams['Facility']['ward_id']) &&
+                empty(Yii::$app->request->queryParams['Facility']['constituency_id']))
             ) {
                 //Public
                 $public_count_active = \backend\models\Facility::find()
                     ->cache(Yii::$app->params['cache_duration'])
                     ->where(['ownership_type' => 1])
                     ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['constituency_id' => Yii::$app->request->queryParams['FacilityFilter']['constituency']])
+                    ->andWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']])
                     ->andWhere(['status' => 1])
                     ->count();
 
@@ -218,61 +265,54 @@ class SiteController extends Controller
                     ->cache(Yii::$app->params['cache_duration'])
                     ->where(['IN', 'ownership_type', [2]])
                     ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['constituency_id' => Yii::$app->request->queryParams['FacilityFilter']['constituency']])
+                    ->andWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']])
                     ->andWhere(['status' => 1])
                     ->count();
 
-                $facility_model = \backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
+                $facility_model = \backend\models\Facility::find()
+                    ->cache(Yii::$app->params['cache_duration'])
                     ->select(['type', 'COUNT(*) AS count'])
                     ->where(['operational_status' => $operation_status_model->id])
                     ->andWhere(['status' => 1])
-                    ->andWhere(['constituency_id' => Yii::$app->request->queryParams['FacilityFilter']['constituency']])
+                    ->andWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']])
                     ->groupBy(['type'])
                     ->createCommand()->queryAll();
+                $dataProvider->query->andFilterWhere(['district_id' => Yii::$app->request->queryParams['Facility']['district_id']]);
+                $districtId= Yii::$app->request->queryParams['Facility']['district_id'];
+                if (!empty($operation_status_model)) {
+                    $province_counts = $connection->cache(function ($connection) use ($operation_status_model, $districtId) {
+                     
+                        return $connection->createCommand('select count(f.id) as count,c.name from public."facility" f INNER JOIN 
+                                            public."geography_constituency" c ON f.constituency_id=c.id INNER JOIN
+                                            public."geography_district" d ON c.district_id=d.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . ' 
+                                             AND f.district_id =' . $districtId . ' group by c.name Order by c.name')
+                        ->queryAll();
+                    });
+                }
+           
+            }
+            if (!empty(Yii::$app->request->queryParams['Facility']['ownership'])) {
+                $dataProvider->query->andFilterWhere(['ownership' => Yii::$app->request->queryParams['Facility']['ownership']]);
+            }
+            if (!empty(Yii::$app->request->queryParams['Facility']['type'])) {
+                $dataProvider->query->andFilterWhere(['type' => Yii::$app->request->queryParams['Facility']['type']]);
+            }
+            if (!empty(Yii::$app->request->queryParams['Facility']['name'])) {
+                $dataProvider->query->andFilterWhere(['LIKE', 'name', Yii::$app->request->queryParams['Facility']['name']]);
             }
 
-            //If district is set and we need to filter by it, ward and constituency should be empty
             if (
-                !empty(Yii::$app->request->queryParams['FacilityFilter']['district']) &&
-                (empty(Yii::$app->request->queryParams['FacilityFilter']['ward']) &&
-                    empty(Yii::$app->request->queryParams['FacilityFilter']['constituency']))
-            ) {
-                //Public
-                $public_count_active = \backend\models\Facility::find()
-                    ->cache(Yii::$app->params['cache_duration'])
-                    ->where(['ownership_type' => 1])
-                    ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['district_id' => Yii::$app->request->queryParams['FacilityFilter']['district']])
-                    ->andWhere(['status' => 1])
-                    ->count();
-
-                // Private
-                $_private_count_active = \backend\models\Facility::find()
-                    ->cache(Yii::$app->params['cache_duration'])
-                    ->where(['IN', 'ownership_type', [2]])
-                    ->andWhere(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['district_id' => Yii::$app->request->queryParams['FacilityFilter']['district']])
-                    ->andWhere(['status' => 1])
-                    ->count();
-
-                $facility_model = \backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
-                    ->select(['type', 'COUNT(*) AS count'])
-                    ->where(['operational_status' => $operation_status_model->id])
-                    ->andWhere(['status' => 1])
-                    ->andWhere(['district_id' => Yii::$app->request->queryParams['FacilityFilter']['district']])
-                    ->groupBy(['type'])
-                    ->createCommand()->queryAll();
-            }
-            if (
-                !empty(Yii::$app->request->queryParams['FacilityFilter']['province']) &&
+                !empty(Yii::$app->request->queryParams['Facility']['province_id']) &&
                 (
-                    empty(Yii::$app->request->queryParams['FacilityFilter']['ward']) &&
-                    empty(Yii::$app->request->queryParams['FacilityFilter']['district']) &&
-                    empty(Yii::$app->request->queryParams['FacilityFilter']['constituency']))
+                    empty(Yii::$app->request->queryParams['Facility']['ward_id']) &&
+                    empty(Yii::$app->request->queryParams['Facility']['district_id']) &&
+                    empty(Yii::$app->request->queryParams['Facility']['constituency_id']))
             ) {
-
+               
                 $district_ids = [];
-                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['FacilityFilter']['province']])->all();
+                $districts = \backend\models\Districts::find()->where(['province_id' => Yii::$app->request->queryParams['Facility']['province_id']])->all();
                 if (!empty($districts)) {
                     foreach ($districts as $id) {
                         array_push($district_ids, $id['id']);
@@ -297,15 +337,62 @@ class SiteController extends Controller
                     ->andWhere(['status' => 1])
                     ->count();
 
-                $facility_model = \backend\models\Facility::find()->cache(Yii::$app->params['cache_duration'])
+                $facility_model = \backend\models\Facility::find()
+                    ->cache(Yii::$app->params['cache_duration'])
                     ->select(['type', 'COUNT(*) AS count'])
                     ->where(['operational_status' => $operation_status_model->id])
                     ->andWhere(['status' => 1])
                     ->andWhere(['IN', 'district_id', $district_ids])
                     ->groupBy(['type'])
                     ->createCommand()->queryAll();
+
+                $dataProvider->query->andFilterWhere(['IN', 'district_id', $district_ids]);
+                if (!empty($operation_status_model)) {
+                    $province_counts = $connection->cache(function ($connection) use ($operation_status_model, $district_ids) {
+                    $districtIds=implode(',',$district_ids);
+                        return $connection->createCommand('select count(f.id) as count,d.name from public."facility" f INNER JOIN 
+                                            public."geography_district" d ON f.district_id=d.id INNER JOIN
+                                            public."geography_province" p ON d.province_id=p.id INNER JOIN
+                                            public."MFL_operationstatus" ops ON f.operational_status=ops.id
+                                            WHERE f.status=1 AND ops.id=' . $operation_status_model->id . ' 
+                                             AND f.district_id IN ('. $districtIds.') group by d.name Order by d.name')
+                        ->queryAll();
+                    });
+                }
+               
             }
+        } else {
+            if (
+                !empty(Yii::$app->request->queryParams['Facility']) &&
+                Yii::$app->request->queryParams['filter'] == "true"
+            ) {
+                Yii::$app->session->setFlash('error', 'Please pick a filter to filter on the map!');
+            }
+            $dataProvider = "";
         }
+
+
+
+
+        if (!empty($province_counts)) {
+            foreach ($province_counts as $model) {
+                //Add to total operating facilities
+                //$totalOperatingFacilities += (int) $model['count'];
+                //Push pie data to array
+                array_push($data2, ['name' => $model['name'], 'y' => (int) $model['count'],]);
+                //Push column labels to array
+                if (!in_array($model['name'], $labels1)) {
+                    array_push($labels1, $model['name']);
+                }
+                //We push column data to array
+                array_push($data3, (int) $model['count']);
+            }
+            //We push pie plot details to the series
+            array_push($pie_series1, ['name' => 'Total', 'colorByPoint' => true, 'data' => $data2]);
+            array_push($column_series1, ['name' => "Total", 'data' => $data3]);
+        }
+
+
 
         if (!empty($facility_model)) {
             foreach ($facility_model as $model) {
@@ -330,13 +417,15 @@ class SiteController extends Controller
             'dataProvider' => $dataProvider,
             '_private_count_active' => $_private_count_active,
             'public_count_active' => $public_count_active,
-            'facilityFilterModel' => $facilityFilterModel,
             'operation_status_model' => $operation_status_model,
             'totalOperatingFacilities' => $totalOperatingFacilities,
             'pie_series' => $pie_series,
             'column_series' => $column_series,
             'labels' => $labels,
             'opstatus_id' => $opstatus_id,
+            'pie_series1' => $pie_series1,
+            'column_series1' => $column_series1,
+            'labels1' => $labels1,
         ]);
     }
 

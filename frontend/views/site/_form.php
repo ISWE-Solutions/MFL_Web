@@ -12,28 +12,46 @@ use yii\helpers\Url;
 
 
 if (
-    isset($_GET['FacilityFilter']['province']) &&
-    !empty($_GET['FacilityFilter']['province'])
+    isset($_GET['Facility']['province_id']) &&
+    !empty($_GET['Facility']['province_id'])
 ) {
-    $model->province = $_GET['FacilityFilter']['province'];
+    $model->province_id = $_GET['Facility']['province_id'];
 }
 if (
-    isset($_GET['FacilityFilter']['district']) &&
-    !empty($_GET['FacilityFilter']['district'])
+    isset($_GET['Facility']['district_id']) &&
+    !empty($_GET['Facility']['district_id'])
 ) {
-    $model->district = $_GET['FacilityFilter']['district'];
+    $model->district_id = $_GET['Facility']['district_id'];
 }
 if (
-    isset($_GET['FacilityFilter']['constituency']) &&
-    !empty($_GET['FacilityFilter']['constituency'])
+    isset($_GET['Facility']['ownership']) &&
+    !empty($_GET['Facility']['ownership'])
 ) {
-    $model->constituency = $_GET['FacilityFilter']['constituency'];
+    $model->ownership = $_GET['Facility']['ownership'];
 }
 if (
-    isset($_GET['FacilityFilter']['ward']) &&
-    !empty($_GET['FacilityFilter']['ward'])
+    isset($_GET['Facility']['type']) &&
+    !empty($_GET['Facility']['type'])
 ) {
-    $model->ward = $_GET['FacilityFilter']['ward'];
+    $model->type = $_GET['Facility']['type'];
+}
+if (
+    isset($_GET['Facility']['name']) &&
+    !empty($_GET['Facility']['name'])
+) {
+    $model->name = $_GET['Facility']['name'];
+}
+if (
+    isset($_GET['Facility']['constituency_id']) &&
+    !empty($_GET['Facility']['constituency_id'])
+) {
+    $model->constituency_id = $_GET['Facility']['constituency_id'];
+}
+if (
+    isset($_GET['Facility']['ward_id']) &&
+    !empty($_GET['Facility']['ward_id'])
+) {
+    $model->ward_id = $_GET['Facility']['ward_id'];
 }
 
 $form = ActiveForm::begin([
@@ -44,7 +62,7 @@ $form = ActiveForm::begin([
 <div class="row">
     <div class="col-lg-3">
         <?=
-        $form->field($model, 'province', [
+        $form->field($model, 'province_id', [
             'labelOptions' => [
                 'class' => 'text-dark is-required',
                 'style' => "font-size:13px;font-weight:normal;",
@@ -55,13 +73,16 @@ $form = ActiveForm::begin([
             'options' => ['placeholder' => 'Filter by province', 'id' => 'province_id'],
             'pluginOptions' => [
                 'allowClear' => true,
+                
             ],
         ]);
         ?>
     </div>
     <div class="col-lg-3">
         <?php
-        echo $form->field($model, 'district', [
+        $model->isNewRecord = !empty($_GET['Facility']['province_id']) ? false : true;
+        echo Html::hiddenInput('selected_id', $model->isNewRecord ? '' : $model->district_id, ['id' => 'selected_id']);
+        echo $form->field($model, 'district_id', [
             'labelOptions' => [
                 'class' => 'text-dark',
                 'style' => "font-size:13px;font-weight:normal;",
@@ -91,8 +112,8 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?php
-        echo Html::hiddenInput('selected_id2', $model->constituency, ['id' => 'selected_id2']);
-        echo $form->field($model, 'constituency', [
+        echo Html::hiddenInput('selected_id2', $model->constituency_id, ['id' => 'selected_id2']);
+        echo $form->field($model, 'constituency_id', [
             'labelOptions' => [
                 'class' => 'text-dark',
                 'style' => "font-size:13px;font-weight:normal;",
@@ -121,8 +142,8 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-3">
         <?php
-        echo Html::hiddenInput('selected_id3', $model->ward, ['id' => 'selected_id3']);
-        echo $form->field($model, 'ward', [
+        echo Html::hiddenInput('selected_id3', $model->ward_id, ['id' => 'selected_id3']);
+        echo $form->field($model, 'ward_id', [
             'labelOptions' => [
                 'class' => 'text-dark',
                 'style' => "font-size:13px;font-weight:normal;",
@@ -149,7 +170,51 @@ $form = ActiveForm::begin([
         ]);
         ?>
     </div>
-
+    <div class="col-lg-4">
+        <?=
+        $form->field($model, 'name', [
+            'labelOptions' => [
+                'class' => 'text-dark',
+                'style' => "font-size:13px;font-weight:normal;",
+            ],
+        ])->textInput(['maxlength' => true, 'placeholder' =>
+        'Filter by facility name', 'required' => false,]);
+        ?>
+    </div>
+    <div class="col-lg-4">
+        <?=
+        $form->field($model, 'type', [
+            'labelOptions' => [
+                'class' => 'text-dark',
+                'style' => "font-size:13px;font-weight:normal;",
+            ],
+        ])->widget(Select2::classname(), [
+            'data' => \backend\models\Facilitytype::getList(),
+            'theme' => Select2::THEME_MATERIAL,
+            'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type'],
+            'pluginOptions' => [
+                'allowClear' => true,
+            ],
+        ]);
+        ?>
+    </div>
+    <div class="col-lg-4">
+        <?=
+        $form->field($model, 'ownership', [
+            'labelOptions' => [
+                'class' => 'text-dark',
+                'style' => "font-size:13px;font-weight:normal;",
+            ],
+        ])->widget(Select2::classname(), [
+            'data' => \backend\models\FacilityOwnership::getList(),
+            'theme' => Select2::THEME_MATERIAL,
+            'options' => ['placeholder' => 'Filter by ownership', 'id' => 'ownership'],
+            'pluginOptions' => [
+                'allowClear' => true,
+            ],
+        ]);
+        ?>
+    </div>
 
     <div class="col-lg-12">
         <?= Html::submitButton('Filter', ['class' => 'btn btn-primary']) ?>
