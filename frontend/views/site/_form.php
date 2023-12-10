@@ -70,10 +70,10 @@ $form = ActiveForm::begin([
         ])->widget(Select2::classname(), [
             'data' => \backend\models\Provinces::getProvinceList(),
             'theme' => Select2::THEME_MATERIAL,
-            'options' => ['placeholder' => 'Filter by province', 'id' => 'province_id','required'=>true],
+            'options' => ['placeholder' => 'Filter by province', 'id' => 'province_id', 'required' => true],
             'pluginOptions' => [
                 'allowClear' => true,
-                
+
             ],
         ]);
         ?>
@@ -183,42 +183,47 @@ $form = ActiveForm::begin([
     </div>
     <div class="col-lg-4">
         <?php
-    //    echo $form->field($model, 'type', [
-    //         'labelOptions' => [
-    //             'class' => 'text-dark',
-    //             'style' => "font-size:13px;font-weight:normal;",
-    //         ],
-    //     ])->widget(Select2::classname(), [
-    //         'data' => \backend\models\Facilitytype::getList(),
-    //         'theme' => Select2::THEME_MATERIAL,
-    //         'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type'],
-    //         'pluginOptions' => [
-    //             'allowClear' => true,
-    //         ],
-    //     ]);
+        //    echo $form->field($model, 'type', [
+        //         'labelOptions' => [
+        //             'class' => 'text-dark',
+        //             'style' => "font-size:13px;font-weight:normal;",
+        //         ],
+        //     ])->widget(Select2::classname(), [
+        //         'data' => \backend\models\Facilitytype::getList(),
+        //         'theme' => Select2::THEME_MATERIAL,
+        //         'options' => ['placeholder' => 'Filter by facility type', 'id' => 'type'],
+        //         'pluginOptions' => [
+        //             'allowClear' => true,
+        //         ],
+        //     ]);
         ?>
     </div>
     <div class="col-lg-4">
         <?php
-    //    echo $form->field($model, 'ownership', [
-    //         'labelOptions' => [
-    //             'class' => 'text-dark',
-    //             'style' => "font-size:13px;font-weight:normal;",
-    //         ],
-    //     ])->widget(Select2::classname(), [
-    //         'data' => \backend\models\FacilityOwnership::getList(),
-    //         'theme' => Select2::THEME_MATERIAL,
-    //         'options' => ['placeholder' => 'Filter by ownership', 'id' => 'ownership'],
-    //         'pluginOptions' => [
-    //             'allowClear' => true,
-    //         ],
-    //     ]);
+        //    echo $form->field($model, 'ownership', [
+        //         'labelOptions' => [
+        //             'class' => 'text-dark',
+        //             'style' => "font-size:13px;font-weight:normal;",
+        //         ],
+        //     ])->widget(Select2::classname(), [
+        //         'data' => \backend\models\FacilityOwnership::getList(),
+        //         'theme' => Select2::THEME_MATERIAL,
+        //         'options' => ['placeholder' => 'Filter by ownership', 'id' => 'ownership'],
+        //         'pluginOptions' => [
+        //             'allowClear' => true,
+        //         ],
+        //     ]);
         ?>
     </div>
 
-    <div class="col-lg-12">
-        <?= Html::submitButton('Filter', ['class' => 'btn btn-primary']) ?>
+    <div class="col-lg-6">
+        <?php
+        echo Html::submitButton('Filter', ['class' => 'btn btn-primary']);
+        echo "&nbsp;&nbsp;&nbsp;";
+        echo Html::a('Reset filters', ['/site/index'], ["class" => "btn btn-default"]);
+        ?>
     </div>
+</div>
 </div>
 
 <?php ActiveForm::end(); ?>

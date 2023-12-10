@@ -33,13 +33,74 @@ $facility_types_model = Facilitytype::find()->cache(Yii::$app->params['cache_dur
 $facility_ownership_model = FacilityOwnership::find()->cache(Yii::$app->params['cache_duration'])->all();
 $facility_model = "";
 $area = "Province";
+$filter_str = "<strong>Filters: </strong> ";
 ?>
 <div class="container-fluid">
+    <div class="row">
+        <!-- <p>Use the form below to perform a filter</p> -->
+        <div class="col-lg-12 text-sm">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <p class="card-title text-sm">
+                        Use the form below to perform a filter.
+                        <!-- Filters by <strong>name, type and ownership</strong> are only applicable to the <strong>Map</strong>. -->
+                        <!-- Filter by <strong>ward/Constituency</strong> is not applicable to the <strong>second graph</strong> -->
+                    </p>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <div class="card-body">
+                    <?php
+
+                    //Show the filter parameters
+                    if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
+                        if (
+                            !empty($_GET['Facility']['province_id']) ||
+                            !empty($_GET['Facility']['constituency_id']) ||
+                            !empty($_GET['Facility']['ward_id']) ||
+                            !empty($_GET['Facility']['ownership']) ||
+                            !empty($_GET['Facility']['type']) ||
+                            !empty($_GET['Facility']['name']) ||
+                            !empty($_GET['Facility']['district_id'])
+                        ) {
+
+                            $_province = !empty($_GET['Facility']['province_id']) ? Provinces::findOne($_GET['Facility']['province_id'])->name : "";
+                            $_district = !empty($_GET['Facility']['district_id']) ? Districts::findOne($_GET['Facility']['district_id'])->name : "";
+                            $constituency = !empty($_GET['Facility']['constituency_id']) ? Constituency::findOne($_GET['Facility']['constituency_id'])->name : "";
+                            $ward = !empty($_GET['Facility']['ward_id']) ? Wards::findOne($_GET['Facility']['ward_id'])->name : "";
+                            $_facility_type = !empty($_GET['Facility']['type']) ? Facilitytype::findOne($_GET['Facility']['type'])->name : "";
+                            $_ownership = !empty($_GET['Facility']['ownership']) ? FacilityOwnership::findOne($_GET['Facility']['ownership'])->name : "";
+                            $prov_str = !empty($_province) ?  $_province . " province | " : "";
+                            $dist_str = !empty($_district) ? $_district . " district | " : "";
+                            $cons_str = !empty($constituency) ? $constituency . " constituency | " : "";
+                            $ward_str = !empty($ward) ? $ward . " ward | " : "";
+                            $fac_str = !empty($_facility_type) ? " Facility type: " . $_facility_type . " | " : "";
+                            $own_str = !empty($_ownership) ? "Ownship: " . $_ownership : "";
+                            $name_str = !empty($_GET['Facility']['name']) ? " Facility name: " . $_GET['Facility']['name'] . " | " : "";
+                            $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i> $cons_str </i><i>$ward_str</i><i>"
+                                . $fac_str . "</i><i>" . $own_str . "</I>";
+                            echo "<p class='text-sm'>$filter_str</p>";
+
+                            $area = !empty($_district) && !empty($_GET['Facility']['district_id']) ? $_district . " district Constituencies" : $area;
+                            $area = empty($_GET['Facility']['district_id']) && !empty($_GET['Facility']['province_id']) ? $_province . " province districts" : $area;
+                        }
+                    }
+                    if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
+                        echo "<p class='text-sm'>No filter results were found!</p>";
+                    }
+                    echo $this->render('_form', ['model' => $Facility_model]);
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-info">
                 <span class="info-box-icon"><i class="fas fa-check"></i></span>
-
                 <div class="info-box-content">
                     <span class="info-box-number"> <?= $public_count_active ?></span>
 
@@ -93,9 +154,6 @@ $area = "Province";
             <!-- /.info-box -->
         </div>
     </div>
-
-
-
 
     <div class="row">
         <div class="col-lg-6">
@@ -317,67 +375,9 @@ $area = "Province";
                 </div><!-- /.card-body -->
             </div>
         </div>
-        
-            <!-- <p>Use the form below to perform a filter</p> -->
-            <div class="col-lg-12 text-sm">
-                <div class="card card-primary card-outline">
-                    <div class="card-header">
-                        <p class="card-title text-sm">
-                            Use the form below to perform a filter.
-                            <!-- Filters by <strong>name, type and ownership</strong> are only applicable to the <strong>Map</strong>. -->
-                            <!-- Filter by <strong>ward/Constituency</strong> is not applicable to the <strong>second graph</strong> -->
-                        </p>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <!-- /.card-tools -->
-                    </div>
-                    <div class="card-body">
-                        <?php
-                        $filter_str = "<strong>Filters: </strong> ";
-                        //Show the filter parameters
-                        if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() > 0)) {
-                            if (
-                                !empty($_GET['Facility']['province_id']) ||
-                                !empty($_GET['Facility']['constituency_id']) ||
-                                !empty($_GET['Facility']['ward_id']) ||
-                                !empty($_GET['Facility']['ownership']) ||
-                                !empty($_GET['Facility']['type']) ||
-                                !empty($_GET['Facility']['name']) ||
-                                !empty($_GET['Facility']['district_id'])
-                            ) {
 
-                                $_province = !empty($_GET['Facility']['province_id']) ? Provinces::findOne($_GET['Facility']['province_id'])->name : "";
-                                $_district = !empty($_GET['Facility']['district_id']) ? Districts::findOne($_GET['Facility']['district_id'])->name : "";
-                                $constituency = !empty($_GET['Facility']['constituency_id']) ? Constituency::findOne($_GET['Facility']['constituency_id'])->name : "";
-                                $ward = !empty($_GET['Facility']['ward_id']) ? Wards::findOne($_GET['Facility']['ward_id'])->name : "";
-                                $_facility_type = !empty($_GET['Facility']['type']) ? Facilitytype::findOne($_GET['Facility']['type'])->name : "";
-                                $_ownership = !empty($_GET['Facility']['ownership']) ? FacilityOwnership::findOne($_GET['Facility']['ownership'])->name : "";
-                                $prov_str = !empty($_province) ?  $_province . " province | " : "";
-                                $dist_str = !empty($_district) ? $_district . " district | " : "";
-                                $cons_str = !empty($constituency) ? $constituency . " constituency | " : "";
-                                $ward_str = !empty($ward) ? $ward . " ward | " : "";
-                                $fac_str = !empty($_facility_type) ? " Facility type: " . $_facility_type . " | " : "";
-                                $own_str = !empty($_ownership) ? "Ownship: " . $_ownership : "";
-                                $name_str = !empty($_GET['Facility']['name']) ? " Facility name: " . $_GET['Facility']['name'] . " | " : "";
-                                $filter_str .= "<i>" . $name_str . "</i><i>" . $prov_str . "</i><i>" . $dist_str . "</i><i> $cons_str </i><i>$ward_str</i><i>"
-                                    . $fac_str . "</i><i>" . $own_str . "</I>";
-                                echo "<p class='text-sm'>$filter_str</p>";
 
-                                $area = !empty($_district) && !empty($_GET['Facility']['district_id']) ? $_district . " district Constituencies" : $area;
-                                $area = empty($_GET['Facility']['district_id']) && !empty($_GET['Facility']['province_id']) ? $_province . " province districts" : $area;
-                            }
-                        }
-                        if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTotalCount() == 0)) {
-                            echo "<p class='text-sm'>No filter results were found!</p>";
-                        }
-                        echo $this->render('_form', ['model' => $Facility_model]);
-                        ?>
-                    </div>
-                </div>
-            </div>
-      
+
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
