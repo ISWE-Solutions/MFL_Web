@@ -121,6 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'attribute' => 'dhis2_uid',
                             'label' => 'DHIS2 UID',
                         ],
+                        'hims_code',
                         [
                             'enableSorting' => true,
                             'attribute' => 'name',

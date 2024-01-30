@@ -72,6 +72,7 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
     echo "<p class='text-sm'>No filter results were found!</p>";
 }
 ?>
+
 <div class="container-fluid">
     <div class="row">
         <!-- <p>Use the form below to perform a filter</p> -->
@@ -79,7 +80,7 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
             <div class="card card-primary card-outline">
                 <div class="card-header">
                     <p class="card-title text-sm">
-                       <?= $filter_str?>
+                        <?= $filter_str ?>
                         <!-- Filters by <strong>name, type and ownership</strong> are only applicable to the <strong>Map</strong>. -->
                         <!-- Filter by <strong>ward/Constituency</strong> is not applicable to the <strong>second graph</strong> -->
                     </p>
@@ -91,8 +92,6 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
                 </div>
                 <div class="card-body">
                     <?php
-
-
                     echo $this->render('_form', ['model' => $Facility_model]);
                     ?>
                 </div>
@@ -100,7 +99,7 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4 col-sm-6 col-12">
+        <div class="col-lg-4">
             <div class="info-box bg-info">
                 <span class="info-box-icon"><i class="fas fa-check"></i></span>
                 <div class="info-box-content">
@@ -118,7 +117,7 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
             <!-- /.info-box -->
         </div>
         <!-- /.col -->
-        <div class="col-md-4 col-sm-6 col-12">
+        <div class="col-lg-4">
             <div class="info-box bg-gradient-indigo">
                 <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
 
@@ -137,7 +136,7 @@ if (isset($_GET['Facility']) && (!empty($dataProvider) && $dataProvider->getTota
             <!-- /.info-box -->
         </div>
         <!-- /.col -->
-        <div class="col-md-4 col-sm-6 col-12">
+        <div class="col-lg-4">
             <div class="info-box bg-warning">
                 <span class="info-box-icon"><i class="fas fa-hospital"></i></span>
 

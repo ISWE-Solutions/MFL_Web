@@ -224,6 +224,5 @@ $form = ActiveForm::begin([
         ?>
     </div>
 </div>
-</div>
 
 <?php ActiveForm::end(); ?>
